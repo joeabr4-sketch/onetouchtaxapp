@@ -5,6 +5,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OneTouch Personal — SA Tax Return Guide</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,500;0,700;0,900;1,300;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  /* ── ACTION ITEMS ── */
+  .action-item { display:flex; align-items:center; gap:14px; padding:16px 22px; cursor:pointer; transition:all 0.15s; }
+  .action-item:hover { background:rgba(200,134,10,0.03); padding-left:28px; }
+  .ai-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .ai-info { flex:1; }
+  .ai-name { font-size:13.5px; font-weight:600; color:var(--ink); margin-bottom:2px; }
+  .ai-type { font-size:11.5px; color:var(--ink-muted); }
+  .ai-date { text-align:right; flex-shrink:0; }
+  .ai-days { font-family:'Fraunces',serif; font-size:13px; font-weight:700; }
+  .ai-due { font-size:10.5px; color:var(--ink-muted); margin-top:2px; }
+  .ai-btn { margin-left:14px; padding:6px 14px; border-radius:7px; font-size:12px; font-weight:700; white-space:nowrap; flex-shrink:0; cursor:pointer; }
+  /* ── PER PANELS ── */
+  .per-panel { display:none; border-top:1px solid var(--border); animation:slideDown 0.3s ease; background:linear-gradient(135deg,rgba(200,134,10,0.03),rgba(200,134,10,0.01)); }
+  .per-panel.open { display:block; }
+  @keyframes slideDown { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+  .pp-inner { padding:24px 22px 28px; }
+  .pp-title { font-family:'Fraunces',serif; font-size:16px; font-weight:700; color:var(--ink); margin-bottom:6px; }
+  .pp-desc { font-size:13px; color:var(--ink-muted); line-height:1.65; margin-bottom:18px; }
+  .pp-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+  .pp-field { display:flex; flex-direction:column; gap:5px; }
+  .pp-field label { font-size:10px; font-weight:700; color:var(--ink-muted); text-transform:uppercase; letter-spacing:0.8px; }
+  .pp-field input { background:#fff; border:1.5px solid var(--border); border-radius:8px; padding:10px 14px; font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; color:var(--ink); outline:none; transition:border-color 0.15s; }
+  .pp-field input:focus { border-color:var(--gold); }
+  .pp-field input::placeholder { color:var(--ink-dim); }
+  .pp-btn { background:var(--ink); border:none; border-radius:9px; padding:13px 22px; color:#fff; font-family:'Fraunces',serif; font-size:14px; font-weight:700; cursor:pointer; transition:all 0.15s; display:inline-flex; align-items:center; gap:8px; }
+  .pp-btn:hover { background:var(--gold); transform:translateY(-1px); box-shadow:0 6px 20px rgba(200,134,10,0.25); }
+  .pdf-toast-p { position:fixed; bottom:24px; right:24px; background:var(--ink); border:1px solid var(--gold); border-radius:12px; padding:14px 20px; display:none; align-items:center; gap:12px; font-size:13px; color:#fff; z-index:999; box-shadow:0 8px 32px rgba(0,0,0,0.2); }
+  .pdf-toast-p.show { display:flex; }
+  .pdf-toast-p strong { color:var(--gold); display:block; }
+</style>
 <style>
 :root {
   --cream: #faf7f2;
@@ -966,7 +998,7 @@ body::after {
           </div>
         </div>
 
-        <div class="grid-2">
+        <div class="grid-2" style="grid-template-columns:1fr">
           <div class="card">
             <div class="card-head">
               <div class="card-title">Your Tax Profile</div>
@@ -979,33 +1011,157 @@ body::after {
             </div>
           </div>
 
-          <div class="card">
+          <div class="card" style="grid-column:1/-1">
             <div class="card-head">
-              <div class="card-title">Key SARS Dates</div>
-              <span class="chip chip-blue">2025</span>
+              <div class="card-title">📅 Your Tax Action Items</div>
+              <span class="chip chip-gold">Click any item to prepare your document</span>
             </div>
-            <div class="card-body">
-              <div style="display:flex; flex-direction:column; gap:10px;">
-                <div style="display:flex; justify-content:space-between; font-size:13.5px; padding:8px 0; border-bottom:1px solid var(--border)">
-                  <span style="color:var(--ink-muted)">eFiling opens</span>
-                  <span style="font-weight:700; color:var(--green)">1 July 2025</span>
+            <div class="card-body" style="padding:0">
+
+              <!-- ITR12 -->
+              <div class="action-item" onclick="togglePerPanel('pp-itr12')">
+                <div class="ai-dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold)"></div>
+                <div class="ai-info">
+                  <div class="ai-name">ITR12 — Personal Income Tax Return</div>
+                  <div class="ai-type">Annual return · Filing opens 1 July 2025</div>
                 </div>
-                <div style="display:flex; justify-content:space-between; font-size:13.5px; padding:8px 0; border-bottom:1px solid var(--border)">
-                  <span style="color:var(--ink-muted)">Auto-assessments issued</span>
-                  <span style="font-weight:700; color:var(--ink)">July 2025</span>
+                <div class="ai-date">
+                  <div class="ai-days" style="color:var(--gold)">Due 24 Oct</div>
+                  <div class="ai-due">~236 days away</div>
                 </div>
-                <div style="display:flex; justify-content:space-between; font-size:13.5px; padding:8px 0; border-bottom:1px solid var(--border)">
-                  <span style="color:var(--ink-muted)">Non-provisional deadline</span>
-                  <span style="font-weight:700; color:var(--gold)">24 Oct 2025</span>
-                </div>
-                <div style="display:flex; justify-content:space-between; font-size:13.5px; padding:8px 0">
-                  <span style="color:var(--ink-muted)">Provisional taxpayer deadline</span>
-                  <span style="font-weight:700; color:var(--red)">31 Jan 2026</span>
+                <div class="ai-btn" style="background:rgba(200,134,10,0.1);border:1px solid rgba(200,134,10,0.25);color:var(--gold)">Prepare Now ↓</div>
+              </div>
+              <div class="per-panel" id="pp-itr12">
+                <div class="pp-inner">
+                  <div class="pp-title">🧾 Personal Tax Summary — Generate & Download</div>
+                  <div class="pp-desc">Fill in your income and deduction details. We'll calculate your tax using the official 2024/25 SARS tables and generate a professional summary to reference while filing on eFiling.</div>
+                  <div class="pp-grid">
+                    <div class="pp-field"><label>Full Name</label><input id="it-name" placeholder="e.g. Sipho Nkosi" /></div>
+                    <div class="pp-field"><label>ID Number</label><input id="it-id" placeholder="e.g. 8001015009087" /></div>
+                    <div class="pp-field"><label>Tax Reference Number</label><input id="it-ref" placeholder="e.g. 1234567890" /></div>
+                    <div class="pp-field"><label>Age Group</label>
+                      <select id="it-age" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink);outline:none">
+                        <option value="under65">Under 65</option>
+                        <option value="65to75">65 – 75</option>
+                        <option value="over75">Over 75</option>
+                      </select>
+                    </div>
+                    <div class="pp-field"><label>Annual Gross Salary (R)</label><input id="it-salary" type="number" placeholder="e.g. 320000" /></div>
+                    <div class="pp-field"><label>PAYE Already Deducted (R)</label><input id="it-paye" type="number" placeholder="e.g. 65000" /></div>
+                    <div class="pp-field"><label>Annual RA Contributions (R)</label><input id="it-ra" type="number" placeholder="e.g. 24000" /></div>
+                    <div class="pp-field"><label>Monthly Medical Aid (R)</label><input id="it-med" type="number" placeholder="e.g. 2800" /></div>
+                    <div class="pp-field"><label>Medical Aid Dependants</label>
+                      <select id="it-deps" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink);outline:none">
+                        <option value="0">Just me</option>
+                        <option value="1">Me + 1</option>
+                        <option value="2">Me + 2</option>
+                        <option value="3">Me + 3+</option>
+                      </select>
+                    </div>
+                    <div class="pp-field"><label>Other Income (rental/freelance) (R)</label><input id="it-other" type="number" placeholder="e.g. 0" /></div>
+                  </div>
+                  <button class="pp-btn" onclick="genPersonalTax()">📄 Download Personal Tax Summary PDF →</button>
                 </div>
               </div>
+
+              <!-- AUTO ASSESSMENT -->
+              <div class="action-item" onclick="togglePerPanel('pp-autoassess')" style="border-top:1px solid var(--border)">
+                <div class="ai-dot" style="background:var(--red);box-shadow:0 0 8px var(--red)"></div>
+                <div class="ai-info">
+                  <div class="ai-name">Auto-Assessment — Check & Dispute if Needed</div>
+                  <div class="ai-type">SARS issues auto-assessments in July · Don't just accept it</div>
+                </div>
+                <div class="ai-date">
+                  <div class="ai-days" style="color:var(--red)">Act in July</div>
+                  <div class="ai-due">40 working days to dispute</div>
+                </div>
+                <div class="ai-btn" style="background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.2);color:var(--red)">Prepare Now ↓</div>
+              </div>
+              <div class="per-panel" id="pp-autoassess">
+                <div class="pp-inner">
+                  <div class="pp-title">✉️ Auto-Assessment Dispute Letter — Generate & Download</div>
+                  <div class="pp-desc">If you disagree with SARS's auto-assessment, you have 40 working days to dispute it. Fill in your details and we'll generate a formal dispute letter ready to submit.</div>
+                  <div class="pp-grid">
+                    <div class="pp-field"><label>Full Name</label><input id="dis-name" placeholder="e.g. Sipho Nkosi" /></div>
+                    <div class="pp-field"><label>ID Number</label><input id="dis-id" placeholder="e.g. 8001015009087" /></div>
+                    <div class="pp-field"><label>Tax Reference Number</label><input id="dis-ref" placeholder="e.g. 1234567890" /></div>
+                    <div class="pp-field"><label>Date of Auto-Assessment</label><input id="dis-date" placeholder="e.g. 15 July 2025" /></div>
+                    <div class="pp-field"><label>SARS Assessment Amount (R)</label><input id="dis-sars" type="number" placeholder="e.g. 4200 (positive=owe, negative=refund)" /></div>
+                    <div class="pp-field"><label>Amount You Believe Correct (R)</label><input id="dis-correct" type="number" placeholder="e.g. -2800" /></div>
+                    <div class="pp-field" style="grid-column:1/-1"><label>Reason for Dispute</label><textarea id="dis-reason" rows="3" placeholder="e.g. SARS did not include my medical aid tax credit of R4,368 and my RA contribution deduction of R24,000..." style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink);outline:none;resize:vertical;width:100%"></textarea></div>
+                  </div>
+                  <button class="pp-btn" onclick="genDisputeLetter()">📄 Download Dispute Letter PDF →</button>
+                </div>
+              </div>
+
+              <!-- MEDICAL AID -->
+              <div class="action-item" onclick="togglePerPanel('pp-medical')" style="border-top:1px solid var(--border)">
+                <div class="ai-dot" style="background:var(--green);box-shadow:0 0 8px var(--green)"></div>
+                <div class="ai-info">
+                  <div class="ai-name">Medical Aid Tax Credit Calculation</div>
+                  <div class="ai-type">Claim your credits — most people miss this or claim it incorrectly</div>
+                </div>
+                <div class="ai-date">
+                  <div class="ai-days" style="color:var(--green)">Before filing</div>
+                  <div class="ai-due">Include in ITR12</div>
+                </div>
+                <div class="ai-btn" style="background:rgba(26,107,60,0.08);border:1px solid rgba(26,107,60,0.2);color:var(--green)">Prepare Now ↓</div>
+              </div>
+              <div class="per-panel" id="pp-medical">
+                <div class="pp-inner">
+                  <div class="pp-title">🏥 Medical Aid Tax Credit Summary — Generate & Download</div>
+                  <div class="pp-desc">We'll calculate your exact medical aid tax credit and any additional out-of-pocket deductions. Use this when completing the medical section of your ITR12.</div>
+                  <div class="pp-grid">
+                    <div class="pp-field"><label>Full Name</label><input id="med-name" placeholder="e.g. Sipho Nkosi" /></div>
+                    <div class="pp-field"><label>Medical Aid Scheme</label><input id="med-scheme" placeholder="e.g. Discovery Health" /></div>
+                    <div class="pp-field"><label>Monthly Contribution (R)</label><input id="med-monthly" type="number" placeholder="e.g. 2800" /></div>
+                    <div class="pp-field"><label>Number of Dependants</label>
+                      <select id="med-deps" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;color:var(--ink);outline:none">
+                        <option value="0">Just me</option>
+                        <option value="1">Me + spouse or 1 child</option>
+                        <option value="2">Me + 2 dependants</option>
+                        <option value="3">Me + 3 dependants</option>
+                        <option value="4">Me + 4+ dependants</option>
+                      </select>
+                    </div>
+                    <div class="pp-field"><label>Out-of-Pocket Medical Expenses (R)</label><input id="med-oop" type="number" placeholder="e.g. 4500" /></div>
+                    <div class="pp-field"><label>Annual Gross Income (R)</label><input id="med-income" type="number" placeholder="e.g. 320000" /></div>
+                  </div>
+                  <button class="pp-btn" onclick="genMedicalPDF()">📄 Download Medical Credit Summary PDF →</button>
+                </div>
+              </div>
+
+              <!-- REFUND FOLLOW UP -->
+              <div class="action-item" onclick="togglePerPanel('pp-refund')" style="border-top:1px solid var(--border)">
+                <div class="ai-dot" style="background:#4da6ff;box-shadow:0 0 8px #4da6ff"></div>
+                <div class="ai-info">
+                  <div class="ai-name">Refund Follow-Up Letter</div>
+                  <div class="ai-type">If SARS hasn't paid your refund after 21 business days — follow up formally</div>
+                </div>
+                <div class="ai-date">
+                  <div class="ai-days" style="color:#4da6ff">After filing</div>
+                  <div class="ai-due">21 business days to wait</div>
+                </div>
+                <div class="ai-btn" style="background:rgba(77,166,255,0.08);border:1px solid rgba(77,166,255,0.2);color:#4da6ff">Prepare Now ↓</div>
+              </div>
+              <div class="per-panel" id="pp-refund">
+                <div class="pp-inner">
+                  <div class="pp-title">💰 SARS Refund Follow-Up Letter — Generate & Download</div>
+                  <div class="pp-desc">If your refund hasn't arrived after 21 business days, generate a formal follow-up letter to send to SARS. Professional format, ready to submit or email.</div>
+                  <div class="pp-grid">
+                    <div class="pp-field"><label>Full Name</label><input id="ref-name" placeholder="e.g. Sipho Nkosi" /></div>
+                    <div class="pp-field"><label>ID Number</label><input id="ref-id" placeholder="e.g. 8001015009087" /></div>
+                    <div class="pp-field"><label>Tax Reference Number</label><input id="ref-ref" placeholder="e.g. 1234567890" /></div>
+                    <div class="pp-field"><label>Return Submitted Date</label><input id="ref-date" placeholder="e.g. 10 August 2025" /></div>
+                    <div class="pp-field"><label>Expected Refund Amount (R)</label><input id="ref-amount" type="number" placeholder="e.g. 8400" /></div>
+                    <div class="pp-field"><label>Bank Account (last 4 digits)</label><input id="ref-bank" placeholder="e.g. 7823" /></div>
+                  </div>
+                  <button class="pp-btn" onclick="genRefundLetter()">📄 Download Refund Follow-Up Letter PDF →</button>
+                </div>
+              </div>
+
             </div>
           </div>
-        </div>
 
         <div class="card">
           <div class="card-head">
@@ -1663,6 +1819,274 @@ function addTyping() {
   wrap.appendChild(div);
   wrap.scrollTop=wrap.scrollHeight;
   return div;
+}
+
+// ── PERSONAL DOC PANEL TOGGLE ──
+function togglePerPanel(id) {
+  const panel = document.getElementById(id);
+  const isOpen = panel.classList.contains('open');
+  document.querySelectorAll('.per-panel').forEach(p => p.classList.remove('open'));
+  if (!isOpen) {
+    panel.classList.add('open');
+    setTimeout(() => panel.scrollIntoView({ behavior:'smooth', block:'nearest' }), 100);
+  }
+}
+
+// ── PDF HELPERS ──
+const { jsPDF } = window.jspdf;
+
+function makePDF(title, sub) {
+  const doc = new jsPDF({ orientation:'p', unit:'mm', format:'a4' });
+  const W = 210, M = 20;
+  // Warm cream header
+  doc.setFillColor(26, 18, 8);
+  doc.rect(0, 0, W, 42, 'F');
+  doc.setFillColor(200, 134, 10);
+  doc.rect(0, 42, W, 2, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(20); doc.setFont('helvetica','bold');
+  doc.text('OneTouch', M, 18);
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.setTextColor(200,134,10);
+  doc.text('PERSONAL · SA TAX RETURN GUIDE', M+44, 18);
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(13); doc.setFont('helvetica','bold');
+  doc.text(title, M, 31);
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.setTextColor(150,160,180);
+  doc.text(sub, M, 38);
+  doc.text('Generated: ' + new Date().toLocaleDateString('en-ZA'), W-M, 38, {align:'right'});
+  return { doc, y:54, W, M };
+}
+
+function addRow(ctx, label, value, highlight) {
+  const {doc,W,M} = ctx;
+  if (highlight) { doc.setFillColor(254,246,228); doc.rect(M, ctx.y-1, W-M*2, 10, 'F'); }
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(138,125,107);
+  doc.text(label, M+4, ctx.y+6);
+  doc.setTextColor(26,18,8); doc.setFont('helvetica', highlight?'bold':'normal');
+  doc.text(String(value||'—'), W-M-4, ctx.y+6, {align:'right'});
+  doc.setDrawColor(226,217,204); doc.line(M, ctx.y+9, W-M, ctx.y+9);
+  ctx.y += 12;
+}
+
+function addSection(ctx, title) {
+  ctx.y += 6;
+  ctx.doc.setFillColor(200,134,10); ctx.doc.rect(ctx.M, ctx.y, 3, 8, 'F');
+  ctx.doc.setTextColor(26,18,8); ctx.doc.setFontSize(12); ctx.doc.setFont('helvetica','bold');
+  ctx.doc.text(title, ctx.M+7, ctx.y+6);
+  ctx.y += 14;
+}
+
+function addDisclaimer(ctx) {
+  const {doc,W,M} = ctx;
+  ctx.y += 10;
+  doc.setFillColor(254,246,228); doc.rect(M, ctx.y, W-M*2, 14, 'F');
+  doc.setFontSize(7.5); doc.setFont('helvetica','italic'); doc.setTextColor(138,125,107);
+  doc.text('⚠ For preparation purposes only. Not professional tax advice. Verify figures on SARS eFiling before submitting.', M+4, ctx.y+5);
+  doc.text('Consult a registered tax practitioner for advice specific to your situation.', M+4, ctx.y+11);
+}
+
+function fmtR(v) { return 'R ' + (parseFloat(v)||0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function gv(id) { return document.getElementById(id)?.value||''; }
+
+function showPDFToast(msg) {
+  let t = document.getElementById('pdfToastP');
+  if (!t) {
+    t = document.createElement('div');
+    t.id='pdfToastP'; t.className='pdf-toast-p';
+    t.innerHTML='<span style="font-size:20px">📄</span><div><strong>Document Downloaded!</strong><span id="pdfToastPMsg"></span></div>';
+    document.body.appendChild(t);
+  }
+  document.getElementById('pdfToastPMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ── PERSONAL TAX SUMMARY ──
+function genPersonalTax() {
+  const salary = parseFloat(gv('it-salary'))||0;
+  const paye = parseFloat(gv('it-paye'))||0;
+  const ra = parseFloat(gv('it-ra'))||0;
+  const medMonthly = parseFloat(gv('it-med'))||0;
+  const deps = parseInt(gv('it-deps'))||0;
+  const other = parseFloat(gv('it-other'))||0;
+  const age = gv('it-age')||'under65';
+
+  const raDeduction = Math.min(ra, salary*0.275, 350000);
+  const taxable = Math.max(0, salary + other - raDeduction);
+  let tax = 0;
+  if(taxable<=237100) tax=taxable*0.18;
+  else if(taxable<=370500) tax=42678+(taxable-237100)*0.26;
+  else if(taxable<=512800) tax=77362+(taxable-370500)*0.31;
+  else if(taxable<=673000) tax=121475+(taxable-512800)*0.36;
+  else if(taxable<=857900) tax=179147+(taxable-673000)*0.39;
+  else if(taxable<=1817000) tax=251258+(taxable-857900)*0.41;
+  else tax=644489+(taxable-1817000)*0.45;
+
+  const rebates = { under65:17235, '65to75':26679, over75:29824 };
+  const rebate = rebates[age];
+  const medCredit = medMonthly > 0 ? (364 + Math.min(deps,1)*364 + Math.max(0,deps-1)*246)*12 : 0;
+  const finalTax = Math.max(0, tax - rebate - medCredit);
+  const diff = paye - finalTax;
+
+  const ctx = makePDF('Personal Income Tax Summary', gv('it-name') + ' · Tax Year 2024/25');
+  addSection(ctx, 'Taxpayer Details');
+  addRow(ctx, 'Full Name', gv('it-name'));
+  addRow(ctx, 'ID Number', gv('it-id'));
+  addRow(ctx, 'Tax Reference', gv('it-ref'));
+  addRow(ctx, 'Age Group', age);
+  addRow(ctx, 'Tax Year', '2024/25');
+
+  addSection(ctx, 'Income');
+  addRow(ctx, 'Annual Gross Salary', fmtR(salary));
+  if(other > 0) addRow(ctx, 'Other Income (rental/freelance)', fmtR(other));
+  addRow(ctx, 'RA Contribution Deduction', fmtR(raDeduction));
+  addRow(ctx, 'Taxable Income', fmtR(taxable));
+
+  addSection(ctx, 'Tax Calculation');
+  addRow(ctx, 'Tax on Taxable Income', fmtR(tax));
+  addRow(ctx, 'Primary Rebate (' + age + ')', fmtR(rebate));
+  addRow(ctx, 'Medical Aid Tax Credit', fmtR(medCredit));
+  addRow(ctx, 'Total Tax Liability', fmtR(finalTax));
+  addRow(ctx, 'PAYE Already Deducted', fmtR(paye));
+  addRow(ctx, diff >= 0 ? '✅ ESTIMATED REFUND DUE' : '⚠ ESTIMATED TAX OWED', fmtR(Math.abs(diff)), true);
+
+  addSection(ctx, 'Next Steps');
+  const {doc,M} = ctx;
+  const steps = diff >= 0
+    ? ['1. File your ITR12 on SARS eFiling before 24 October 2025', '2. Verify figures match your IRP5 certificate', '3. Ensure bank details are correct on eFiling', '4. Refund expected within 7–21 business days after filing']
+    : ['1. File your ITR12 on SARS eFiling before 24 October 2025', '2. Arrange payment of tax owed to avoid penalties', '3. Late payment attracts 10% penalty + interest', '4. Contact SARS if you need a payment arrangement'];
+  steps.forEach(s => {
+    doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(26,18,8);
+    doc.text(s, M+4, ctx.y+5); ctx.y+=9;
+  });
+
+  addDisclaimer(ctx);
+  ctx.doc.save('OneTouch_Personal_Tax_' + (gv('it-name')||'').replace(/\s/g,'_') + '.pdf');
+  showPDFToast('Personal tax summary saved to downloads');
+}
+
+// ── DISPUTE LETTER ──
+function genDisputeLetter() {
+  const ctx = makePDF('Auto-Assessment Dispute Letter', gv('dis-name') + ' · Ref: ' + gv('dis-ref'));
+  const {doc,W,M} = ctx;
+  doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(26,18,8);
+  const lines = [
+    'The Commissioner',
+    'South African Revenue Service (SARS)',
+    '',
+    'Date: ' + new Date().toLocaleDateString('en-ZA'),
+    '',
+    'Dear Sir/Madam,',
+    '',
+    'NOTICE OF OBJECTION — TAX REFERENCE: ' + gv('dis-ref'),
+    'ID NUMBER: ' + gv('dis-id'),
+    '',
+    'I, ' + gv('dis-name') + ', formally object to the auto-assessment issued on ' + gv('dis-date') + '.',
+    '',
+    'SARS Assessment Amount: ' + fmtR(gv('dis-sars')),
+    'Amount I Believe Correct: ' + fmtR(gv('dis-correct')),
+    '',
+    'GROUNDS FOR OBJECTION:',
+    gv('dis-reason') || '[Reason not provided]',
+    '',
+    'I request that SARS review and issue a revised assessment. Supporting documents available on request.',
+    '',
+    'Yours faithfully,',
+    '',
+    '',
+    gv('dis-name'),
+    'ID: ' + gv('dis-id') + ' | Tax Ref: ' + gv('dis-ref'),
+    'Date: ' + new Date().toLocaleDateString('en-ZA')
+  ];
+  lines.forEach(line => {
+    doc.text(line, M, ctx.y, {maxWidth:W-M*2});
+    ctx.y += line===''?5:7;
+  });
+  addDisclaimer(ctx);
+  doc.save('OneTouch_Dispute_Letter_' + (gv('dis-name')||'').replace(/\s/g,'_') + '.pdf');
+  showPDFToast('Dispute letter saved to downloads');
+}
+
+// ── MEDICAL PDF ──
+function genMedicalPDF() {
+  const monthly = parseFloat(gv('med-monthly'))||0;
+  const deps = parseInt(gv('med-deps'))||0;
+  const oop = parseFloat(gv('med-oop'))||0;
+  const income = parseFloat(gv('med-income'))||0;
+  const monthlyCredit = 364 + Math.min(deps,1)*364 + Math.max(0,deps-1)*246;
+  const annualCredit = monthlyCredit * 12;
+  const threshold = income * 0.075;
+  const oopDeductible = Math.max(0, oop - threshold);
+
+  const ctx = makePDF('Medical Aid Tax Credit Summary', gv('med-name') + ' · ' + gv('med-scheme'));
+  addSection(ctx, 'Medical Aid Details');
+  addRow(ctx, 'Name', gv('med-name'));
+  addRow(ctx, 'Scheme', gv('med-scheme'));
+  addRow(ctx, 'Monthly Contribution', fmtR(monthly));
+  addRow(ctx, 'Annual Contribution', fmtR(monthly*12));
+  addRow(ctx, 'Number of Dependants', deps);
+
+  addSection(ctx, 'Tax Credit Calculation (2024/25)');
+  addRow(ctx, 'Main member monthly credit', 'R 364');
+  addRow(ctx, 'Spouse / first dependant', 'R ' + Math.min(deps,1)*364);
+  addRow(ctx, 'Additional dependants (' + Math.max(0,deps-1) + ' × R246)', 'R ' + Math.max(0,deps-1)*246);
+  addRow(ctx, 'ANNUAL MEDICAL TAX CREDIT', fmtR(annualCredit), true);
+
+  addSection(ctx, 'Out-of-Pocket Expenses');
+  addRow(ctx, 'Out-of-Pocket Medical Expenses', fmtR(oop));
+  addRow(ctx, '7.5% of Income Threshold', fmtR(threshold));
+  addRow(ctx, 'Additional Deductible Amount', fmtR(oopDeductible));
+
+  addSection(ctx, 'What to Enter on ITR12');
+  const {doc,M} = ctx;
+  const notes = ['• Source code 4116: Medical scheme fees tax credit = ' + fmtR(annualCredit), '• Source code 4119: Out-of-pocket expenses = ' + fmtR(oop), '• These are in the Medical Expenses section of your ITR12'];
+  notes.forEach(n => { doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(26,18,8); doc.text(n, M+4, ctx.y+5); ctx.y+=9; });
+
+  addDisclaimer(ctx);
+  ctx.doc.save('OneTouch_Medical_Credit_' + (gv('med-name')||'').replace(/\s/g,'_') + '.pdf');
+  showPDFToast('Medical credit summary saved to downloads');
+}
+
+// ── REFUND LETTER ──
+function genRefundLetter() {
+  const ctx = makePDF('Tax Refund Follow-Up Letter', gv('ref-name') + ' · Ref: ' + gv('ref-ref'));
+  const {doc,W,M} = ctx;
+  doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(26,18,8);
+  const lines = [
+    'The Commissioner',
+    'South African Revenue Service (SARS)',
+    '',
+    'Date: ' + new Date().toLocaleDateString('en-ZA'),
+    '',
+    'Dear Sir/Madam,',
+    '',
+    'RE: OUTSTANDING TAX REFUND — TAX REFERENCE: ' + gv('ref-ref'),
+    '',
+    'I, ' + gv('ref-name') + ' (ID: ' + gv('ref-id') + '), submitted my ITR12 return on ' + gv('ref-date') + '.',
+    'I was assessed for a refund of ' + fmtR(gv('ref-amount')) + '.',
+    '',
+    'More than 21 business days have passed and I have not received my refund',
+    'into my bank account ending in ' + (gv('ref-bank')||'XXXX') + '.',
+    '',
+    'I kindly request that SARS investigate and expedite payment of my refund.',
+    'Please confirm my banking details are correct and no further documents are required.',
+    '',
+    'Yours faithfully,',
+    '',
+    '',
+    gv('ref-name'),
+    'ID: ' + gv('ref-id') + ' | Tax Ref: ' + gv('ref-ref'),
+    'Date: ' + new Date().toLocaleDateString('en-ZA')
+  ];
+  lines.forEach(line => {
+    doc.text(line, M, ctx.y, {maxWidth:W-M*2});
+    ctx.y += line===''?5:7;
+  });
+  addDisclaimer(ctx);
+  doc.save('OneTouch_Refund_Followup_' + (gv('ref-name')||'').replace(/\s/g,'_') + '.pdf');
+  showPDFToast('Refund letter saved to downloads');
 }
 </script>
 </body>
