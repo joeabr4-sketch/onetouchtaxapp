@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OneTouch TaxApp — Accountant View</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --ink:#0a0f1e;--ink2:#334155;--ink3:#64748b;
+    --bg:#f1f5f9;--white:#fff;--border:#e2e8f0;
+    --blue:#3b82f6;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--gold:#c9a84c;
+    --surface:#fff;--surface2:#f8fafc;
+  }
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+
+  /* ── HEADER ── */
+  .header{background:var(--ink);padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .logo{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:800;color:#fff;letter-spacing:-.3px}
+  .logo span{color:var(--gold)}
+  .header-badge{background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold);padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700}
+  .biz-name{font-size:13px;color:rgba(255,255,255,.6);margin-top:2px}
+
+  /* ── LOADING / ERROR ── */
+  .center-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;text-align:center;padding:32px}
+  .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .error-icon{font-size:48px}
+  .error-title{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:var(--ink)}
+  .error-msg{font-size:14px;color:var(--ink3);max-width:400px;line-height:1.6}
+
+  /* ── MAIN CONTENT ── */
+  .main{max-width:960px;margin:0 auto;padding:32px 24px}
+  .page-title{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:800;color:var(--ink);margin-bottom:4px}
+  .page-sub{font-size:14px;color:var(--ink3);margin-bottom:28px}
+
+  /* ── STAT CARDS ── */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px}
+  .stat{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px}
+  .stat-label{font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .stat-val{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:800;color:var(--ink)}
+  .stat-val.green{color:var(--green)}
+  .stat-val.red{color:var(--red)}
+  .stat-val.amber{color:var(--amber)}
+
+  /* ── CARDS ── */
+  .card{background:var(--white);border:1px solid var(--border);border-radius:14px;margin-bottom:20px;overflow:hidden}
+  .card-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .card-title{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:var(--ink)}
+  .card-body{padding:20px}
+
+  /* ── TABLE ── */
+  .data-table{width:100%;border-collapse:collapse;font-size:13px}
+  .data-table th{text-align:left;padding:10px 12px;font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid var(--border);background:var(--surface2)}
+  .data-table td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--ink2)}
+  .data-table tr:last-child td{border-bottom:none}
+  .data-table tr:hover td{background:var(--surface2)}
+  .badge{display:inline-block;padding:3px 8px;border-radius:5px;font-size:11px;font-weight:700}
+  .b-green{background:rgba(16,185,129,.1);color:var(--green)}
+  .b-red{background:rgba(239,68,68,.1);color:var(--red)}
+  .b-blue{background:rgba(59,130,246,.1);color:var(--blue)}
+  .b-amber{background:rgba(245,158,11,.1);color:var(--amber)}
+
+  /* ── DOWNLOAD BTN ── */
+  .dl-btn{background:var(--ink);color:#fff;border:none;padding:12px 24px;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;text-decoration:none;transition:opacity .2s}
+  .dl-btn:hover{opacity:.85}
+  .dl-btn.gold{background:var(--gold)}
+
+  /* ── REVIEW CHECKLIST ── */
+  .checklist{display:flex;flex-direction:column;gap:8px}
+  .check-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--ink2)}
+  .check-item input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--green)}
+
+  /* ── FOOTER ── */
+  .footer{text-align:center;padding:32px 24px;font-size:12px;color:var(--ink3);border-top:1px solid var(--border);margin-top:40px}
+  .footer strong{color:var(--ink)}
+
+  /* ── EXPIRY BANNER ── */
+  .expiry-banner{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:var(--amber);display:flex;align-items:center;gap:8px}
+
+  @media(max-width:600px){
+    .main{padding:20px 16px}
+    .header{padding:0 16px}
+    .stats{grid-template-columns:1fr 1fr}
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="logo">OneTouch <span>TaxApp</span></div>
+    <div class="biz-name" id="headerBizName">Loading...</div>
+  </div>
+  <div class="header-badge">🔒 Read-Only Accountant View</div>
+</div>
+
+<!-- LOADING STATE -->
+<div class="center-wrap" id="loadingState">
+  <div class="spinner"></div>
+  <div style="font-size:14px;color:var(--ink3)">Loading financial records...</div>
+</div>
+
+<!-- ERROR STATE -->
+<div class="center-wrap" id="errorState" style="display:none">
+  <div class="error-icon">🔒</div>
+  <div class="error-title" id="errorTitle">Link Invalid or Expired</div>
+  <div class="error-msg" id="errorMsg">This accountant access link is no longer valid. Please ask your client to send a new link from their OneTouch TaxApp settings.</div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main" id="mainContent" style="display:none">
+
+  <!-- Expiry warning -->
+  <div class="expiry-banner" id="expiryBanner" style="display:none">
+    ⏳ <span id="expiryText"></span>
+  </div>
+
+  <div class="page-title" id="pageTitle">Financial Records</div>
+  <div class="page-sub" id="pageSub">Prepared via OneTouch TaxApp · Read-only access</div>
+
+  <!-- DOWNLOAD FULL PACK -->
+  <div style="display:flex;gap:12px;margin-bottom:28px;flex-wrap:wrap">
+    <button class="dl-btn gold" onclick="downloadFullPack()">📥 Download Full Bookkeeper Pack PDF</button>
+    <button class="dl-btn" onclick="window.print()">🖨 Print This Page</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-label">Total Revenue</div>
+      <div class="stat-val green" id="statRevenue">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Total Expenses</div>
+      <div class="stat-val red" id="statExpenses">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Net Profit</div>
+      <div class="stat-val" id="statProfit">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">VAT Owing</div>
+      <div class="stat-val amber" id="statVAT">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Total Invoices</div>
+      <div class="stat-val" id="statInvoices">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Tax Year</div>
+      <div class="stat-val" id="statYear">—</div>
+    </div>
+  </div>
+
+  <!-- P&L MONTHLY BREAKDOWN -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">📊 Monthly P&L Breakdown</div>
+      <span style="font-size:12px;color:var(--ink3)" id="snapshotCount"></span>
+    </div>
+    <div class="card-body" style="padding:0">
+      <table class="data-table" id="plTable">
+        <thead><tr><th>Month</th><th>Revenue</th><th>Expenses</th><th>Profit / Loss</th><th>VAT Owing</th></tr></thead>
+        <tbody id="plBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- INVOICE REGISTER -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">🧾 Invoice Register</div>
+      <span style="font-size:12px;color:var(--ink3)" id="invoiceCount"></span>
+    </div>
+    <div class="card-body" style="padding:0">
+      <table class="data-table" id="invTable">
+        <thead><tr><th>Date</th><th>Description</th><th>Type</th><th>Amount</th><th>VAT</th><th>Total</th></tr></thead>
+        <tbody id="invBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- VAT SUMMARY -->
+  <div class="card">
+    <div class="card-head"><div class="card-title">💰 VAT Summary</div></div>
+    <div class="card-body">
+      <table class="data-table">
+        <tbody>
+          <tr><td style="font-weight:600">Output VAT (on sales)</td><td id="vatOutput">—</td></tr>
+          <tr><td style="font-weight:600">Input VAT (on expenses)</td><td id="vatInput">—</td></tr>
+          <tr><td style="font-weight:700;color:var(--ink)">Net VAT Owing to SARS</td><td id="vatNet" style="font-weight:700;color:var(--amber)">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ACCOUNTANT REVIEW CHECKLIST -->
+  <div class="card">
+    <div class="card-head"><div class="card-title">✅ Accountant Review Checklist</div></div>
+    <div class="card-body">
+      <p style="font-size:13px;color:var(--ink3);margin-bottom:16px">Review each item before signing off and submitting to SARS.</p>
+      <div class="checklist">
+        <label class="check-item"><input type="checkbox"> All invoice categories correctly assigned</label>
+        <label class="check-item"><input type="checkbox"> All expenses are legitimate business expenses</label>
+        <label class="check-item"><input type="checkbox"> Figures cross-referenced with bank statements</label>
+        <label class="check-item"><input type="checkbox"> VAT registration status confirmed</label>
+        <label class="check-item"><input type="checkbox"> Output and input VAT figures verified</label>
+        <label class="check-item"><input type="checkbox"> Payroll and PAYE figures reviewed</label>
+        <label class="check-item"><input type="checkbox"> No missing invoices against bank deposits</label>
+        <label class="check-item"><input type="checkbox"> Annual financial statements reviewed and signed</label>
+        <label class="check-item"><input type="checkbox"> Ready to submit to SARS eFiling</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISCLAIMER -->
+  <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:16px;font-size:12px;color:var(--ink3);line-height:1.7;margin-bottom:20px">
+    <strong style="color:var(--ink)">⚠ For Review Purposes Only</strong><br>
+    This report was prepared by the business owner using OneTouch TaxApp. All figures should be verified against source documents before submission to SARS. OneTouch TaxApp accepts no liability for errors or omissions.
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer" id="mainFooter" style="display:none">
+  <strong>OneTouch TaxApp</strong> · Powered by official SARS 2024/25 tax tables<br>
+  Always verify with SARS eFiling before submitting · <a href="https://onetouchtaxapp.vercel.app" style="color:var(--gold)">onetouchtaxapp.vercel.app</a>
+</div>
+
+<script>
+const { createClient } = supabase;
+const sb = createClient(
+  'https://stcxldjcagyxjfwfforx.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0Y3hsZGpjYWd5eGpmd2Zmb3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MjI3ODUsImV4cCI6MjA4ODE5ODc4NX0.kGmiqXZ9TYsO58pCSLuZg7kUiwknxFpF14N2i0Q-Wis'
+);
+
+const fmtR = v => 'R ' + Number(v||0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2});
+
+let profileData = null;
+let invoiceData = [];
+let snapshotData = [];
+
+async function init() {
+  // Get token from URL
+  const token = new URLSearchParams(window.location.search).get('token');
+  if (!token) { showError('No Access Token', 'No access token found in this link. Please ask your client to resend the link.'); return; }
+
+  try {
+    // Find profile with this token
+    const { data: profile, error } = await sb
+      .from('profiles')
+      .select('*')
+      .eq('share_token', token)
+      .single();
+
+    if (error || !profile) { showError('Link Not Found', 'This access link is invalid. Please ask your client to send a new link from their OneTouch TaxApp settings.'); return; }
+
+    // Check expiry
+    const expiry = new Date(profile.share_token_expiry);
+    const now    = new Date();
+    if (expiry < now) { showError('Link Expired', `This access link expired on ${expiry.toLocaleDateString('en-ZA')}. Please ask your client to send a new link.`); return; }
+
+    // Check expiry warning (within 5 days)
+    const daysLeft = Math.ceil((expiry - now) / (1000*60*60*24));
+    if (daysLeft <= 5) {
+      document.getElementById('expiryBanner').style.display = 'flex';
+      document.getElementById('expiryText').textContent = `This link expires in ${daysLeft} day${daysLeft===1?'':'s'} (${expiry.toLocaleDateString('en-ZA')}). Ask your client to send a new link soon.`;
+    }
+
+    profileData = profile;
+    const bizName = profile.biz_name || 'Business';
+    document.getElementById('headerBizName').textContent = bizName;
+    document.getElementById('pageTitle').textContent = bizName + ' — Financial Records';
+    document.getElementById('pageSub').textContent = `Prepared via OneTouch TaxApp · Tax Year ${new Date().getFullYear()} · Read-only access`;
+    document.getElementById('statYear').textContent = new Date().getFullYear();
+
+    // Load invoices
+    const { data: invoices } = await sb
+      .from('invoices')
+      .select('*')
+      .eq('user_id', profile.id)
+      .order('created_at', { ascending: false });
+
+    invoiceData = invoices || [];
+
+    // Load monthly snapshots
+    const { data: snapshots } = await sb
+      .from('monthly_snapshots')
+      .select('*')
+      .eq('user_id', profile.id)
+      .order('year', { ascending: true });
+
+    snapshotData = snapshots || [];
+
+    renderAll();
+
+    document.getElementById('loadingState').style.display  = 'none';
+    document.getElementById('mainContent').style.display   = 'block';
+    document.getElementById('mainFooter').style.display    = 'block';
+
+  } catch(e) {
+    showError('Something Went Wrong', 'Could not load financial records. Please try again or ask your client to resend the link.');
+  }
+}
+
+function renderAll() {
+  // Stats
+  const revenue  = invoiceData.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0);
+  const expenses = invoiceData.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0);
+  const profit   = revenue - expenses;
+  const vatOut   = invoiceData.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.vat||0),0);
+  const vatIn    = invoiceData.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.vat||0),0);
+  const vatNet   = vatOut - vatIn;
+
+  document.getElementById('statRevenue').textContent  = fmtR(revenue);
+  document.getElementById('statExpenses').textContent = fmtR(expenses);
+  const profEl = document.getElementById('statProfit');
+  profEl.textContent = fmtR(profit);
+  profEl.className = 'stat-val ' + (profit >= 0 ? 'green' : 'red');
+  document.getElementById('statVAT').textContent      = fmtR(vatNet);
+  document.getElementById('statInvoices').textContent = invoiceData.length;
+  document.getElementById('vatOutput').textContent    = fmtR(vatOut);
+  document.getElementById('vatInput').textContent     = fmtR(vatIn);
+  document.getElementById('vatNet').textContent       = fmtR(vatNet);
+
+  // Monthly P&L
+  const plBody = document.getElementById('plBody');
+  if (snapshotData.length > 0) {
+    document.getElementById('snapshotCount').textContent = snapshotData.length + ' months saved';
+    plBody.innerHTML = snapshotData.map(s => {
+      const p = s.revenue - s.expenses;
+      return `<tr>
+        <td><strong>${s.month_label||s.month_key}</strong></td>
+        <td style="color:var(--green)">${fmtR(s.revenue)}</td>
+        <td style="color:var(--red)">${fmtR(s.expenses)}</td>
+        <td style="font-weight:600">${fmtR(p)}</td>
+        <td style="color:var(--amber)">${fmtR(s.vat_owing)}</td>
+      </tr>`;
+    }).join('');
+  } else {
+    plBody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--ink3);padding:24px">No monthly snapshots saved yet</td></tr>';
+  }
+
+  // Invoice register
+  const invBody = document.getElementById('invBody');
+  document.getElementById('invoiceCount').textContent = invoiceData.length + ' transactions';
+  if (invoiceData.length > 0) {
+    invBody.innerHTML = invoiceData.map(inv => {
+      const date = inv.created_at ? new Date(inv.created_at).toLocaleDateString('en-ZA') : '—';
+      const badge = inv.type === 'income'
+        ? '<span class="badge b-green">Income</span>'
+        : '<span class="badge b-red">Expense</span>';
+      return `<tr>
+        <td>${date}</td>
+        <td>${inv.description||inv.category||'—'}</td>
+        <td>${badge}</td>
+        <td>${fmtR(inv.amount)}</td>
+        <td>${fmtR(inv.vat||0)}</td>
+        <td style="font-weight:600">${fmtR(Number(inv.amount||0)+Number(inv.vat||0))}</td>
+      </tr>`;
+    }).join('');
+  } else {
+    invBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink3);padding:24px">No invoices found</td></tr>';
+  }
+}
+
+async function downloadFullPack() {
+  const btn = document.querySelector('.dl-btn.gold');
+  btn.textContent = '⏳ Generating...'; btn.disabled = true;
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc  = new jsPDF({ unit:'mm', format:'a4' });
+    const W    = doc.internal.pageSize.getWidth();
+    const M    = 18;
+    let y      = 0;
+
+    const bizName = profileData?.biz_name || 'Business';
+    const now     = new Date().toLocaleDateString('en-ZA');
+
+    // ── COVER PAGE ──
+    doc.setFillColor(10,15,30); doc.rect(0,0,W,297,'F');
+    doc.setFillColor(201,168,76); doc.rect(0,0,W,6,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFont('helvetica','bold'); doc.setFontSize(28);
+    doc.text('BOOKKEEPER PACK', M, 60);
+    doc.setFontSize(16); doc.setFont('helvetica','normal');
+    doc.text(bizName, M, 75);
+    doc.setFontSize(12); doc.setTextColor(180,180,180);
+    doc.text('Prepared via OneTouch TaxApp', M, 88);
+    doc.text('Generated: ' + now, M, 98);
+    doc.text('For accountant review only — verify before SARS submission', M, 108);
+    doc.setFillColor(201,168,76); doc.rect(M, 120, 60, 0.5, 'F');
+
+    // Revenue/expense summary on cover
+    const revenue  = invoiceData.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0);
+    const expenses = invoiceData.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0);
+    const profit   = revenue - expenses;
+    doc.setTextColor(150,150,150); doc.setFontSize(10);
+    doc.text('TOTAL REVENUE',  M, 140); doc.text('TOTAL EXPENSES', M+65, 140); doc.text('NET PROFIT', M+130, 140);
+    doc.setTextColor(16,185,129); doc.setFontSize(16); doc.setFont('helvetica','bold');
+    doc.text('R '+revenue.toLocaleString('en-ZA',{minimumFractionDigits:2}), M, 152);
+    doc.setTextColor(239,68,68);
+    doc.text('R '+expenses.toLocaleString('en-ZA',{minimumFractionDigits:2}), M+65, 152);
+    doc.setTextColor(profit>=0?[16,185,129]:[239,68,68]);
+    doc.text('R '+Math.abs(profit).toLocaleString('en-ZA',{minimumFractionDigits:2}), M+130, 152);
+
+    doc.setTextColor(60,60,60); doc.setFontSize(9); doc.setFont('helvetica','normal');
+    doc.text('OneTouch TaxApp · onetouchtaxapp.vercel.app', M, 285);
+    doc.text('Page 1', W-M, 285, {align:'right'});
+
+    // ── P&L PAGE ──
+    doc.addPage();
+    doc.setFillColor(201,168,76); doc.rect(0,0,W,6,'F');
+    doc.setTextColor(10,15,30); doc.setFont('helvetica','bold'); doc.setFontSize(18);
+    doc.text('Profit & Loss Statement', M, 24);
+    doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(100,116,139);
+    doc.text(bizName + ' · Generated: ' + now, M, 32);
+
+    y = 45;
+    const addRow = (label, val, bold=false, color=null) => {
+      doc.setFillColor(bold ? 241 : (y%2===0?248:255), bold?245:250, bold?249:252);
+      doc.rect(M, y-5, W-M*2, 9, 'F');
+      doc.setFont('helvetica', bold?'bold':'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(bold ? 10 : 51, bold ? 15 : 65, bold ? 30 : 94);
+      doc.text(label, M+3, y+1);
+      if (color) doc.setTextColor(...color);
+      doc.text(val, W-M-3, y+1, {align:'right'});
+      doc.setTextColor(51,65,94);
+      y += 10;
+    };
+
+    addRow('INCOME', '', true);
+    const incInvoices = invoiceData.filter(i=>i.type==='income');
+    incInvoices.forEach(inv => addRow(inv.description||inv.category||'Income', fmtR(inv.amount)));
+    addRow('Total Revenue', fmtR(revenue), true, [16,185,129]);
+    y += 4;
+    addRow('EXPENSES', '', true);
+    const expInvoices = invoiceData.filter(i=>i.type==='expense');
+    expInvoices.forEach(inv => addRow(inv.description||inv.category||'Expense', fmtR(inv.amount)));
+    addRow('Total Expenses', fmtR(expenses), true, [239,68,68]);
+    y += 6;
+    doc.setFillColor(10,15,30); doc.rect(M, y-5, W-M*2, 11, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(255,255,255);
+    doc.text('NET PROFIT / (LOSS)', M+3, y+2);
+    doc.setTextColor(profit>=0 ? 16 : 239, profit>=0 ? 185 : 68, profit>=0 ? 129 : 68);
+    doc.text(fmtR(profit), W-M-3, y+2, {align:'right'});
+    y += 16;
+
+    // ── VAT SUMMARY ──
+    if (y > 240) { doc.addPage(); doc.setFillColor(201,168,76); doc.rect(0,0,W,6,'F'); y = 24; }
+    doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(10,15,30);
+    doc.text('VAT Summary', M, y); y += 14;
+    const vatOut = incInvoices.reduce((s,i)=>s+Number(i.vat||0),0);
+    const vatIn  = expInvoices.reduce((s,i)=>s+Number(i.vat||0),0);
+    addRow('Output VAT (on sales)', fmtR(vatOut));
+    addRow('Input VAT (on expenses)', fmtR(vatIn));
+    addRow('Net VAT Owing to SARS', fmtR(vatOut-vatIn), true, [245,158,11]);
+
+    // ── INVOICE REGISTER ──
+    doc.addPage();
+    doc.setFillColor(201,168,76); doc.rect(0,0,W,6,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(10,15,30);
+    doc.text('Invoice Register', M, 24);
+    doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(100,116,139);
+    doc.text(`${invoiceData.length} transactions · ${bizName}`, M, 32);
+    y = 45;
+    // Header row
+    doc.setFillColor(10,15,30); doc.rect(M, y-6, W-M*2, 9, 'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(9);
+    doc.text('Date', M+2, y); doc.text('Description', M+28, y);
+    doc.text('Type', M+100, y); doc.text('Amount', M+122, y); doc.text('VAT', M+148, y); doc.text('Total', W-M-3, y, {align:'right'});
+    y += 10;
+    invoiceData.forEach((inv, i) => {
+      if (y > 270) { doc.addPage(); doc.setFillColor(201,168,76); doc.rect(0,0,W,6,'F'); y = 20; }
+      doc.setFillColor(i%2===0?248:255, i%2===0?250:255, i%2===0?252:255);
+      doc.rect(M, y-5, W-M*2, 9, 'F');
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+      const date = inv.created_at ? new Date(inv.created_at).toLocaleDateString('en-ZA') : '—';
+      const desc = (inv.description||inv.category||'—').substring(0,30);
+      const total = Number(inv.amount||0) + Number(inv.vat||0);
+      if (inv.type==='income') doc.setTextColor(16,185,129); else doc.setTextColor(239,68,68);
+      doc.text(inv.type==='income'?'Income':'Expense', M+100, y);
+      doc.setTextColor(51,65,94);
+      doc.text(date, M+2, y);
+      doc.text(desc, M+28, y);
+      doc.text(fmtR(inv.amount), M+122, y);
+      doc.text(fmtR(inv.vat||0), M+148, y);
+      doc.setFont('helvetica','bold');
+      doc.text(fmtR(total), W-M-3, y, {align:'right'});
+      y += 9;
+    });
+
+    // ── REVIEW CHECKLIST ──
+    doc.addPage();
+    doc.setFillColor(201,168,76); doc.rect(0,0,W,6,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(10,15,30);
+    doc.text('Accountant Review Checklist', M, 24); y = 42;
+    const checks = [
+      'All invoice categories correctly assigned',
+      'All expenses are legitimate business expenses',
+      'Figures cross-referenced with bank statements',
+      'VAT registration status confirmed and current',
+      'Output and input VAT figures verified',
+      'Payroll and PAYE figures reviewed',
+      'No missing invoices against bank deposits',
+      'Annual financial statements reviewed and signed',
+      'Ready to submit to SARS eFiling'
+    ];
+    checks.forEach(c => {
+      doc.setFillColor(248,250,252); doc.rect(M, y-5, W-M*2, 10, 'F');
+      doc.setDrawColor(226,232,240); doc.rect(M+3, y-3, 5, 5);
+      doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(51,65,94);
+      doc.text(c, M+12, y+1);
+      y += 13;
+    });
+
+    // Signature block
+    y += 10;
+    doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(10,15,30);
+    doc.text('Sign-off', M, y); y += 12;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(100,116,139);
+    doc.text('Accountant Name: _______________________________  Date: __________________', M, y); y += 14;
+    doc.text('Signature: _____________________________________  Stamp:', M, y);
+
+    // ── DISCLAIMER ──
+    y += 20;
+    doc.setFillColor(254,252,232); doc.rect(M, y-4, W-M*2, 20, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(146,96,26);
+    doc.text('For review purposes only.', M+3, y+2);
+    doc.setFont('helvetica','normal');
+    doc.text('All figures prepared by business owner using OneTouch TaxApp. Verify all figures against source documents before SARS submission.', M+3, y+8, {maxWidth: W-M*2-6});
+    doc.text('Powered by official SARS 2024/25 tax tables · onetouchtaxapp.vercel.app', M+3, y+14);
+
+    doc.save('OneTouch_BookkeeperPack_' + (profileData?.biz_name||'').replace(/\s/g,'_') + '_' + new Date().getFullYear() + '.pdf');
+    btn.textContent = '✅ Downloaded!';
+    setTimeout(()=>{ btn.textContent='📥 Download Full Bookkeeper Pack PDF'; btn.disabled=false; }, 3000);
+  } catch(e) {
+    console.error(e);
+    btn.textContent = '❌ Error — try again'; btn.disabled = false;
+  }
+}
+
+function showError(title, msg) {
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('errorState').style.display   = 'flex';
+  document.getElementById('errorTitle').textContent     = title;
+  document.getElementById('errorMsg').textContent       = msg;
+}
+
+init();
+</script>
+</body>
+</html>
