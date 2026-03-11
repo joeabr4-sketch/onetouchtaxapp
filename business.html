@@ -969,8 +969,16 @@ h1,h2,h3,.logo-text,.stat-value{font-family:'Syne',sans-serif}
           <div class="bar-chart" id="barChart"><div style="color:var(--text-3);font-size:13px;margin:auto">Add invoices to see your chart</div></div>
         </div>
         <div class="card">
-          <div class="card-head"><div class="card-title">💡 AI Saving Tips</div><button class="gen-tips-btn" onclick="generateSavingTips()" id="tipsBtn">✨ Generate Tips</button></div>
-          <div id="tipsWrap" style="padding:16px 20px"><div style="text-align:center;padding:20px;color:var(--text-3);font-size:13px">Click "Generate Tips" to get personalised tax-saving advice based on your figures.</div></div>
+          <div class="card-head"><div class="card-title">💡 AI Business Tips</div><span class="badge b-blue plan-lock" style="font-size:10px">PRO</span><button class="gen-tips-btn" onclick="generateSavingTips()" id="tipsBtn" style="margin-left:auto">✨ Generate Tips</button></div>
+          <div id="tipsWrap" style="padding:16px 20px">
+            <div id="tipsFreeMsg" style="display:none;background:var(--gold-dim);border:1px solid rgba(212,168,67,.25);border-radius:10px;padding:18px;text-align:center">
+              <div style="font-size:22px;margin-bottom:8px">💡</div>
+              <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">AI Tax-Saving Tips</div>
+              <div style="font-size:12.5px;color:var(--text-2);margin-bottom:14px;line-height:1.6">Get personalised South African tax-saving advice based on your actual revenue, expenses and VAT status.</div>
+              <button onclick="showUpgradePrompt('pro')" style="background:var(--gold);color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">⬆ Upgrade to Pro</button>
+            </div>
+            <div id="tipsProMsg" style="text-align:center;padding:20px;color:var(--text-3);font-size:13px">Click "Generate Tips" to get personalised tax-saving advice based on your figures.</div>
+          </div>
         </div>
       </div>
     </div>
@@ -1523,8 +1531,14 @@ async function initApp() {
       await loadUserProfile();
     } else if (event === 'SIGNED_OUT') {
       currentUser = null; userProfile = null; invoices = [];
+      const emailInput = document.getElementById('emailInput');
+      const magicBtn = document.querySelector('.magic-btn');
+      if (emailInput) emailInput.value = '';
+      if (magicBtn) { magicBtn.textContent = 'Send Magic Link →'; magicBtn.disabled = false; }
       document.getElementById('mainWrapper').style.display = 'none';
+      document.getElementById('loadingScreen').style.display = 'none';
       document.getElementById('authScreen').style.display = 'flex';
+      sessionStorage.removeItem('ot_welcomed');
     }
   });
 }
@@ -1554,15 +1568,20 @@ async function signInWithEmail() {
 async function signOut() {
   try {
     await sb.auth.signOut();
-    // Force UI reset in case onAuthStateChange doesn't fire
-    currentUser = null; userProfile = null; invoices = [];
-    document.getElementById('mainWrapper').style.display = 'none';
-    document.getElementById('authScreen').style.display = 'flex';
-    document.getElementById('loadingScreen').style.display = 'none';
-  } catch(e) {
-    // Force reload as final fallback
-    window.location.reload();
-  }
+  } catch(e) { /* continue with UI reset regardless */ }
+  // Always fully reset state and UI
+  currentUser = null; userProfile = null; invoices = [];
+  // Reset auth form to clean state
+  const emailInput = document.getElementById('emailInput');
+  const magicBtn = document.querySelector('.magic-btn');
+  if (emailInput) emailInput.value = '';
+  if (magicBtn) { magicBtn.textContent = 'Send Magic Link →'; magicBtn.disabled = false; }
+  // Reset screen visibility
+  document.getElementById('mainWrapper').style.display = 'none';
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'flex';
+  // Clear session storage so welcome popup shows again on next login
+  sessionStorage.removeItem('ot_welcomed');
 }
 
 // ── PROFILE ──
@@ -2708,6 +2727,14 @@ function renderFinancials() {
   if (finProfit) { finProfit.textContent = fmtR(profit); finProfit.style.color = profit>=0?'var(--green)':'var(--red)'; }
   if (finMargin) finMargin.textContent = (income>0?((profit/income)*100).toFixed(1):0)+'% profit margin';
   renderBarChart(months);
+  // Show correct tips state based on plan
+  const tipsBtn = document.getElementById('tipsBtn');
+  const tipsFree = document.getElementById('tipsFreeMsg');
+  const tipsPro = document.getElementById('tipsProMsg');
+  const isPro = canUse('tips');
+  if (tipsBtn) tipsBtn.style.display = isPro ? 'inline-flex' : 'none';
+  if (tipsFree) tipsFree.style.display = isPro ? 'none' : 'block';
+  if (tipsPro) tipsPro.style.display = isPro ? 'block' : 'none';
 }
 function renderBarChart(months) {
   const chart = document.getElementById('barChart'); if (!chart) return;
@@ -2715,7 +2742,8 @@ function renderBarChart(months) {
   for (let i=months-1; i>=0; i--) {
     const d = new Date(); d.setMonth(d.getMonth()-i);
     const y=d.getFullYear(), m=d.getMonth();
-    const label = d.toLocaleString('en-ZA',{month:'short'});
+    const months2 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const label = months2[d.getMonth()];
     const inc = invoices.filter(inv=>inv.type==='income'&&new Date(inv.date||0).getMonth()===m&&new Date(inv.date||0).getFullYear()===y).reduce((s,inv)=>s+Number(inv.amount||0),0);
     const exp = invoices.filter(inv=>inv.type==='expense'&&new Date(inv.date||0).getMonth()===m&&new Date(inv.date||0).getFullYear()===y).reduce((s,inv)=>s+Number(inv.amount||0),0);
     data.push({label,inc,exp});
@@ -2736,18 +2764,20 @@ async function generateSavingTips() {
   if (!canUse('tips')) { showUpgradePrompt('pro'); return; }
   const canProceed = await checkAICalls(); if (!canProceed) return;
   const btn = document.getElementById('tipsBtn');
-  const wrap = document.getElementById('tipsWrap');
+  const wrap = document.getElementById('tipsProMsg');
   btn.textContent='⏳ Generating...'; btn.disabled=true;
   const income = invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0);
   const exp = invoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0);
   const cats = [...new Set(invoices.filter(i=>i.type==='expense').map(i=>i.category))].join(', ');
   try {
     const data = await aiCall({model:'claude-sonnet-4-20250514',max_tokens:600,
-      system:'You are a South African tax advisor. Give 4 specific actionable tax-saving tips. Be concise.',
-      messages:[{role:'user',content:`Business: ${userProfile?.biz_name}, VAT: ${isVatRegistered()}, Revenue: ${fmtR(income)}, Expenses: ${fmtR(exp)}, Categories: ${cats||'various'}. Give 4 SA tax-saving tips.`}]});
+      system:'You are a South African tax advisor. Give 4 specific actionable tax-saving tips. Each tip on its own line starting with a number. Be concise and specific to SA tax law.',
+      messages:[{role:'user',content:`Business: ${userProfile?.biz_name}, VAT registered: ${isVatRegistered()}, Revenue: ${fmtR(income)}, Expenses: ${fmtR(exp)}, Expense categories: ${cats||'various'}. Give 4 SA-specific tax-saving tips.`}]});
     const tips = data.content?.[0]?.text||'';
-    wrap.innerHTML = tips.split('\n').filter(l=>l.trim()).map(l=>`<div class="insight-box" style="margin-bottom:8px">${l}</div>`).join('');
-  } catch(e) { wrap.innerHTML='<div style="color:var(--red);font-size:13px">Failed to generate tips. Please try again.</div>'; }
+    if (wrap) wrap.innerHTML = tips.split('\n').filter(l=>l.trim()).map(l=>`<div class="insight-box" style="margin-bottom:8px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;font-size:13px;color:var(--text-2);line-height:1.65">${l}</div>`).join('');
+  } catch(e) {
+    if (wrap) wrap.innerHTML='<div style="color:var(--red);font-size:13px;padding:12px">Failed to generate tips. Please try again.</div>';
+  }
   btn.textContent='✨ Regenerate Tips'; btn.disabled=false;
 }
 
