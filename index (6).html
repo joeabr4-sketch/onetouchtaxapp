@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OneTouch TaxApp — South African Tax & Business Finance</title>
+<meta name="description" content="The smart way for South African businesses and individuals to manage tax, invoices, VAT, and SARS compliance. Start free today.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07090f;
+  --bg2: #0b0e1a;
+  --surface: #0f1520;
+  --surface2: #131c2e;
+  --border: #1a2640;
+  --border2: #223050;
+  --blue: #4f8ef7;
+  --blue-dim: rgba(79,142,247,.1);
+  --blue-glow: rgba(79,142,247,.2);
+  --cyan: #2dd4bf;
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,.08);
+  --amber: #f59e0b;
+  --red: #f43f5e;
+  --gold: #d4a843;
+  --gold-dim: rgba(212,168,67,.1);
+  --text: #e8edf5;
+  --text-2: #8899b8;
+  --text-3: #4a5a78;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6}
+h1,h2,h3,h4,.syne{font-family:'Syne',sans-serif}
+
+/* ── NOISE OVERLAY ── */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");opacity:.4;pointer-events:none;z-index:0}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 40px;height:64px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:rgba(7,9,15,.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(26,38,64,.6)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-mark{width:36px;height:36px;background:var(--blue);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#fff;flex-shrink:0}
+.nav-wordmark{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--text)}
+.nav-wordmark span{color:var(--blue)}
+.nav-links{display:flex;align-items:center;gap:28px;justify-content:center}
+.nav-links a{color:var(--text-2);text-decoration:none;font-size:13.5px;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--blue);color:#fff;border:none;padding:9px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s;justify-self:end}
+.nav-cta:hover{background:#3a7ae0;transform:translateY(-1px)}
+
+/* ── QUICK NAV BAR ── */
+.quick-nav{position:fixed;top:64px;left:0;right:0;z-index:99;height:40px;background:rgba(7,9,15,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(26,38,64,.5);display:flex;align-items:center;justify-content:center;padding:0 20px;transform:translateY(-110%);transition:transform .35s cubic-bezier(.16,1,.3,1),opacity .3s;opacity:0}
+.quick-nav-inner{display:flex;align-items:center;gap:4px;width:100%;max-width:1100px}
+.quick-nav.visible{transform:translateY(0);opacity:1}
+.qn-link{display:flex;align-items:center;gap:5px;padding:5px 13px;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;color:var(--text-3);transition:all .2s;white-space:nowrap;letter-spacing:.2px;border:1px solid transparent}
+.qn-link:hover{color:var(--text);background:var(--surface2);border-color:var(--border)}
+.qn-link.active{color:var(--blue);background:var(--blue-dim);border-color:rgba(79,142,247,.2)}
+.qn-icon{font-size:12px}
+.qn-divider{width:1px;height:16px;background:var(--border);margin:0 2px;flex-shrink:0}
+@media(max-width:600px){.quick-nav{gap:0;padding:0 10px}.qn-link{padding:5px 9px;font-size:11px}.qn-divider{display:none}}
+
+/* ── HERO ── */
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:120px 24px 80px;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 20%,rgba(79,142,247,.12),transparent),radial-gradient(ellipse 40% 30% at 80% 60%,rgba(45,212,191,.06),transparent),radial-gradient(ellipse 50% 40% at 20% 80%,rgba(212,168,67,.05),transparent)}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(79,142,247,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(79,142,247,.04) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 60% at 50% 30%,black,transparent)}
+.hero-inner{position:relative;z-index:1;text-align:center;max-width:820px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(212,168,67,.1);border:1px solid rgba(212,168,67,.25);border-radius:20px;padding:6px 16px;font-size:12px;color:var(--gold);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:28px;animation:fadeUp .6s ease both}
+.hero-badge-dot{width:6px;height:6px;background:var(--gold);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero-h{font-size:clamp(38px,6vw,72px);font-weight:800;line-height:1.08;letter-spacing:-2px;margin-bottom:22px;animation:fadeUp .6s .1s ease both}
+.hero-h .accent{color:var(--blue)}
+.hero-h .accent2{color:var(--gold)}
+.hero-sub{font-size:clamp(15px,2vw,18px);color:var(--text-2);max-width:560px;margin:0 auto 36px;line-height:1.7;animation:fadeUp .6s .2s ease both}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;animation:fadeUp .6s .3s ease both}
+.btn-primary{background:var(--blue);color:#fff;border:none;padding:14px 28px;border-radius:10px;font-family:'Syne',sans-serif;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .25s;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 24px rgba(79,142,247,.3)}
+.btn-primary:hover{background:#3a7ae0;transform:translateY(-2px);box-shadow:0 8px 32px rgba(79,142,247,.4)}
+.btn-secondary{background:transparent;color:var(--text);border:1px solid var(--border2);padding:14px 28px;border-radius:10px;font-family:'Syne',sans-serif;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .25s;display:inline-flex;align-items:center;gap:8px}
+.btn-secondary:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-2px)}
+.hero-trust{display:flex;align-items:center;justify-content:center;gap:24px;margin-top:48px;flex-wrap:wrap;animation:fadeUp .6s .4s ease both}
+.trust-item{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-3)}
+.trust-item span{color:var(--green);font-size:14px}
+.hero-cards{position:relative;margin-top:64px;animation:fadeUp .6s .5s ease both}
+.app-preview{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px 24px;max-width:700px;margin:0 auto;box-shadow:0 32px 80px rgba(0,0,0,.5),0 0 0 1px rgba(79,142,247,.06)}
+.preview-bar{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.preview-dot{width:10px;height:10px;border-radius:50%}
+.preview-title{font-size:11px;color:var(--text-3);margin-left:6px;font-family:'Syne',sans-serif;letter-spacing:.5px}
+.preview-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.prev-stat{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.prev-stat-label{font-size:10px;color:var(--text-3);margin-bottom:4px}
+.prev-stat-val{font-family:'Syne',sans-serif;font-size:16px;font-weight:700}
+.preview-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface2);border-radius:7px;margin-bottom:6px}
+.preview-row:last-child{margin-bottom:0}
+.pr-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pr-text{font-size:12px;color:var(--text-2);flex:1}
+.pr-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── SECTION SHARED ── */
+section{position:relative;z-index:1}
+.container{max-width:1100px;margin:0 auto;padding:0 24px}
+.section-badge{display:inline-block;background:var(--blue-dim);border:1px solid rgba(79,142,247,.2);border-radius:20px;padding:4px 14px;font-size:11px;color:var(--blue);font-weight:600;letter-spacing:.8px;text-transform:uppercase;margin-bottom:14px}
+.section-h{font-size:clamp(28px,4vw,42px);font-weight:700;letter-spacing:-1px;margin-bottom:12px}
+.section-sub{font-size:15px;color:var(--text-2);max-width:540px;line-height:1.7}
+
+/* ── HOW IT WORKS ── */
+.how{padding:100px 0}
+.how-inner{text-align:center;margin-bottom:60px}
+.how-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;position:relative}
+.how-steps::before{content:'';position:absolute;top:36px;left:calc(16.6% + 16px);right:calc(16.6% + 16px);height:1px;background:linear-gradient(90deg,var(--blue),var(--cyan));opacity:.4;z-index:0}
+.step{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px 28px;text-align:center;position:relative;z-index:1;transition:all .3s}
+.step:hover{border-color:var(--border2);transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.3)}
+.step-num{width:48px;height:48px;background:linear-gradient(135deg,var(--blue),var(--cyan));border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#fff;margin:0 auto 18px}
+.step-title{font-size:17px;font-weight:700;margin-bottom:8px}
+.step-desc{font-size:13.5px;color:var(--text-2);line-height:1.65}
+
+/* ── FEATURES ── */
+.features{padding:100px 0;background:linear-gradient(180deg,transparent,rgba(11,14,26,.6),transparent)}
+.features-inner{text-align:center;margin-bottom:60px}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.feat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;transition:all .3s;position:relative;overflow:hidden}
+.feat-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 0% 0%,var(--blue-glow),transparent 60%);opacity:0;transition:opacity .3s}
+.feat-card:hover{border-color:var(--border2);transform:translateY(-3px)}
+.feat-card:hover::before{opacity:1}
+.feat-icon{font-size:28px;margin-bottom:14px}
+.feat-title{font-size:16px;font-weight:700;margin-bottom:8px}
+.feat-desc{font-size:13px;color:var(--text-2);line-height:1.65}
+.feat-tag{display:inline-block;margin-top:10px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;letter-spacing:.4px}
+.tag-free{background:var(--green-dim);color:var(--green);border:1px solid rgba(34,197,94,.15)}
+.tag-pro{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(79,142,247,.2)}
+.tag-full{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(212,168,67,.2)}
+
+/* ── COMPARISON ── */
+.compare{padding:100px 0}
+.compare-inner{text-align:center;margin-bottom:50px}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:820px;margin:0 auto}
+.compare-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px;position:relative;overflow:hidden}
+.compare-card.featured{border-color:rgba(79,142,247,.4);background:linear-gradient(135deg,rgba(79,142,247,.06),var(--surface))}
+.compare-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.compare-card.personal::after{background:linear-gradient(90deg,var(--green),var(--cyan))}
+.compare-card.business::after{background:linear-gradient(90deg,var(--blue),var(--gold))}
+.compare-label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);margin-bottom:10px}
+.compare-title{font-size:24px;font-weight:800;margin-bottom:6px}
+.compare-price{font-size:32px;font-weight:800;color:var(--green);margin-bottom:4px}
+.compare-price.paid{color:var(--blue)}
+.compare-price-note{font-size:12px;color:var(--text-3);margin-bottom:20px}
+.compare-list{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.compare-list li{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;color:var(--text-2)}
+.compare-list li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0;margin-top:1px}
+.compare-btn{display:block;text-align:center;padding:13px;border-radius:10px;font-family:'Syne',sans-serif;font-size:14px;font-weight:600;text-decoration:none;transition:all .2s;cursor:pointer;border:none}
+.compare-btn.green{background:var(--green);color:#fff}
+.compare-btn.green:hover{background:#16a34a;transform:translateY(-1px)}
+.compare-btn.blue{background:var(--blue);color:#fff}
+.compare-btn.blue:hover{background:#3a7ae0;transform:translateY(-1px)}
+.free-badge{position:absolute;top:16px;right:16px;background:var(--green-dim);border:1px solid rgba(34,197,94,.25);color:var(--green);font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px;letter-spacing:.5px}
+
+/* ── PRICING ── */
+.pricing{padding:100px 0}
+.pricing-inner{text-align:center;margin-bottom:56px}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start}
+.price-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;position:relative;transition:all .3s}
+.price-card:hover{transform:translateY(-4px);box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.price-card.popular{border-color:rgba(79,142,247,.4);background:linear-gradient(160deg,rgba(79,142,247,.07),var(--surface));transform:scale(1.03)}
+.price-card.popular:hover{transform:scale(1.03) translateY(-4px)}
+.popular-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;padding:4px 16px;border-radius:20px;letter-spacing:.5px;white-space:nowrap}
+.price-top-bar{height:3px;border-radius:3px;margin-bottom:24px;margin:-32px -32px 24px}
+.price-tier{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-3);margin-bottom:6px}
+.price-amount{font-family:'Syne',sans-serif;font-size:40px;font-weight:800;line-height:1;margin-bottom:4px}
+.price-amount sup{font-size:18px;vertical-align:top;margin-top:8px;display:inline-block}
+.price-period{font-size:12px;color:var(--text-3);margin-bottom:20px}
+.price-desc{font-size:13px;color:var(--text-2);margin-bottom:24px;line-height:1.6;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.price-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.price-features li{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--text-2)}
+.price-features li .check{color:var(--green);flex-shrink:0;font-size:13px;margin-top:1px}
+.price-features li .x{color:var(--text-3);flex-shrink:0;font-size:13px;margin-top:1px}
+.price-features li.muted{color:var(--text-3)}
+.price-cta{display:block;text-align:center;padding:13px;border-radius:10px;font-family:'Syne',sans-serif;font-size:14px;font-weight:600;text-decoration:none;transition:all .2s;border:none;cursor:pointer;width:100%}
+.price-cta.outline{background:transparent;color:var(--text-2);border:1px solid var(--border2)}
+.price-cta.outline:hover{border-color:var(--blue);color:var(--blue)}
+.price-cta.solid-blue{background:var(--blue);color:#fff;box-shadow:0 4px 20px rgba(79,142,247,.3)}
+.price-cta.solid-blue:hover{background:#3a7ae0;transform:translateY(-1px)}
+.price-cta.solid-gold{background:linear-gradient(135deg,var(--gold),#b8872e);color:#fff;box-shadow:0 4px 20px rgba(212,168,67,.25)}
+.price-cta.solid-gold:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(212,168,67,.35)}
+
+/* ── TESTIMONIALS ── */
+.testimonials{padding:100px 0;background:linear-gradient(180deg,transparent,rgba(11,14,26,.8),transparent)}
+.testimonials-inner{text-align:center;margin-bottom:56px}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.testi-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;transition:all .3s}
+.testi-card:hover{border-color:var(--border2);transform:translateY(-3px)}
+.testi-stars{color:var(--gold);font-size:14px;margin-bottom:14px;letter-spacing:2px}
+.testi-quote{font-size:14px;color:var(--text-2);line-height:1.75;margin-bottom:20px;font-style:italic}
+.testi-author{display:flex;align-items:center;gap:10px}
+.testi-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.testi-name{font-size:13px;font-weight:600;color:var(--text)}
+.testi-role{font-size:11.5px;color:var(--text-3)}
+.testi-note{text-align:center;margin-top:28px;font-size:12px;color:var(--text-3);font-style:italic}
+
+/* ── FAQ ── */
+.faq{padding:100px 0}
+.faq-inner{text-align:center;margin-bottom:56px}
+.faq-list{max-width:700px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.faq-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s}
+.faq-item.open{border-color:var(--border2)}
+.faq-q{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;cursor:pointer;font-size:14.5px;font-weight:600;color:var(--text);gap:16px;user-select:none}
+.faq-arrow{font-size:12px;color:var(--text-3);transition:transform .3s;flex-shrink:0}
+.faq-item.open .faq-arrow{transform:rotate(180deg);color:var(--blue)}
+.faq-a{font-size:13.5px;color:var(--text-2);line-height:1.75;padding:0 22px;max-height:0;overflow:hidden;transition:all .35s ease}
+.faq-item.open .faq-a{max-height:300px;padding-bottom:18px}
+
+/* ── FOOTER ── */
+footer{background:var(--surface);border-top:1px solid var(--border);padding:60px 0 32px}
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px}
+.footer-brand .nav-mark{margin-bottom:12px}
+.footer-tagline{font-size:13px;color:var(--text-3);line-height:1.7;margin-top:10px;max-width:220px}
+.footer-col-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);margin-bottom:16px}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:10px}
+.footer-links a{color:var(--text-2);text-decoration:none;font-size:13px;transition:color .2s}
+.footer-links a:hover{color:var(--text)}
+.footer-bottom{border-top:1px solid var(--border);padding-top:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-copy{font-size:12px;color:var(--text-3)}
+.footer-legal{display:flex;gap:20px}
+.footer-legal a{font-size:12px;color:var(--text-3);text-decoration:none;transition:color .2s}
+.footer-legal a:hover{color:var(--text-2)}
+.sars-note{text-align:center;padding:14px 20px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:8px;font-size:11.5px;color:var(--text-3);margin-bottom:32px;max-width:700px;margin-left:auto;margin-right:auto;line-height:1.65}
+
+/* ── SCROLL ANIMATIONS ── */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:.1s}
+.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  nav{padding:0 20px}
+  .nav-links{display:none}
+  .feat-grid{grid-template-columns:1fr 1fr}
+  .pricing-grid{grid-template-columns:1fr}
+  .price-card.popular{transform:none}
+  .compare-grid{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .testi-grid{grid-template-columns:1fr}
+  .how-steps{grid-template-columns:1fr}
+  .how-steps::before{display:none}
+}
+@media(max-width:600px){
+  .hero{padding:90px 16px 60px}
+  .feat-grid{grid-template-columns:1fr}
+  .preview-stats{grid-template-columns:1fr 1fr}
+  .footer-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a class="nav-logo" href="/">
+    <div class="nav-mark">OT</div>
+    <div class="nav-wordmark">OneTouch <span>Tax</span>App</div>
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how">How it works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+    <a href="/business.html">Sign In</a>
+  </div>
+  <a class="nav-cta" href="/business.html">Start Free →</a>
+</nav>
+
+<!-- ── QUICK NAV BAR ── -->
+<div class="quick-nav" id="quickNav">
+  <div class="quick-nav-inner">
+    <a class="qn-link" href="#how" data-section="how"><span class="qn-icon">⚡</span> How it works</a>
+    <div class="qn-divider"></div>
+    <a class="qn-link" href="#features" data-section="features"><span class="qn-icon">✦</span> Features</a>
+    <div class="qn-divider"></div>
+    <a class="qn-link" href="#compare" data-section="compare"><span class="qn-icon">⚖️</span> Business vs Personal</a>
+    <div class="qn-divider"></div>
+    <a class="qn-link" href="#pricing" data-section="pricing"><span class="qn-icon">💳</span> Pricing</a>
+    <div class="qn-divider"></div>
+    <a class="qn-link" href="#testimonials" data-section="testimonials"><span class="qn-icon">💬</span> Reviews</a>
+    <div class="qn-divider"></div>
+    <a class="qn-link" href="#faq" data-section="faq"><span class="qn-icon">❓</span> FAQ</a>
+  </div>
+</div>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">
+      <div class="hero-badge-dot"></div>
+      Built for South African businesses
+    </div>
+    <h1 class="hero-h">
+      Tax compliance,<br>
+      <span class="accent">done properly.</span><br>
+      <span class="accent2">Stress-free.</span>
+    </h1>
+    <p class="hero-sub">Invoices, VAT, PAYE, provisional tax and SARS deadlines — all in one place. Built specifically for South African businesses by people who understand the SA tax system.</p>
+    <div class="hero-btns">
+      <a class="btn-primary" href="/business.html">Start for Free →</a>
+      <a class="btn-secondary" href="#pricing">See Pricing</a>
+    </div>
+    <div class="hero-trust">
+      <div class="trust-item"><span>✓</span> No credit card required</div>
+      <div class="trust-item"><span>✓</span> SARS-aligned deadlines</div>
+      <div class="trust-item"><span>✓</span> POPIA compliant</div>
+      <div class="trust-item"><span>✓</span> Cancel anytime</div>
+    </div>
+
+    <!-- App preview mockup -->
+    <div class="hero-cards">
+      <div class="app-preview">
+        <div class="preview-bar">
+          <div class="preview-dot" style="background:#f43f5e"></div>
+          <div class="preview-dot" style="background:#f59e0b"></div>
+          <div class="preview-dot" style="background:#22c55e"></div>
+          <div class="preview-title">ONETOUCH TAXAPP — BUSINESS DASHBOARD</div>
+        </div>
+        <div class="preview-stats">
+          <div class="prev-stat"><div class="prev-stat-label">Revenue (YTD)</div><div class="prev-stat-val" style="color:#22c55e">R 284k</div></div>
+          <div class="prev-stat"><div class="prev-stat-label">VAT Owing</div><div class="prev-stat-val" style="color:#4f8ef7">R 12,450</div></div>
+          <div class="prev-stat"><div class="prev-stat-label">Outstanding</div><div class="prev-stat-val" style="color:#f59e0b">R 38,200</div></div>
+          <div class="prev-stat"><div class="prev-stat-label">Compliance</div><div class="prev-stat-val" style="color:#22c55e">94%</div></div>
+        </div>
+        <div class="preview-row">
+          <div class="pr-dot" style="background:#f43f5e;box-shadow:0 0 6px #f43f5e"></div>
+          <div class="pr-text">VAT201 — Due in 3 days</div>
+          <div class="pr-badge" style="background:rgba(244,63,94,.12);color:#f43f5e">Urgent</div>
+        </div>
+        <div class="preview-row">
+          <div class="pr-dot" style="background:#22c55e;box-shadow:0 0 6px #22c55e"></div>
+          <div class="pr-text">INV-047 — Acme Design — R 18,500</div>
+          <div class="pr-badge" style="background:rgba(34,197,94,.1);color:#22c55e">Paid ✓</div>
+        </div>
+        <div class="preview-row">
+          <div class="pr-dot" style="background:#f59e0b;box-shadow:0 0 6px #f59e0b"></div>
+          <div class="pr-text">INV-048 — Studio Nine — R 24,000</div>
+          <div class="pr-badge" style="background:rgba(245,158,11,.1);color:#f59e0b">Deposit Received</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section class="how" id="how">
+  <div class="container">
+    <div class="how-inner reveal">
+      <div class="section-badge">How it works</div>
+      <h2 class="section-h">Three steps to full compliance</h2>
+      <p class="section-sub" style="margin:0 auto">No accountant jargon. No spreadsheets. Just a clear, simple system built around how SA businesses actually operate.</p>
+    </div>
+    <div class="how-steps">
+      <div class="step reveal">
+        <div class="step-num">1</div>
+        <div class="step-title">Set up your business profile</div>
+        <p class="step-desc">Enter your business details, VAT registration status, PAYE obligations and financial year end. Takes under 2 minutes.</p>
+      </div>
+      <div class="step reveal reveal-delay-1">
+        <div class="step-num">2</div>
+        <div class="step-title">Capture invoices & transactions</div>
+        <p class="step-desc">Create professional invoices and quotes, upload your bank statement for AI analysis, and track every payment and expense.</p>
+      </div>
+      <div class="step reveal reveal-delay-2">
+        <div class="step-num">3</div>
+        <div class="step-title">Stay ahead of SARS deadlines</div>
+        <p class="step-desc">Your compliance calendar updates automatically. Download VAT201, EMP201 and IRP6 prep documents with one click.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ── -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="features-inner reveal">
+      <div class="section-badge">Features</div>
+      <h2 class="section-h">Everything your business needs</h2>
+      <p class="section-sub" style="margin:0 auto">Built specifically for the South African tax environment — not a generic global app with SA bolted on.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card reveal">
+        <div class="feat-icon">🧾</div>
+        <div class="feat-title">Professional Invoices & Quotes</div>
+        <p class="feat-desc">Create branded invoices and quotes with line items, VAT, deposit tracking and balance outstanding. Export as clean PDF.</p>
+        <span class="feat-tag tag-free">Free</span>
+      </div>
+      <div class="feat-card reveal reveal-delay-1">
+        <div class="feat-icon">📅</div>
+        <div class="feat-title">SARS Compliance Calendar</div>
+        <p class="feat-desc">Never miss a VAT201, EMP201 or IRP6 deadline again. Your calendar auto-updates based on your business profile.</p>
+        <span class="feat-tag tag-free">Free</span>
+      </div>
+      <div class="feat-card reveal reveal-delay-2">
+        <div class="feat-icon">🏦</div>
+        <div class="feat-title">AI Bank Statement Analysis</div>
+        <p class="feat-desc">Upload your bank statement and get instant transaction categorisation, VAT extraction, and SARS audit risk flags — using only real data.</p>
+        <span class="feat-tag tag-pro">Pro</span>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">📊</div>
+        <div class="feat-title">VAT201 & EMP201 Prep</div>
+        <p class="feat-desc">Auto-fill VAT return and payroll submission documents from your invoices. Download ready-to-submit PDF prep packs.</p>
+        <span class="feat-tag tag-pro">Pro</span>
+      </div>
+      <div class="feat-card reveal reveal-delay-1">
+        <div class="feat-icon">💬</div>
+        <div class="feat-title">AI Tax Assistant</div>
+        <p class="feat-desc">Ask anything about SA tax — VAT, PAYE, eFiling, SARS notices — and get clear, plain-language answers specific to your business.</p>
+        <span class="feat-tag tag-pro">Pro</span>
+      </div>
+      <div class="feat-card reveal reveal-delay-2">
+        <div class="feat-icon">📁</div>
+        <div class="feat-title">Bookkeeper Handoff Pack</div>
+        <p class="feat-desc">Generate a full P&L, VAT summary and invoice register in one click. Share with your accountant via a secure access link.</p>
+        <span class="feat-tag tag-full">Full</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PERSONAL vs BUSINESS ── -->
+<section class="compare" id="compare">
+  <div class="container">
+    <div class="compare-inner reveal">
+      <div class="section-badge">Choose your app</div>
+      <h2 class="section-h">Business or Personal?</h2>
+      <p class="section-sub" style="margin:0 auto">Whether you're filing your own income tax or running a business, we have the right tool.</p>
+    </div>
+    <div class="compare-grid">
+      <div class="compare-card personal reveal">
+        <div class="free-badge">FREE</div>
+        <div class="compare-label">For Individuals</div>
+        <div class="compare-title">Personal Tax</div>
+        <div class="compare-price">R0</div>
+        <div class="compare-price-note">Always free — no card needed</div>
+        <ul class="compare-list">
+          <li>Step-by-step eFiling guide</li>
+          <li>IRP5 income capture</li>
+          <li>Medical aid & retirement deductions</li>
+          <li>Travel allowance calculator</li>
+          <li>Home office deduction guide</li>
+          <li>SARS efiling checklist</li>
+        </ul>
+        <a href="/personal.html" class="compare-btn green">Start Personal Tax →</a>
+      </div>
+      <div class="compare-card business featured reveal reveal-delay-1">
+        <div class="compare-label">For Businesses</div>
+        <div class="compare-title">Business Suite</div>
+        <div class="compare-price paid">From R0</div>
+        <div class="compare-price-note">Free plan available · Pro from R299/month</div>
+        <ul class="compare-list">
+          <li>Invoices, quotes & PDF export</li>
+          <li>VAT201, EMP201 & IRP6 prep</li>
+          <li>AI bank statement analysis</li>
+          <li>P&L financials & reconciliation</li>
+          <li>AI tax assistant (Pro)</li>
+          <li>Bookkeeper handoff pack (Full)</li>
+        </ul>
+        <a href="/business.html" class="compare-btn blue">Start Business App →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRICING ── -->
+<section class="pricing" id="pricing">
+  <div class="container">
+    <div class="pricing-inner reveal">
+      <div class="section-badge">Pricing</div>
+      <h2 class="section-h">Simple, transparent pricing</h2>
+      <p class="section-sub" style="margin:0 auto">No hidden fees. No per-user charges. Cancel anytime — your data stays yours.</p>
+    </div>
+    <div class="pricing-grid">
+
+      <!-- FREE -->
+      <div class="price-card reveal">
+        <div class="price-top-bar" style="background:linear-gradient(90deg,var(--green),var(--cyan))"></div>
+        <div class="price-tier">Free</div>
+        <div class="price-amount" style="color:var(--green)"><sup>R</sup>0</div>
+        <div class="price-period">forever free</div>
+        <div class="price-desc">Get started with the essentials — invoicing, compliance calendar and your business dashboard.</div>
+        <ul class="price-features">
+          <li><span class="check">✓</span> 5 invoices & quotes per month</li>
+          <li><span class="check">✓</span> Basic business dashboard</li>
+          <li><span class="check">✓</span> SARS compliance calendar</li>
+          <li><span class="check">✓</span> Deadline notifications</li>
+          <li class="muted"><span class="x">—</span> PDF export</li>
+          <li class="muted"><span class="x">—</span> Bank analysis</li>
+          <li class="muted"><span class="x">—</span> VAT201 / EMP201 prep</li>
+          <li class="muted"><span class="x">—</span> AI assistant</li>
+        </ul>
+        <a href="/business.html" class="price-cta outline">Get Started Free</a>
+      </div>
+
+      <!-- PRO -->
+      <div class="price-card popular reveal reveal-delay-1">
+        <div class="popular-badge">Most Popular</div>
+        <div class="price-top-bar" style="background:linear-gradient(90deg,var(--blue),var(--cyan))"></div>
+        <div class="price-tier">Pro</div>
+        <div class="price-amount" style="color:var(--blue)"><sup>R</sup>299</div>
+        <div class="price-period">per month · billed monthly</div>
+        <div class="price-desc">Everything you need to run a compliant SA business and stay on top of SARS.</div>
+        <ul class="price-features">
+          <li><span class="check">✓</span> Unlimited invoices & quotes</li>
+          <li><span class="check">✓</span> Unlimited PDF export</li>
+          <li><span class="check">✓</span> VAT201 prep documents</li>
+          <li><span class="check">✓</span> EMP201 payroll prep</li>
+          <li><span class="check">✓</span> AI bank statement analysis</li>
+          <li><span class="check">✓</span> P&L financials & reconciliation</li>
+          <li><span class="check">✓</span> 10 AI assistant calls/month</li>
+          <li class="muted"><span class="x">—</span> IRP6 / ITR14 prep</li>
+        </ul>
+        <a href="/business.html" class="price-cta solid-blue">Start Pro →</a>
+      </div>
+
+      <!-- FULL -->
+      <div class="price-card reveal reveal-delay-2">
+        <div class="price-top-bar" style="background:linear-gradient(90deg,var(--gold),#b8872e)"></div>
+        <div class="price-tier">Full</div>
+        <div class="price-amount" style="color:var(--gold)"><sup>R</sup>499</div>
+        <div class="price-period">per month · billed monthly</div>
+        <div class="price-desc">The complete business tax suite — for growing businesses that need everything working seamlessly.</div>
+        <ul class="price-features">
+          <li><span class="check">✓</span> Everything in Pro</li>
+          <li><span class="check">✓</span> Unlimited AI assistant calls</li>
+          <li><span class="check">✓</span> IRP6 provisional tax prep</li>
+          <li><span class="check">✓</span> ITR14 annual return prep</li>
+          <li><span class="check">✓</span> Full bookkeeper handoff pack</li>
+          <li><span class="check">✓</span> Accountant access link</li>
+          <li><span class="check">✓</span> Priority support</li>
+          <li><span class="check">✓</span> All future features included</li>
+        </ul>
+        <a href="/business.html" class="price-cta solid-gold">Start Full Plan →</a>
+      </div>
+
+    </div>
+    <div class="sars-note" style="margin-top:32px">
+      ⚠️ OneTouch TaxApp generates preparation documents to assist with your SARS submissions. All figures should be verified with a registered tax practitioner before submitting. OneTouch is not a registered tax practitioner.
+    </div>
+  </div>
+</section>
+
+<!-- ── TESTIMONIALS ── -->
+<section class="testimonials" id="testimonials">
+  <div class="container">
+    <div class="testimonials-inner reveal">
+      <div class="section-badge">What users say</div>
+      <h2 class="section-h">Real SA business owners</h2>
+      <p class="section-sub" style="margin:0 auto">From sole traders to growing companies — hear how OneTouch changed how they deal with tax.</p>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card reveal">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"I used to dread VAT season. Now I just click, download my VAT201 prep pack, and hand it to my bookkeeper. Game changer."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#4f8ef7,#2dd4bf)">TM</div>
+          <div><div class="testi-name">Thandeka M.</div><div class="testi-role">Creative Agency, Johannesburg</div></div>
+        </div>
+      </div>
+      <div class="testi-card reveal reveal-delay-1">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"The bank statement analysis flagged two transactions I hadn't noticed. Saved me from a potential SARS audit issue before I even knew about it."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#22c55e,#2dd4bf)">SR</div>
+          <div><div class="testi-name">Sipho R.</div><div class="testi-role">Construction, Durban</div></div>
+        </div>
+      </div>
+      <div class="testi-card reveal reveal-delay-2">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"Finally an invoicing tool that understands South African business. The VAT handling alone is worth every cent of the Pro plan."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#d4a843,#f59e0b)">NP</div>
+          <div><div class="testi-name">Nadia P.</div><div class="testi-role">Consulting, Cape Town</div></div>
+        </div>
+      </div>
+    </div>
+    <p class="testi-note">Testimonials are representative of user experiences. Individual results may vary.</p>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section class="faq" id="faq">
+  <div class="container">
+    <div class="faq-inner reveal">
+      <div class="section-badge">FAQ</div>
+      <h2 class="section-h">Common questions</h2>
+      <p class="section-sub" style="margin:0 auto">If you don't find your answer here, our AI assistant is available in the app.</p>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-q">Is OneTouch TaxApp a registered SARS tax practitioner? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">No. OneTouch TaxApp is a preparation and organisation tool — not a registered tax practitioner. All documents generated are preparation aids and must be reviewed and submitted by a registered tax practitioner or by yourself via SARS eFiling. We recommend verifying all figures before submitting.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-q">Does the free plan have any time limits? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">No. The Free plan is genuinely free with no time limit. You get 5 invoices per month, the compliance calendar, and your business dashboard — forever. When you need more, upgrading is easy.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-q">How does the AI bank statement analysis work? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">You upload your bank statement (PDF or text). Our AI reads only what is actually in the document — it never guesses or estimates. It categorises transactions, calculates VAT on claimable items, and flags anything that could trigger a SARS audit. If it can't read a value clearly, it leaves it blank and tells you to fill it in manually.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-q">Is my financial data safe? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Yes. All data is stored securely using Supabase with row-level security — meaning only you can access your data. We are POPIA compliant. We do not sell your data to any third parties, ever.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-q">Can my accountant access my data? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Yes — on the Full plan you can generate a secure, time-limited accountant access link. This gives your accountant read access to your financials without sharing your login. The link expires after 30 days and can be revoked at any time.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-q">Can I cancel my subscription? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Yes, at any time. If you cancel, you drop to the Free plan at the end of your billing period. All your data is retained — nothing is deleted. You can re-upgrade whenever you're ready.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-q">What tax types does OneTouch support? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">OneTouch currently supports VAT (VAT201), PAYE (EMP201), Provisional Tax (IRP6) and Corporate Income Tax preparation (ITR14). Personal income tax support is available via our free Personal Tax app. We are continually adding new features.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
+          <div class="nav-mark">OT</div>
+          <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700">OneTouch <span style="color:var(--blue)">Tax</span>App</div>
+        </div>
+        <div class="footer-tagline">South African tax compliance, made simple. Built by justadopeboy (Pty) Ltd.</div>
+      </div>
+      <div>
+        <div class="footer-col-title">Product</div>
+        <ul class="footer-links">
+          <li><a href="/business.html">Business App</a></li>
+          <li><a href="/personal.html">Personal Tax</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Support</div>
+        <ul class="footer-links">
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="mailto:support@onetouch.net.za">Contact Us</a></li>
+          <li><a href="https://www.sars.gov.za" target="_blank" rel="noopener">SARS eFiling</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Legal</div>
+        <ul class="footer-links">
+          <li><a href="/legal.html#tos">Terms of Service</a></li>
+          <li><a href="/legal.html#privacy">Privacy Policy</a></li>
+          <li><a href="/legal.html#refund">Refund Policy</a></li>
+          <li><a href="/legal.html#popia">POPIA Notice</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="sars-note">
+      OneTouch TaxApp is not a registered tax practitioner. Documents generated are preparation aids only. Always verify with a SARS-registered tax practitioner before submitting.
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 justadopeboy (Pty) Ltd t/a OneTouch TaxApp. All rights reserved.</div>
+      <div class="footer-legal">
+        <a href="/legal.html#tos">Terms</a>
+        <a href="/legal.html#privacy">Privacy</a>
+        <a href="/legal.html#popia">POPIA</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── SCROLL REVEAL ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── FAQ TOGGLE ──
+function toggleFAQ(item) {
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+// ── QUICK NAV — show after hero, highlight active section ──
+const quickNav = document.getElementById('quickNav');
+const sections = ['how','features','compare','pricing','testimonials','faq'];
+
+const sectionObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      document.querySelectorAll('.qn-link').forEach(l => {
+        l.classList.toggle('active', l.dataset.section === id);
+      });
+    }
+  });
+}, { threshold: 0.35, rootMargin: '-100px 0px -40% 0px' });
+
+sections.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) sectionObserver.observe(el);
+});
+
+window.addEventListener('scroll', () => {
+  const nav = document.querySelector('nav');
+  const scrolled = window.scrollY;
+
+  // Nav border
+  nav.style.borderBottomColor = scrolled > 40 ? 'rgba(26,38,64,.9)' : 'rgba(26,38,64,.6)';
+
+  // Show quick nav after scrolling past ~60% of viewport height
+  if (scrolled > window.innerHeight * 0.5) {
+    quickNav.classList.add('visible');
+  } else {
+    quickNav.classList.remove('visible');
+    // Clear active when back at top
+    document.querySelectorAll('.qn-link').forEach(l => l.classList.remove('active'));
+  }
+}, { passive: true });
+
+// ── SMOOTH SCROLL offset for fixed bars ──
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (!target) return;
+    e.preventDefault();
+    const offset = 110; // nav (64) + quick nav (40) + breathing room
+    const top = target.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top, behavior: 'smooth' });
+  });
+});
+</script>
+</body>
+</html>
