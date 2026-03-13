@@ -1371,7 +1371,11 @@ h1,h2,h3,.logo-text,.stat-value{font-family:'Syne',sans-serif}
     </div>
     <div class="inv-form-footer">
       <button class="inv-cancel-btn" onclick="closeInvForm()">Cancel</button>
-      <button onclick="saveInvAndPDF()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text-2);padding:12px 20px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">💾 Save & Export PDF</button>
+      <button onclick="saveInvAndPDF()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text-2);padding:12px 20px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='rgba(255,255,255,.1)'">💾 Save & Export PDF</button>
+      <button onclick="saveAndWhatsApp()" style="background:linear-gradient(135deg,#25d366,#1da851);border:none;color:#fff;padding:12px 20px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.122 1.532 5.858L.057 23.215a.75.75 0 00.912.921l5.521-1.447A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.885 0-3.65-.52-5.16-1.426l-.36-.214-3.28.859.875-3.196-.234-.371A9.956 9.956 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+        Send via WhatsApp
+      </button>
       <button class="inv-save-btn" onclick="saveInvoice()">💾 Save Invoice</button>
     </div>
   </div>
@@ -1851,6 +1855,7 @@ function renderInvoices() {
           ${isQuote ? `<button class="inv-edit" onclick="convertQuoteToInvoice('${inv.id}')" title="Convert to Invoice" style="font-size:11px;padding:4px 8px">→ Invoice</button>` : ''}
           ${!isQuote && inv.type==='income' ? `<button class="inv-edit" onclick="exportInvPDF('${inv.id}')" title="Export PDF">📄</button>` : ''}
           <button class="inv-del" onclick="deleteInvoice('${inv.id}')" title="Delete">🗑</button>
+        <button onclick="sendInvoiceWhatsApp(invoices.find(i=>String(i.id)==='${inv.id}'))" title="Send via WhatsApp" style="background:linear-gradient(135deg,#25d366,#1da851);border:none;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:13px"><svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.122 1.532 5.858L.057 23.215a.75.75 0 00.912.921l5.521-1.447A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.885 0-3.65-.52-5.16-1.426l-.36-.214-3.28.859.875-3.196-.234-.371A9.956 9.956 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg></button>
         </td>
       </tr>`;
     }).join('')
@@ -2035,7 +2040,8 @@ async function saveInvoice(exportPDF) {
     total: total,
     has_vat: invVATEnabled,
     description: lineItems.map(li=>li.desc).filter(Boolean).join(', '),
-    doc_type: document.getElementById('invFormOverlay').getAttribute('data-is-quote')==='true' ? 'quote' : 'invoice'
+    doc_type: document.getElementById('invFormOverlay').getAttribute('data-is-quote')==='true' ? 'quote' : 'invoice',
+    client_whatsapp: document.getElementById('inv-whatsapp')?.value?.trim() || ''
   };
   // Clear quote flag
   document.getElementById('invFormOverlay').removeAttribute('data-is-quote');
@@ -3579,6 +3585,70 @@ function closeWelcomePopup() {
 
 // ── KICKOFF ──
 initApp();
+
+// ── WHATSAPP INVOICE DELIVERY ──
+async function sendInvoiceWhatsApp(inv) {
+  const clientPhone = inv.whatsapp || inv.client_whatsapp;
+  if (!clientPhone) {
+    showToast('No WhatsApp number on this invoice', 'var(--amber)');
+    return;
+  }
+
+  // Format phone — ensure it starts with +
+  let phone = clientPhone.replace(/\s/g,'').replace(/^0/, '+27');
+  if (!phone.startsWith('+')) phone = '+' + phone;
+
+  const docType = inv.doc_type === 'quote' ? 'quote' : 'invoice';
+  const amount = inv.total ? 'R ' + parseFloat(inv.total).toLocaleString('en-ZA', {minimumFractionDigits:2}) : '';
+  const dueDate = inv.due_date ? new Date(inv.due_date).toLocaleDateString('en-ZA') : '';
+  const businessName = userProfile?.business_name || 'OneTouch Business';
+  const invoiceNumber = inv.invoice_number || '';
+
+  const btn = document.querySelector('[onclick="saveAndWhatsApp()"]') || document.querySelector('[onclick*="WhatsApp"]');
+  if (btn) { btn.textContent = 'Sending...'; btn.disabled = true; }
+
+  try {
+    const res = await fetch('/api/whatsapp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: phone,
+        clientName: inv.client_name || '',
+        invoiceNumber,
+        amount,
+        dueDate,
+        businessName,
+        docType,
+        invoiceUrl: ''
+      })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ Sent via WhatsApp!', 'var(--green)');
+    } else {
+      showToast('WhatsApp failed: ' + (data.error || 'Unknown error'), 'var(--red)');
+    }
+  } catch(e) {
+    showToast('WhatsApp error: ' + e.message, 'var(--red)');
+  } finally {
+    if (btn) { btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.558 4.122 1.532 5.858L.057 23.215a.75.75 0 00.912.921l5.521-1.447A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.885 0-3.65-.52-5.16-1.426l-.36-.214-3.28.859.875-3.196-.234-.371A9.956 9.956 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg> Send via WhatsApp'; btn.disabled = false; }
+  }
+}
+
+async function saveAndWhatsApp() {
+  // Grab whatsapp number from form before saving
+  const waNum = document.getElementById('inv-whatsapp')?.value?.trim() || '';
+  await saveInvoice();
+  // Find the invoice we just saved
+  await loadInvoices();
+  const latest = invoices[0];
+  if (latest) {
+    latest.whatsapp = waNum;
+    await sendInvoiceWhatsApp(latest);
+  }
+}
+
 </script>
 </body>
 </html>
