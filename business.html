@@ -2270,6 +2270,7 @@ function showSection(name, btn) {
   if (name === 'financials') { renderFinancials(); updateTipsState(); }
   if (name === 'reconcile') renderReconciliation();
   if (name === 'handoff') { updatePackStatus(); updateHandoffReconBanner(); }
+  if (name === 'history') autoSaveMonthlySnapshot();
   document.getElementById('notifDropdown').classList.remove('open');
 }
 
@@ -2290,6 +2291,7 @@ async function loadInvoices() {
     if (invoices.length === 0) { finEmpty.style.display = 'block'; finContent.style.display = 'none'; }
     else { finEmpty.style.display = 'none'; finContent.style.display = 'block'; }
   }
+  if (invoices.length > 0) autoSaveMonthlySnapshot();
 }
 
 function getInvStatus(inv) {
@@ -4829,11 +4831,34 @@ async function loadStatementHistory() {
     list.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--text-3)"><div style="font-size:36px;margin-bottom:10px">🏦</div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:5px">No statements yet</div><div style="font-size:12px">Upload a bank statement via the Reconciliation section — it saves here automatically.</div></div>';
     return;
   }
-  list.innerHTML = data.map(s=>`<div style="display:flex;align-items:center;gap:14px;padding:13px 20px;border-bottom:1px solid var(--border)">
-    <div style="font-size:20px">🏦</div>
-    <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--text)">${s.filename||'Statement'}</div><div style="font-size:11.5px;color:var(--text-3)">${s.period||''} · ${new Date(s.created_at).toLocaleDateString('en-ZA')}</div></div>
-    <div style="text-align:right"><div style="font-size:12px;color:var(--green)">${fmtR(s.total_income||0)}</div><div style="font-size:10.5px;color:var(--text-3)">income</div></div>
-  </div>`).join('');
+  list.innerHTML = data.map((s,i) => `
+    <div style="border-bottom:1px solid var(--border)">
+      <div onclick="toggleStmtDetail('stmtd-${i}')" style="display:flex;align-items:center;gap:14px;padding:13px 20px;cursor:pointer">
+        <div style="font-size:20px">🏦</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:var(--text)">${s.filename||'Statement'}</div>
+          <div style="font-size:11.5px;color:var(--text-3)">${s.period||''} · ${new Date(s.created_at).toLocaleDateString('en-ZA')}</div>
+        </div>
+        <div style="text-align:right;margin-right:10px"><div style="font-size:12px;color:var(--green)">${fmtR(s.total_income||0)}</div><div style="font-size:10.5px;color:var(--text-3)">income</div></div>
+        <div style="font-size:11px;color:var(--text-3)">▼</div>
+      </div>
+      <div id="stmtd-${i}" style="display:none;padding:0 20px 14px 54px">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div><div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Total Credits</div><div style="font-size:15px;font-weight:700;color:var(--green)">${fmtR(s.total_income||0)}</div></div>
+          <div><div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Total Debits</div><div style="font-size:15px;font-weight:700;color:var(--red)">${fmtR(s.total_expenses||0)}</div></div>
+          <div><div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Net</div><div style="font-size:15px;font-weight:700;color:var(--blue)">${fmtR((s.total_income||0)-(s.total_expenses||0))}</div></div>
+          ${s.vat_liability ? `<div><div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">VAT Liability</div><div style="font-size:15px;font-weight:700;color:var(--amber)">${fmtR(s.vat_liability||0)}</div></div>` : ''}
+          ${s.flag_count ? `<div><div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Flagged Items</div><div style="font-size:15px;font-weight:700;color:var(--red)">${s.flag_count}</div></div>` : ''}
+          <div><div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Period</div><div style="font-size:12px;font-weight:600;color:var(--text)">${s.period||'—'}</div></div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleStmtDetail(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
 async function loadDocHistory() {
@@ -4854,10 +4879,22 @@ async function loadDocHistory() {
     list.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text-3)"><div style="font-size:36px;margin-bottom:10px">📄</div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:5px">No documents generated yet</div><div style="font-size:12px">Every PDF you generate is logged here automatically.</div></div>';
     return;
   }
-  list.innerHTML = data.map(d=>`<div style="display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--border)">
-    <div style="font-size:18px">📄</div>
-    <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">${d.doc_type||'Document'}</div><div style="font-size:11px;color:var(--text-3)">${new Date(d.created_at).toLocaleDateString('en-ZA')}</div></div>
-  </div>`).join('');
+  const regenMap = {
+    'VAT201': "showSarsDisclaimer('genVAT201')",
+    'EMP201': "showSarsDisclaimer('genEMP201')",
+    'IRP6':   "showSarsDisclaimer('genIRP6')",
+    'ITR14':  "showSarsDisclaimer('genITR14')",
+    'Invoice PDF': 'showSection(\'invoices\',document.querySelector(\'.s-btn[onclick*=invoices]\'))',
+    'Bookkeeper Pack': "showSarsDisclaimer('downloadFullPack')"
+  };
+  list.innerHTML = data.map(d => {
+    const action = regenMap[d.doc_type];
+    return `<div style="display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--border)">
+      <div style="font-size:18px">📄</div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">${d.doc_type||'Document'}</div><div style="font-size:11px;color:var(--text-3)">${new Date(d.created_at).toLocaleDateString('en-ZA')}${d.reference?' · '+d.reference:''}</div></div>
+      ${action ? `<button onclick="${action}" style="background:var(--surface2);border:1px solid var(--border);color:var(--text-2);padding:6px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap">↓ Re-download</button>` : ''}
+    </div>`;
+  }).join('');
 }
 
 async function logDocGenerated(type, ref) {
