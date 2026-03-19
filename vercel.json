@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/shared/financials/:token", "destination": "/shared-financials.html" }
+  ]
+}
