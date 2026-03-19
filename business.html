@@ -2009,8 +2009,8 @@ function isPlan(p) {
 }
 
 function canUse(feature) {
-  const proFeatures = ['invoices','financials','reconcile','vat201','exportpdf'];
-  const fullFeatures = ['irp6','itr14','accountant','handoff','payroll','emp201','tips','whatsapp'];
+  const proFeatures = ['invoices','financials','reconcile','vat201','exportpdf','handoff'];
+  const fullFeatures = ['irp6','itr14','accountant','payroll','emp201','tips','whatsapp'];
   if (fullFeatures.includes(feature)) return isPlan('full');
   if (proFeatures.includes(feature)) return isPlan('pro');
   return true;
@@ -4636,9 +4636,19 @@ function switchHistTab(tab) {
 }
 
 async function loadMonthlyHistory() {
+  const badge = document.getElementById('monthlyHistBadge');
   let data = null;
-  try { const r = await sb.from('monthly_snapshots').select('*').eq('user_id',currentUser.id).order('month_key',{ascending:false}); data = r.data; } catch(e) { data = null; }
+  try {
+    const r = await sb.from('monthly_snapshots').select('*').eq('user_id',currentUser.id).order('month_key',{ascending:false});
+    if (r.error) throw r.error;
+    data = r.data;
+  } catch(e) {
+    if (badge) badge.textContent = 'Error loading';
+    console.warn('loadMonthlyHistory:', e.message);
+    return;
+  }
   const list = document.getElementById('monthlyHistList'); if (!list) return;
+  if (badge) badge.textContent = data && data.length ? data.length + ' month' + (data.length === 1 ? '' : 's') : 'No snapshots';
   if (!data||!data.length) return;
   list.innerHTML = data.map(s=>`<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)">
     <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--text)">${s.month_label||s.month_key||'—'}</div></div>
@@ -4699,7 +4709,7 @@ async function saveMonthlySnapshot() {
   await sb.from('monthly_snapshots').delete().eq('user_id', currentUser.id).eq('month_key', monthKey);
   const {error} = await sb.from('monthly_snapshots').insert({user_id:currentUser.id,month_key:monthKey,month_label:monthLabel,year:now.getFullYear(),revenue:income,expenses:exp,profit:income-exp,vat_owing:vat,invoice_count:invoices.filter(i=>i.type==='income').length,saved_at:new Date().toISOString()});
   if (error) { showToast('Error: '+error.message,'var(--red)'); return; }
-  showToast('✅ Snapshot saved for '+month,'var(--green)');
+  showToast('✅ Snapshot saved for '+monthLabel,'var(--green)');
   loadMonthlyHistory();
 }
 

@@ -162,44 +162,35 @@ async function loadSharedData() {
 
   if (!token) { showError('Invalid Link', 'No access token found in this URL.'); return; }
 
-  // Look up profile by share_token
-  const { data: profile, error } = await sb
-    .from('profiles')
-    .select('*')
-    .eq('share_token', token)
-    .single();
-
-  if (error || !profile) { showError('Link Not Found', 'This access link is invalid or has been revoked.'); return; }
-
-  // Check expiry
-  if (profile.share_token_expiry) {
-    const expiry = new Date(profile.share_token_expiry);
-    if (expiry < new Date()) {
-      showError('Link Expired', `This access link expired on ${expiry.toLocaleDateString('en-ZA')}. Ask the business owner to send a new link.`);
+  // Fetch via server-side proxy to bypass Supabase RLS on profiles/invoices
+  let result;
+  try {
+    const resp = await fetch('/api/shared-data?token=' + encodeURIComponent(token));
+    result = await resp.json();
+    if (!resp.ok) {
+      if (result.error === 'expired') {
+        const expiry = new Date(result.expiry);
+        showError('Link Expired', `This access link expired on ${expiry.toLocaleDateString('en-ZA')}. Ask the business owner to send a new link.`);
+      } else {
+        showError('Link Not Found', 'This access link is invalid or has been revoked.');
+      }
       return;
     }
+  } catch (e) {
+    showError('Connection Error', 'Could not load financial data. Please try again.');
+    return;
+  }
+
+  const { profile, invoices, recon_session } = result;
+
+  // Show expiry note
+  if (profile.share_token_expiry) {
+    const expiry = new Date(profile.share_token_expiry);
     const expiryNote = document.getElementById('expiryNote');
     if (expiryNote) expiryNote.textContent = `This link expires on ${expiry.toLocaleDateString('en-ZA', {day:'numeric',month:'long',year:'numeric'})}`;
   }
 
-  // Load invoices
-  const { data: invoices } = await sb
-    .from('invoices')
-    .select('*')
-    .eq('user_id', profile.id)
-    .order('date', { ascending: false });
-
-  // Load reconciliation session
-  const period = new Date().toISOString().slice(0,7);
-  const { data: reconSession } = await sb
-    .from('reconciliation_sessions')
-    .select('*')
-    .eq('user_id', profile.id)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
-
-  sharedData = { profile, invoices: invoices || [], reconSession };
+  sharedData = { profile, invoices: invoices || [], reconSession: recon_session };
   renderSharedData();
 }
 
