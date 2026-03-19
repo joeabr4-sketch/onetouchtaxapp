@@ -45,9 +45,9 @@ export default async function handler(req, res) {
     );
     const invoices = invoicesRes.ok ? await invoicesRes.json() : [];
 
-    // Fetch latest recon session
+    // Fetch best recon session — prefer highest confidence (closed month), fall back to most recent
     const reconRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/reconciliation_sessions?user_id=eq.${profile.id}&order=created_at.desc&limit=1&select=*`,
+      `${SUPABASE_URL}/rest/v1/reconciliation_sessions?user_id=eq.${profile.id}&order=confidence.desc,created_at.desc&limit=1&select=*`,
       { headers }
     );
     const reconRows = reconRes.ok ? await reconRes.json() : [];

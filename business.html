@@ -3615,6 +3615,8 @@ function getCheckpointLabel() {
 // ── LOAD BANK TRANSACTIONS ──
 async function loadBankTransactions() {
   if (!reconSession) return;
+  // Clear any stale localStorage cache — DB is the source of truth
+  localStorage.removeItem('ot_bank_transactions_' + currentUser.id);
   const { data } = await sb.from('bank_transactions').select('*')
     .eq('user_id', currentUser.id).eq('session_id', reconSession.id)
     .order('date', { ascending: true });
@@ -3825,6 +3827,17 @@ async function processReconFile(file) {
 
     const { error } = await sb.from('bank_transactions').insert(inserts);
     if (error) { showToast('Upload failed: ' + error.message, 'var(--red)'); resetReconDropZone(); return; }
+
+    // Save to statements history so it appears in Financial History
+    const totalCredits = rows.filter(r=>r.type==='credit').reduce((s,r)=>s+r.amount,0);
+    const totalDebits  = rows.filter(r=>r.type==='debit').reduce((s,r)=>s+r.amount,0);
+    const dates = rows.map(r=>r.date).filter(Boolean).sort();
+    const period = dates.length ? dates[0] + ' – ' + dates[dates.length-1] : getCurrentPeriod();
+    sb.from('statements').insert({
+      user_id: currentUser.id, filename: file.name, period,
+      total_income: totalCredits, total_expenses: totalDebits,
+      vat_liability: 0, flag_count: 0, created_at: new Date().toISOString()
+    }).then(({error:se}) => { if (!se) loadStatementHistory(); });
 
     const fn = document.getElementById('reconFileName');
     if (fn) fn.textContent = file.name;
