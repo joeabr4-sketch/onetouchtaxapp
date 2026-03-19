@@ -1149,7 +1149,7 @@ h1,h2,h3,.logo-text,.stat-value{font-family:'Syne',sans-serif}
         <div class="card">
           <div class="card-head">
             <div class="card-title">Bank Transactions</div>
-            <button onclick="runReconciliationEngine()" style="background:linear-gradient(135deg,#c0c8d8,#8a9ab8);border:none;color:#0f1520;padding:7px 16px;border-radius:8px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer">⚡ Auto-Match</button>
+            <button id="autoMatchBtn" onclick="runReconciliationEngine()" style="background:linear-gradient(135deg,#c0c8d8,#8a9ab8);border:none;color:#0f1520;padding:7px 16px;border-radius:8px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer">⚡ Auto-Match</button>
           </div>
           <div style="overflow-x:auto"><table class="tx-table"><thead><tr>
             <th>Date</th><th>Description</th><th>Amount</th><th>Type</th><th>Matched To</th><th>Status</th><th>Action</th>
@@ -1317,6 +1317,39 @@ h1,h2,h3,.logo-text,.stat-value{font-family:'Syne',sans-serif}
           <button onclick="downloadEMP201()" id="emp201DownloadBtn" style="display:none;margin-top:14px;background:linear-gradient(135deg,#c0c8d8,#8a9ab8);border:none;color:#0f1520;padding:11px 22px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px">📥 Download EMP201 Prep PDF</button>
         </div>
       </div>
+
+      <!-- PAYROLL RUNS -->
+      <div class="card" style="margin-top:16px" id="payrollRunsCard">
+        <div class="card-head">
+          <div class="card-title">📅 Payroll Runs</div>
+          <button id="runPayrollBtn" onclick="openRunPayrollModal()" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;color:#fff;padding:7px 16px;border-radius:8px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer">▶ Run Payroll</button>
+        </div>
+        <div id="payrollRunsList" style="padding:8px 0">
+          <div style="text-align:center;padding:32px;color:var(--text-3);font-size:13px">No payroll runs yet. Click "Run Payroll" to process this month.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RUN PAYROLL CONFIRMATION MODAL -->
+    <div id="runPayrollModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2000;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeRunPayrollModal()">
+      <div style="background:#1a1d24;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:28px;max-width:520px;width:100%;max-height:85vh;overflow-y:auto">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+          <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700">▶ Run Payroll</div>
+          <button onclick="closeRunPayrollModal()" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:20px;cursor:pointer">✕</button>
+        </div>
+        <div id="runPayrollPreview" style="background:#0f1015;border-radius:10px;padding:16px;border:1px solid rgba(255,255,255,.08);margin-bottom:16px;font-size:13px"></div>
+        <div style="margin-bottom:16px">
+          <label style="font-size:11px;color:var(--text-3);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">Pay Date</label>
+          <input id="run-paydate" type="date" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%">
+        </div>
+        <div style="font-size:12px;color:var(--text-3);margin-bottom:18px;line-height:1.65;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:8px;padding:10px 12px">
+          ⚠️ This will post expense entries to your books: net salaries as <strong style="color:var(--text)">Salaries & Wages</strong> and PAYE/UIF/SDL as <strong style="color:var(--text)">SARS / Tax Payments</strong>. These will appear as unmatched debits in reconciliation.
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button onclick="closeRunPayrollModal()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text-2);padding:10px 20px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer">Cancel</button>
+          <button onclick="confirmRunPayroll()" id="confirmRunPayrollBtn" style="background:linear-gradient(135deg,#22c55e,#16a34a);border:none;color:#fff;padding:10px 22px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">✅ Confirm & Post</button>
+        </div>
+      </div>
     </div>
 
     <!-- PAYSLIP FORM MODAL -->
@@ -1340,6 +1373,8 @@ h1,h2,h3,.logo-text,.stat-value{font-family:'Syne',sans-serif}
                 <option value="contract">Contract</option>
               </select>
             </div>
+            <div class="pr-field"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding-top:6px"><input type="checkbox" id="pr-uif" checked onchange="calcPayslip()" style="accent-color:var(--blue);width:15px;height:15px;flex-shrink:0"> UIF Applicable</label></div>
+            <div class="pr-field"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding-top:6px"><input type="checkbox" id="pr-sdl" checked onchange="calcPayslip()" style="accent-color:var(--blue);width:15px;height:15px;flex-shrink:0"> SDL Applicable</label></div>
           </div>
           <!-- Salary & Period -->
           <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.07)">Salary & Period</div>
@@ -2104,6 +2139,8 @@ async function initDashboard() {
   updateUserUI();
   window._appReady = true; // flag: profile is loaded, upgrade prompts allowed
   await loadInvoices();
+  await loadEmployees();
+  await loadPayrollRuns();
   buildDeadlines();
   buildDashChecklist();
   renderComplianceScore();
@@ -3816,85 +3853,101 @@ async function clearReconStatement() {
 
 // ── AUTO-MATCH ENGINE ──
 async function runReconciliationEngine() {
-  if (!reconTransactions.length) { showToast('Upload a bank statement first', 'var(--amber)'); return; }
-  const credits = reconTransactions.filter(t => t.type === 'credit' && !t.ignored && t.match_status === 'unmatched');
-  const invs = invoices.filter(i => i.type === 'income' && i.doc_type !== 'quote');
-  if (!invs.length) { showToast('No invoices to match against', 'var(--amber)'); return; }
+  const btn = document.getElementById('autoMatchBtn');
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Matching...'; }
 
-  let exactCount = 0, fuzzyCount = 0;
-  // Track matched invoice IDs this run to prevent double-matching
-  const usedInvIds = new Set(reconTransactions.filter(t => t.match_status === 'matched').map(t => t.matched_invoice_id).filter(Boolean));
-
-  for (const tx of credits) {
-    const txAmt = parseFloat(tx.amount);
-    const txRef = (tx.reference || tx.description || '').toLowerCase();
-    const txDate = tx.date ? new Date(tx.date) : null;
-    const available = invs.filter(i => !usedInvIds.has(String(i.id)));
-
-    // STEP 1: Exact amount + invoice number in reference
-    let match = available.find(inv => {
-      const invNum = (inv.invoice_number || '').toLowerCase();
-      return Math.abs(txAmt - parseFloat(inv.total || inv.amount || 0)) < 0.01
-        && invNum && txRef.includes(invNum);
-    });
-    let matchType = 'exact_ref';
-
-    // STEP 2: Exact amount + client name in description + date ±7 days
-    if (!match) {
-      match = available.find(inv => {
-        const invAmt = parseFloat(inv.total || inv.amount || 0);
-        if (Math.abs(txAmt - invAmt) >= 0.01) return false;
-        const name = (inv.client_name || '').toLowerCase();
-        const nameMatch = name.length >= 3 && (txRef.includes(name.slice(0,4)) || name.includes(txRef.slice(0,4)));
-        const dateOk = !txDate || !inv.date || Math.abs((txDate - new Date(inv.date)) / 86400000) <= 7;
-        return nameMatch && dateOk;
-      });
-      matchType = 'exact_name';
+    if (!reconTransactions.length) {
+      if (btn) { btn.disabled = false; btn.textContent = '⚡ Auto-Match'; }
+      showToast('Upload a bank statement first', 'var(--amber)'); return;
+    }
+    const credits = reconTransactions.filter(t => t.type === 'credit' && !t.ignored && t.match_status === 'unmatched');
+    const invs = invoices.filter(i => i.type === 'income' && i.doc_type !== 'quote');
+    if (!invs.length) {
+      if (btn) { btn.disabled = false; btn.textContent = '⚡ Auto-Match'; }
+      showToast('No invoices to match against', 'var(--amber)'); return;
     }
 
-    // STEP 3: Exact amount + date ±7 days (no name required)
-    if (!match) {
-      match = available.find(inv => {
+    let exactCount = 0, fuzzyCount = 0;
+    // Track matched invoice IDs this run to prevent double-matching
+    const usedInvIds = new Set(reconTransactions.filter(t => t.match_status === 'matched').map(t => t.matched_invoice_id).filter(Boolean));
+
+    for (const tx of credits) {
+      const txAmt = parseFloat(tx.amount);
+      const txRef = (tx.reference || tx.description || '').toLowerCase();
+      const txDate = tx.date ? new Date(tx.date) : null;
+      const available = invs.filter(i => !usedInvIds.has(String(i.id)));
+
+      // STEP 1: Exact amount + invoice number in reference
+      let match = available.find(inv => {
+        const invNum = (inv.invoice_number || '').toLowerCase();
+        return Math.abs(txAmt - parseFloat(inv.total || inv.amount || 0)) < 0.01
+          && invNum && txRef.includes(invNum);
+      });
+      let matchType = 'exact_ref';
+
+      // STEP 2: Exact amount + client name in description + date ±7 days
+      if (!match) {
+        match = available.find(inv => {
+          const invAmt = parseFloat(inv.total || inv.amount || 0);
+          if (Math.abs(txAmt - invAmt) >= 0.01) return false;
+          const name = (inv.client_name || '').toLowerCase();
+          const nameMatch = name.length >= 3 && (txRef.includes(name.slice(0,4)) || name.includes(txRef.slice(0,4)));
+          const dateOk = !txDate || !inv.date || Math.abs((txDate - new Date(inv.date)) / 86400000) <= 7;
+          return nameMatch && dateOk;
+        });
+        matchType = 'exact_name';
+      }
+
+      // STEP 3: Exact amount + date ±7 days (no name required)
+      if (!match) {
+        match = available.find(inv => {
+          const invAmt = parseFloat(inv.total || inv.amount || 0);
+          if (Math.abs(txAmt - invAmt) >= 0.01) return false;
+          return !txDate || !inv.date || Math.abs((txDate - new Date(inv.date)) / 86400000) <= 7;
+        });
+        matchType = 'exact_date';
+      }
+
+      if (match) {
+        await sb.from('bank_transactions').update({ match_status: 'matched', matched_invoice_id: match.id, match_type: matchType }).eq('id', tx.id);
+        tx.match_status = 'matched'; tx.matched_invoice_id = match.id; tx.match_type = matchType;
+        usedInvIds.add(String(match.id));
+        await updateInvoiceStatus(match.id);
+        addReconAudit('auto', `Auto-matched (${matchType}): ${tx.description} ↔ ${match.invoice_number||'INV'} — ${fmtR(txAmt)}`);
+        exactCount++;
+        continue;
+      }
+
+      // STEP 4: Amount within 5% + date ±7 days → SUGGESTED only
+      const fuzzy = available.find(inv => {
         const invAmt = parseFloat(inv.total || inv.amount || 0);
-        if (Math.abs(txAmt - invAmt) >= 0.01) return false;
+        const pct = Math.abs(txAmt - invAmt) / Math.max(invAmt, 1);
+        if (pct > 0.05) return false;
         return !txDate || !inv.date || Math.abs((txDate - new Date(inv.date)) / 86400000) <= 7;
       });
-      matchType = 'exact_date';
+
+      if (fuzzy) {
+        await sb.from('bank_transactions').update({ match_status: 'suggested', matched_invoice_id: fuzzy.id, match_type: 'fuzzy' }).eq('id', tx.id);
+        tx.match_status = 'suggested'; tx.matched_invoice_id = fuzzy.id;
+        addReconAudit('suggest', `Suggested: ${tx.description} ↔ ${fuzzy.invoice_number||'INV'} (±${fmtR(Math.abs(txAmt - parseFloat(fuzzy.total||fuzzy.amount||0)))})`);
+        fuzzyCount++;
+      }
     }
 
-    if (match) {
-      await sb.from('bank_transactions').update({ match_status: 'matched', matched_invoice_id: match.id, match_type: matchType }).eq('id', tx.id);
-      tx.match_status = 'matched'; tx.matched_invoice_id = match.id; tx.match_type = matchType;
-      usedInvIds.add(String(match.id));
-      await updateInvoiceStatus(match.id);
-      addReconAudit('auto', `Auto-matched (${matchType}): ${tx.description} ↔ ${match.invoice_number||'INV'} — ${fmtR(txAmt)}`);
-      exactCount++;
-      continue;
-    }
-
-    // STEP 4: Amount within 5% + date ±7 days → SUGGESTED only
-    const fuzzy = available.find(inv => {
-      const invAmt = parseFloat(inv.total || inv.amount || 0);
-      const pct = Math.abs(txAmt - invAmt) / Math.max(invAmt, 1);
-      if (pct > 0.05) return false;
-      return !txDate || !inv.date || Math.abs((txDate - new Date(inv.date)) / 86400000) <= 7;
-    });
-
-    if (fuzzy) {
-      await sb.from('bank_transactions').update({ match_status: 'suggested', matched_invoice_id: fuzzy.id, match_type: 'fuzzy' }).eq('id', tx.id);
-      tx.match_status = 'suggested'; tx.matched_invoice_id = fuzzy.id;
-      addReconAudit('suggest', `Suggested: ${tx.description} ↔ ${fuzzy.invoice_number||'INV'} (±${fmtR(Math.abs(txAmt - parseFloat(fuzzy.total||fuzzy.amount||0)))})`);
-      fuzzyCount++;
-    }
+    await loadInvoices();
+    updateReconUI();
+    renderTxTable();
+    renderInvoiceReconTable();
+    renderUnrecorded();
+    detectConflicts();
+    if (btn) { btn.disabled = false; btn.textContent = '⚡ Auto-Match'; }
+    showToast(`✅ ${exactCount} matched · 🟡 ${fuzzyCount} suggested`, 'var(--green)');
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = '⚡ Auto-Match'; }
+    showToast('Auto-match error: ' + e.message, 'var(--red)');
+    console.error('runReconciliationEngine:', e);
   }
-
-  await loadInvoices();
-  updateReconUI();
-  renderTxTable();
-  renderInvoiceReconTable();
-  renderUnrecorded();
-  detectConflicts();
-  showToast(`✅ ${exactCount} matched · 🟡 ${fuzzyCount} suggested`, 'var(--green)');
 }
 
 // ── RENDER TRANSACTION TABLE ──
@@ -5149,6 +5202,7 @@ async function saveAndWhatsApp() {
 // ── PAYROLL ──
 // ════════════════════════════════════════════
 let employees = [];
+let payrollRuns = [];
 let editingEmpIdx = null;
 
 // ── SA PAYE TAX TABLES 2025/2026 ──
@@ -5182,29 +5236,45 @@ function fmtPayroll(v) {
   return 'R ' + Math.abs(parseFloat(v)||0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 
-function calcPayslip() {
-  const gross    = parseFloat(document.getElementById('pr-gross')?.value) || 0;
-  const travel   = parseFloat(document.getElementById('pr-travel')?.value) || 0;
-  const housing  = parseFloat(document.getElementById('pr-housing')?.value) || 0;
-  const bonus    = parseFloat(document.getElementById('pr-bonus')?.value) || 0;
-  const medical  = parseFloat(document.getElementById('pr-medical')?.value) || 0;
-  const pension  = parseFloat(document.getElementById('pr-pension')?.value) || 0;
-  const name     = document.getElementById('pr-name')?.value || '—';
-  const role     = document.getElementById('pr-role')?.value || '—';
-  const paydate  = document.getElementById('pr-paydate')?.value || '';
+// Pure calculation — no DOM access. Called by calcPayslip() and confirmRunPayroll().
+function calcEmployeePayslip(emp) {
+  const gross    = parseFloat(emp.gross)   || 0;
+  const travel   = parseFloat(emp.travel)  || 0;
+  const housing  = parseFloat(emp.housing) || 0;
+  const bonus    = parseFloat(emp.bonus)   || 0;
+  const medical  = parseFloat(emp.medical) || 0;
+  const pension  = parseFloat(emp.pension) || 0;
+  const uifApplicable = emp.uif_applicable !== false;
+  const sdlApplicable = emp.sdl_applicable !== false;
 
-  const totalGross = gross + travel + housing + bonus;
-
-  // PAYE — calculated on gross + housing + bonus (travel allowance 80% taxable)
+  const totalGross    = gross + travel + housing + bonus;
   const taxableIncome = gross + housing + bonus + (travel * 0.8);
-  const paye    = calcPAYE(taxableIncome * 12) ; // monthly
-  const uifEmp  = Math.min(gross * 0.01, 177.12); // capped at R177.12/month
-  const uifEr   = Math.min(gross * 0.01, 177.12);
-  const sdl     = gross * 0.01; // 1% of basic
+  const paye    = calcPAYE(taxableIncome * 12); // monthly — note: calcPAYE(annualIncome) at line ~5155
+  const uifEmp  = uifApplicable ? Math.min(gross * 0.01, 177.12) : 0;
+  const uifEr   = uifApplicable ? Math.min(gross * 0.01, 177.12) : 0;
+  const sdl     = sdlApplicable ? gross * 0.01 : 0;
   const totalDed = paye + uifEmp + medical + pension;
   const netPay  = totalGross - totalDed;
+  return { gross, travel, housing, bonus, totalGross, taxableIncome, paye, uifEmp, uifEr, sdl, medical, pension, totalDed, netPay };
+}
 
-  // Update preview
+function calcPayslip() {
+  const emp = {
+    gross:          parseFloat(document.getElementById('pr-gross')?.value)   || 0,
+    travel:         parseFloat(document.getElementById('pr-travel')?.value)  || 0,
+    housing:        parseFloat(document.getElementById('pr-housing')?.value) || 0,
+    bonus:          parseFloat(document.getElementById('pr-bonus')?.value)   || 0,
+    medical:        parseFloat(document.getElementById('pr-medical')?.value) || 0,
+    pension:        parseFloat(document.getElementById('pr-pension')?.value) || 0,
+    uif_applicable: document.getElementById('pr-uif')?.checked ?? true,
+    sdl_applicable: document.getElementById('pr-sdl')?.checked ?? true,
+  };
+  const name    = document.getElementById('pr-name')?.value || '—';
+  const role    = document.getElementById('pr-role')?.value || '—';
+  const paydate = document.getElementById('pr-paydate')?.value || '';
+  const result  = calcEmployeePayslip(emp);
+  const { gross, travel, housing, bonus, totalGross, paye, uifEmp, uifEr, sdl, medical, pension, totalDed, netPay } = result;
+
   const bizName = userProfile?.business_name || 'Your Business';
   document.getElementById('ps-biz-name').textContent = bizName;
   document.getElementById('ps-period-label').textContent = paydate ? 'Period: ' + new Date(paydate).toLocaleDateString('en-ZA',{month:'long',year:'numeric'}) : 'Period: —';
@@ -5219,7 +5289,6 @@ function calcPayslip() {
   document.getElementById('ps-total-ded').textContent = fmtPayroll(totalDed);
   document.getElementById('ps-net').textContent = fmtPayroll(netPay);
 
-  // Show/hide optional rows
   const showRow = (rowId, valId, val) => {
     document.getElementById(rowId).style.display = val > 0 ? 'flex' : 'none';
     document.getElementById(valId).textContent = fmtPayroll(val);
@@ -5230,7 +5299,7 @@ function calcPayslip() {
   showRow('ps-medical-row','ps-medical-val', medical);
   showRow('ps-pension-row','ps-pension-val', pension);
 
-  return { gross, travel, housing, bonus, totalGross, taxableIncome, paye, uifEmp, uifEr, sdl, medical, pension, totalDed, netPay };
+  return { ...emp, ...result };
 }
 
 function openPayslipForm(idx = null) {
@@ -5254,6 +5323,8 @@ function openPayslipForm(idx = null) {
     document.getElementById('pr-housing').value = e.housing || '';
     document.getElementById('pr-bonus').value   = e.bonus || '';
     document.getElementById('pr-pension').value = e.pension || '';
+    const uifEl = document.getElementById('pr-uif'); if (uifEl) uifEl.checked = e.uif_applicable !== false;
+    const sdlEl = document.getElementById('pr-sdl'); if (sdlEl) sdlEl.checked = e.sdl_applicable !== false;
     calcPayslip();
   } else {
     ['pr-name','pr-id','pr-role','pr-gross','pr-medical','pr-travel','pr-housing','pr-bonus','pr-pension'].forEach(id => {
@@ -5269,65 +5340,90 @@ function closePayslipForm() {
   editingEmpIdx = null;
 }
 
-function saveEmployee() {
+async function saveEmployee() {
   const name = document.getElementById('pr-name').value.trim();
   if (!name) { showToast('Please enter employee name', 'var(--amber)'); return; }
   const gross = parseFloat(document.getElementById('pr-gross').value) || 0;
   if (!gross) { showToast('Please enter gross salary', 'var(--amber)'); return; }
 
-  const calc = calcPayslip();
-  const emp = {
+  const empData = {
+    user_id:        currentUser.id,
     name,
-    id_num:   document.getElementById('pr-id').value.trim(),
-    role:     document.getElementById('pr-role').value.trim(),
-    emp_type: document.getElementById('pr-type').value,
-    gross:    calc.gross,
-    travel:   calc.travel,
-    housing:  calc.housing,
-    bonus:    calc.bonus,
-    medical:  calc.medical,
-    pension:  calc.pension,
-    period:   document.getElementById('pr-period').value,
-    paydate:  document.getElementById('pr-paydate').value,
-    totalGross: calc.totalGross,
-    paye:     calc.paye,
-    uifEmp:   calc.uifEmp,
-    uifEr:    calc.uifEr,
-    sdl:      calc.sdl,
-    totalDed: calc.totalDed,
-    netPay:   calc.netPay,
+    id_num:         document.getElementById('pr-id').value.trim(),
+    role:           document.getElementById('pr-role').value.trim(),
+    emp_type:       document.getElementById('pr-type').value,
+    gross,
+    travel:         parseFloat(document.getElementById('pr-travel').value)  || 0,
+    housing:        parseFloat(document.getElementById('pr-housing').value) || 0,
+    bonus:          parseFloat(document.getElementById('pr-bonus').value)   || 0,
+    medical:        parseFloat(document.getElementById('pr-medical').value) || 0,
+    pension:        parseFloat(document.getElementById('pr-pension').value) || 0,
+    period:         document.getElementById('pr-period').value,
+    uif_applicable: document.getElementById('pr-uif')?.checked ?? true,
+    sdl_applicable: document.getElementById('pr-sdl')?.checked ?? true,
+    updated_at:     new Date().toISOString(),
   };
 
-  if (editingEmpIdx !== null) {
-    employees[editingEmpIdx] = emp;
+  if (editingEmpIdx !== null && employees[editingEmpIdx]?.id) {
+    const { error } = await sb.from('employees').update(empData).eq('id', employees[editingEmpIdx].id).eq('user_id', currentUser.id);
+    if (error) { showToast('Save failed: ' + error.message, 'var(--red)'); return; }
     showToast('✅ Employee updated!', 'var(--green)');
   } else {
-    employees.push(emp);
+    const { error } = await sb.from('employees').insert(empData);
+    if (error) { showToast('Save failed: ' + error.message, 'var(--red)'); return; }
     showToast('✅ Employee added!', 'var(--green)');
   }
 
-  // Persist to localStorage
-  localStorage.setItem('ot_employees_' + currentUser?.id, JSON.stringify(employees));
   closePayslipForm();
-  renderEmployees();
-  renderEMP201();
+  await loadEmployees();
 }
 
-function loadEmployees() {
-  const stored = localStorage.getItem('ot_employees_' + currentUser?.id);
-  if (stored) {
-    try { employees = JSON.parse(stored); } catch(e) { employees = []; }
+async function loadEmployees() {
+  if (!currentUser?.id) return;
+  const { data, error } = await sb.from('employees').select('*').eq('user_id', currentUser.id).eq('active', true).order('name', { ascending: true });
+  if (error) { console.warn('loadEmployees:', error.message); employees = []; }
+  else {
+    employees = data || [];
+    // One-time migration: if Supabase is empty, check localStorage and migrate
+    if (employees.length === 0) await migrateLocalStorageEmployees();
   }
   renderEmployees();
   renderEMP201();
 }
 
-function deleteEmployee(idx) {
+async function migrateLocalStorageEmployees() {
+  const stored = localStorage.getItem('ot_employees_' + currentUser.id);
+  if (!stored) return;
+  let localEmps;
+  try { localEmps = JSON.parse(stored); } catch(e) { return; }
+  if (!localEmps?.length) return;
+  const inserts = localEmps.map(e => ({
+    user_id: currentUser.id, name: e.name || 'Employee', id_num: e.id_num || '',
+    role: e.role || '', emp_type: e.emp_type || 'fulltime',
+    gross: parseFloat(e.gross) || 0, travel: parseFloat(e.travel) || 0,
+    housing: parseFloat(e.housing) || 0, bonus: parseFloat(e.bonus) || 0,
+    medical: parseFloat(e.medical) || 0, pension: parseFloat(e.pension) || 0,
+    period: e.period || 'monthly', uif_applicable: true, sdl_applicable: true, active: true,
+  }));
+  const { data, error } = await sb.from('employees').insert(inserts).select();
+  if (!error && data?.length) {
+    localStorage.removeItem('ot_employees_' + currentUser.id);
+    employees = data;
+    showToast('✅ ' + data.length + ' employee(s) migrated to cloud', 'var(--green)');
+  }
+}
+
+async function deleteEmployee(idx) {
   if (!confirm('Remove this employee?')) return;
+  const empId = employees[idx]?.id;
+  if (empId) {
+    const { error } = await sb.from('employees').update({ active: false }).eq('id', empId).eq('user_id', currentUser.id);
+    if (error) { showToast('Delete failed: ' + error.message, 'var(--red)'); return; }
+  }
   employees.splice(idx, 1);
-  localStorage.setItem('ot_employees_' + currentUser?.id, JSON.stringify(employees));
   renderEmployees();
   renderEMP201();
+  renderPayrollRunsSection();
   showToast('Employee removed', 'var(--text-2)');
 }
 
@@ -5335,11 +5431,11 @@ function renderEmployees() {
   const list = document.getElementById('employeeList');
   if (!list) return;
 
-  // Update stats
-  const totalGross = employees.reduce((s,e) => s + (e.totalGross||0), 0);
-  const totalPAYE  = employees.reduce((s,e) => s + (e.paye||0), 0);
-  const totalUIF   = employees.reduce((s,e) => s + (e.uifEmp||0) + (e.uifEr||0), 0);
-  document.getElementById('pr-emp-count').textContent = employees.length;
+  const calcs = employees.map(e => calcEmployeePayslip(e));
+  const totalGross = calcs.reduce((s,c) => s + c.totalGross, 0);
+  const totalPAYE  = calcs.reduce((s,c) => s + c.paye, 0);
+  const totalUIF   = calcs.reduce((s,c) => s + c.uifEmp + c.uifEr, 0);
+  document.getElementById('pr-emp-count').textContent  = employees.length;
   document.getElementById('pr-total-gross').textContent = fmtPayroll(totalGross);
   document.getElementById('pr-total-paye').textContent  = fmtPayroll(totalPAYE);
   document.getElementById('pr-total-uif').textContent   = fmtPayroll(totalUIF);
@@ -5349,19 +5445,21 @@ function renderEmployees() {
     return;
   }
 
-  list.innerHTML = employees.map((e,i) => `
+  list.innerHTML = employees.map((e,i) => {
+    const c = calcs[i];
+    return `
     <div class="emp-card" style="margin:8px 12px;border-radius:10px">
       <div class="emp-info">
         <div class="emp-avatar">${e.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>
         <div>
           <div class="emp-name">${e.name}</div>
-          <div class="emp-role">${e.role || e.emp_type} · ${e.period}</div>
+          <div class="emp-role">${e.role || e.emp_type} · ${e.period}${e.uif_applicable===false?' · No UIF':''}${e.sdl_applicable===false?' · No SDL':''}</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:16px">
         <div>
-          <div class="emp-gross">${fmtPayroll(e.totalGross)}</div>
-          <div class="emp-net">Net: ${fmtPayroll(e.netPay)}</div>
+          <div class="emp-gross">${fmtPayroll(c.totalGross)}</div>
+          <div class="emp-net">Net: ${fmtPayroll(c.netPay)}</div>
         </div>
         <div style="display:flex;flex-direction:column;gap:4px">
           <button onclick="openPayslipForm(${i})" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text);padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">✏️ Edit</button>
@@ -5369,34 +5467,59 @@ function renderEmployees() {
           <button onclick="deleteEmployee(${i})" style="background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.2);color:var(--red);padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">🗑</button>
         </div>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 function renderEMP201() {
   const prep = document.getElementById('emp201Prep');
   const btn  = document.getElementById('emp201DownloadBtn');
   if (!prep) return;
-  if (!employees.length) {
+
+  // Prefer the latest payroll run for the current month if one exists
+  const thisMonth = new Date().toISOString().slice(0,7);
+  const latestRun = payrollRuns.find(r => r.period_month === thisMonth);
+  const empData   = latestRun ? (latestRun.employee_snapshot || []) : employees.map(e => ({ ...e, ...calcEmployeePayslip(e) }));
+
+  if (!empData.length) {
     prep.innerHTML = '<div style="font-size:12px;color:var(--text-3);text-align:center;padding:20px">Add employees to generate your EMP201 prep.</div>';
     if (btn) btn.style.display = 'none';
     return;
   }
-  const totalGross = employees.reduce((s,e)=>s+(e.totalGross||0),0);
-  const totalPAYE  = employees.reduce((s,e)=>s+(e.paye||0),0);
-  const totalUifEmp= employees.reduce((s,e)=>s+(e.uifEmp||0),0);
-  const totalUifEr = employees.reduce((s,e)=>s+(e.uifEr||0),0);
+
+  const totalPAYE  = empData.reduce((s,e)=>s+(e.paye||0),0);
+  const totalUifEmp= empData.reduce((s,e)=>s+(e.uifEmp||0),0);
+  const totalUifEr = empData.reduce((s,e)=>s+(e.uifEr||0),0);
   const totalUIF   = totalUifEmp + totalUifEr;
-  const totalSDL   = employees.reduce((s,e)=>s+(e.sdl||0),0);
+  const totalSDL   = empData.reduce((s,e)=>s+(e.sdl||0),0);
   const totalRemit = totalPAYE + totalUIF + totalSDL;
+  const label      = latestRun ? latestRun.period_label : new Date().toLocaleDateString('en-ZA',{month:'long',year:'numeric'});
+
+  const statusBadge = latestRun ? (() => {
+    const s = latestRun.status;
+    if (s === 'verified') return `<span style="background:rgba(34,197,94,.12);color:var(--green);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700">✅ Verified</span>`;
+    if (s === 'paid')     return `<span style="background:rgba(245,158,11,.12);color:var(--amber);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700">💸 Salary Paid</span>`;
+    if (s === 'posted')   return `<span style="background:rgba(79,142,247,.12);color:var(--blue);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700">📋 Posted</span>`;
+    return `<span style="background:rgba(255,255,255,.06);color:var(--text-2);padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700">⚙ Calculated</span>`;
+  })() : '';
+
+  const matchBtns = latestRun && latestRun.status !== 'verified' ? `
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      ${!latestRun.salary_tx_id ? `<button onclick="openMatchPayrollPanel('${latestRun.id}','salary')" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:var(--green);padding:6px 13px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">💸 Match Salary Payment</button>` : '<span style="font-size:12px;color:var(--green)">✅ Salary matched</span>'}
+      ${!latestRun.sars_tx_id ? `<button onclick="openMatchPayrollPanel('${latestRun.id}','sars')" style="background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.2);color:var(--red);padding:6px 13px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">🔗 Match SARS Payment</button>` : '<span style="font-size:12px;color:var(--green)">✅ SARS matched</span>'}
+    </div>` : '';
 
   prep.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px">EMP201 Summary — ${label}</div>
+      ${statusBadge}
+    </div>
+    ${latestRun ? '' : '<div style="font-size:11px;color:var(--amber);margin-bottom:10px;padding:6px 10px;background:rgba(245,158,11,.06);border-radius:6px">Live preview — run payroll to lock these figures.</div>'}
     <div style="margin-bottom:16px">
-      <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">EMP201 Summary — ${new Date().toLocaleDateString('en-ZA',{month:'long',year:'numeric'})}</div>
-      ${employees.map(e=>`
+      ${empData.map(e=>`
         <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px">
           <span style="color:var(--text-2)">${e.name}</span>
-          <span style="color:var(--text)">PAYE: ${fmtPayroll(e.paye)} · UIF: ${fmtPayroll(e.uifEmp+e.uifEr)}</span>
+          <span style="color:var(--text)">PAYE: ${fmtPayroll(e.paye||0)} · UIF: ${fmtPayroll((e.uifEmp||0)+(e.uifEr||0))}</span>
         </div>
       `).join('')}
     </div>
@@ -5406,6 +5529,7 @@ function renderEMP201() {
       <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:var(--text-2)"><span>Total SDL</span><span style="color:var(--red)">${fmtPayroll(totalSDL)}</span></div>
       <div style="display:flex;justify-content:space-between;padding:10px 0 4px;font-size:16px;font-family:'Syne',sans-serif;font-weight:700;border-top:1px solid rgba(255,255,255,.1);margin-top:6px"><span>Total to Remit to SARS</span><span style="color:var(--red)">${fmtPayroll(totalRemit)}</span></div>
     </div>
+    ${matchBtns}
   `;
   if (btn) btn.style.display = 'flex';
 }
@@ -5509,7 +5633,7 @@ function downloadPayslipPDF() {
 function downloadEmployeePayslip(idx) {
   const emp = employees[idx];
   if (!emp) return;
-  const doc = generatePayslipPDFData(emp);
+  const doc = generatePayslipPDFData({ ...emp, ...calcEmployeePayslip(emp) });
   doc.save('Payslip_' + emp.name.replace(/\s/g,'_') + '.pdf');
   showToast('📄 Payslip downloaded!', 'var(--green)');
 }
@@ -5537,19 +5661,24 @@ function downloadEMP201() {
   doc.text('EMPLOYEE', 14, y); doc.text('GROSS', 80, y); doc.text('PAYE', 110, y); doc.text('UIF', 140, y); doc.text('SDL', 165, y);
   y += 3; doc.setDrawColor(40,45,56); doc.line(14,y,W-14,y); y += 6;
 
-  const totalGross = employees.reduce((s,e)=>s+(e.totalGross||0),0);
-  const totalPAYE  = employees.reduce((s,e)=>s+(e.paye||0),0);
-  const totalUIF   = employees.reduce((s,e)=>s+(e.uifEmp||0)+(e.uifEr||0),0);
-  const totalSDL   = employees.reduce((s,e)=>s+(e.sdl||0),0);
+  // Use payroll run snapshot for current month if available, otherwise calculate live
+  const thisMonth = new Date().toISOString().slice(0,7);
+  const latestRun = payrollRuns.find(r => r.period_month === thisMonth);
+  const empData   = latestRun ? (latestRun.employee_snapshot || []) : employees.map(e => ({ ...e, ...calcEmployeePayslip(e) }));
+
+  const totalGross = empData.reduce((s,e)=>s+(e.totalGross||0),0);
+  const totalPAYE  = empData.reduce((s,e)=>s+(e.paye||0),0);
+  const totalUIF   = empData.reduce((s,e)=>s+(e.uifEmp||0)+(e.uifEr||0),0);
+  const totalSDL   = empData.reduce((s,e)=>s+(e.sdl||0),0);
   const totalRemit = totalPAYE + totalUIF + totalSDL;
 
-  employees.forEach(e => {
+  empData.forEach(e => {
     doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(200,210,225);
     doc.text(e.name, 14, y);
-    doc.text(fmtPayroll(e.totalGross), 80, y);
-    doc.text(fmtPayroll(e.paye), 110, y);
-    doc.text(fmtPayroll(e.uifEmp+e.uifEr), 140, y);
-    doc.text(fmtPayroll(e.sdl), 165, y);
+    doc.text(fmtPayroll(e.totalGross||0), 80, y);
+    doc.text(fmtPayroll(e.paye||0), 110, y);
+    doc.text(fmtPayroll((e.uifEmp||0)+(e.uifEr||0)), 140, y);
+    doc.text(fmtPayroll(e.sdl||0), 165, y);
     y += 8;
   });
 
@@ -5577,7 +5706,244 @@ function downloadEMP201() {
   showToast('📄 EMP201 prep downloaded!', 'var(--green)');
 }
 
+// ── PAYROLL RUNS ──
 
+async function loadPayrollRuns() {
+  if (!currentUser?.id) return;
+  const { data, error } = await sb.from('payroll_runs').select('*').eq('user_id', currentUser.id).order('period_month', { ascending: false }).limit(24);
+  if (!error) payrollRuns = data || [];
+  renderPayrollRunsSection();
+}
+
+function renderPayrollRunsSection() {
+  const list = document.getElementById('payrollRunsList');
+  if (!list) return;
+  if (!payrollRuns.length) {
+    list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-3);font-size:13px">No payroll runs yet. Click "Run Payroll" to process this month.</div>';
+    return;
+  }
+  const statusLabel = s => {
+    if (s === 'verified') return `<span style="background:rgba(34,197,94,.12);color:var(--green);padding:2px 9px;border-radius:10px;font-size:10px;font-weight:700">✅ Verified</span>`;
+    if (s === 'paid')     return `<span style="background:rgba(245,158,11,.12);color:var(--amber);padding:2px 9px;border-radius:10px;font-size:10px;font-weight:700">💸 Salary Paid</span>`;
+    if (s === 'posted')   return `<span style="background:rgba(79,142,247,.12);color:var(--blue);padding:2px 9px;border-radius:10px;font-size:10px;font-weight:700">📋 Posted to Books</span>`;
+    return `<span style="background:rgba(255,255,255,.06);color:var(--text-2);padding:2px 9px;border-radius:10px;font-size:10px;font-weight:700">⚙ Calculated</span>`;
+  };
+  list.innerHTML = payrollRuns.map(run => `
+    <div style="padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:160px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span style="font-size:13px;font-weight:600;color:var(--text)">${run.period_label}</span>
+          ${statusLabel(run.status)}
+        </div>
+        <div style="font-size:12px;color:var(--text-3)">Run date: ${run.run_date} · ${run.employee_count} employee${run.employee_count===1?'':'s'}</div>
+        <div style="display:flex;gap:14px;margin-top:6px;font-size:12px">
+          <span style="color:var(--green)">Net: ${fmtPayroll(run.total_net)}</span>
+          <span style="color:var(--red)">SARS: ${fmtPayroll((run.total_paye||0)+(run.total_uif_emp||0)+(run.total_uif_er||0)+(run.total_sdl||0))}</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end">
+        ${run.status !== 'verified' && !run.salary_tx_id ? `<button onclick="openMatchPayrollPanel('${run.id}','salary')" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:var(--green);padding:5px 11px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap">💸 Match Salary</button>` : ''}
+        ${run.status !== 'verified' && !run.sars_tx_id ? `<button onclick="openMatchPayrollPanel('${run.id}','sars')" style="background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.2);color:var(--red);padding:5px 11px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap">🔗 Match SARS</button>` : ''}
+        <button onclick="downloadEMP201()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text-2);padding:5px 11px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap">📥 EMP201</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openRunPayrollModal() {
+  if (!canUse('payroll')) { showUpgradePrompt('full'); return; }
+  if (!employees.length) { showToast('Add at least one employee first', 'var(--amber)'); return; }
+  const snapshots = employees.map(e => ({ ...e, ...calcEmployeePayslip(e) }));
+  const totalNet  = snapshots.reduce((s,e) => s + e.netPay, 0);
+  const totalSARS = snapshots.reduce((s,e) => s + e.paye + e.uifEmp + e.uifEr + e.sdl, 0);
+  const thisMonth = new Date().toISOString().slice(0,7);
+  const existing  = payrollRuns.find(r => r.period_month === thisMonth);
+
+  document.getElementById('run-paydate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('runPayrollPreview').innerHTML = `
+    ${existing ? `<div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:7px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--amber)">⚠️ A run already exists for this month (${existing.period_label}). This will create a new additional run.</div>` : ''}
+    <div style="font-size:12px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">${employees.length} Employee${employees.length===1?'':'s'}</div>
+    ${snapshots.map(e => `
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:12.5px">
+        <span style="color:var(--text-2)">${e.name}</span>
+        <span style="color:var(--text)">Net <span style="color:var(--green)">${fmtPayroll(e.netPay)}</span> · PAYE ${fmtPayroll(e.paye)} · UIF ${fmtPayroll(e.uifEmp+e.uifEr)} · SDL ${fmtPayroll(e.sdl)}</span>
+      </div>`).join('')}
+    <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;font-size:13px;font-weight:700">
+      <span style="color:var(--green)">Net Salaries: ${fmtPayroll(totalNet)}</span>
+      <span style="color:var(--red)">SARS: ${fmtPayroll(totalSARS)}</span>
+    </div>`;
+  document.getElementById('runPayrollModal').style.display = 'flex';
+}
+
+function closeRunPayrollModal() {
+  document.getElementById('runPayrollModal').style.display = 'none';
+}
+
+async function confirmRunPayroll() {
+  if (!employees.length) return;
+  const btn = document.getElementById('confirmRunPayrollBtn');
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Processing...'; }
+
+    const paydate     = document.getElementById('run-paydate').value || new Date().toISOString().split('T')[0];
+    const periodMonth = paydate.slice(0, 7);
+    const periodLabel = new Date(paydate + 'T12:00:00').toLocaleDateString('en-ZA', { month: 'long', year: 'numeric' });
+    const snapshot    = employees.map(e => ({ ...e, ...calcEmployeePayslip(e) }));
+
+    const totalGross  = snapshot.reduce((s,e) => s + e.totalGross, 0);
+    const totalNet    = snapshot.reduce((s,e) => s + e.netPay, 0);
+    const totalPAYE   = snapshot.reduce((s,e) => s + e.paye, 0);
+    const totalUifEmp = snapshot.reduce((s,e) => s + e.uifEmp, 0);
+    const totalUifEr  = snapshot.reduce((s,e) => s + e.uifEr, 0);
+    const totalSDL    = snapshot.reduce((s,e) => s + e.sdl, 0);
+    const totalDed    = snapshot.reduce((s,e) => s + e.totalDed, 0);
+
+    // Create payroll_run record
+    const { data: run, error: runErr } = await sb.from('payroll_runs').insert({
+      user_id: currentUser.id, period_month: periodMonth, period_label: periodLabel,
+      run_date: paydate, status: 'calculated',
+      total_gross: totalGross, total_net: totalNet, total_paye: totalPAYE,
+      total_uif_emp: totalUifEmp, total_uif_er: totalUifEr, total_sdl: totalSDL,
+      total_deductions: totalDed, employee_count: employees.length,
+      employee_snapshot: snapshot,
+    }).select().single();
+    if (runErr) throw new Error(runErr.message);
+
+    // Create expense invoices
+    const today = paydate;
+    const inserts = [
+      { category: 'Salaries & Wages', amount: totalNet,                          description: `Payroll - ${periodLabel} - Net Salaries (${employees.length} staff)` },
+      { category: 'SARS / Tax Payments', amount: totalPAYE,                      description: `Payroll - ${periodLabel} - PAYE to SARS` },
+      { category: 'SARS / Tax Payments', amount: totalUifEmp + totalUifEr,       description: `Payroll - ${periodLabel} - UIF to SARS` },
+      { category: 'SARS / Tax Payments', amount: totalSDL,                        description: `Payroll - ${periodLabel} - SDL to SARS` },
+    ].filter(i => i.amount > 0);
+
+    const invResults = [];
+    for (const item of inserts) {
+      const { data: inv } = await sb.from('invoices').insert({
+        user_id: currentUser.id, type: 'expense', category: item.category,
+        date: today, description: item.description,
+        amount: item.amount, vat: 0, total: item.amount,
+        has_vat: false, reconciled: false, status: 'outstanding',
+      }).select().single();
+      if (inv) invResults.push(inv);
+    }
+
+    // Link invoice IDs and advance status to 'posted'
+    const invMap = {};
+    inserts.forEach((item, i) => { if (invResults[i]) invMap[item.description] = invResults[i].id; });
+    const salKey  = `Payroll - ${periodLabel} - Net Salaries (${employees.length} staff)`;
+    const payeKey = `Payroll - ${periodLabel} - PAYE to SARS`;
+
+    await sb.from('payroll_runs').update({
+      status: 'posted',
+      salary_invoice_id: invMap[salKey]  || null,
+      paye_invoice_id:   invMap[payeKey] || null,
+      updated_at: new Date().toISOString(),
+    }).eq('id', run.id);
+
+    await loadInvoices();
+    await loadPayrollRuns();
+    closeRunPayrollModal();
+    renderEMP201();
+    showToast(`✅ Payroll posted — ${fmtPayroll(totalNet)} net + ${fmtPayroll(totalPAYE+totalUifEmp+totalUifEr+totalSDL)} SARS`, 'var(--green)');
+  } catch(e) {
+    showToast('Payroll failed: ' + e.message, 'var(--red)');
+    console.error('confirmRunPayroll:', e);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✅ Confirm & Post'; }
+  }
+}
+
+function openMatchPayrollPanel(runId, paymentType) {
+  const run = payrollRuns.find(r => r.id === runId);
+  if (!run) return;
+  const targetAmt = paymentType === 'salary'
+    ? run.total_net
+    : (run.total_paye||0) + (run.total_uif_emp||0) + (run.total_uif_er||0) + (run.total_sdl||0);
+  const label = paymentType === 'salary' ? 'Net Salary Payment' : 'SARS Payment (PAYE + UIF + SDL)';
+
+  // Find candidate debit transactions within ±10% of target amount
+  const candidates = reconTransactions.filter(t =>
+    t.type === 'debit' && !t.ignored &&
+    (t.match_status === 'unmatched' || t.match_status === 'suggested') &&
+    Math.abs(parseFloat(t.amount) - targetAmt) / Math.max(targetAmt, 1) <= 0.10
+  );
+
+  const panel = `<div id="matchPayrollOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:2500;display:flex;align-items:center;justify-content:center;padding:20px">
+    <div style="background:#1a1d24;border:1px solid rgba(255,255,255,.12);border-radius:16px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto">
+      <div style="padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text)">Match ${label}</div>
+          <div style="font-size:12px;color:var(--text-3);margin-top:2px">${run.period_label} · Expected: <span style="color:var(--text);font-weight:600">${fmtPayroll(targetAmt)}</span></div>
+        </div>
+        <button onclick="document.getElementById('matchPayrollOverlay').remove()" style="background:none;border:none;color:var(--text-3);font-size:18px;cursor:pointer">✕</button>
+      </div>
+      <div style="padding:16px 20px">
+        ${candidates.length ? `
+          <div style="font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Matching bank debits</div>
+          ${candidates.map(tx => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;margin-bottom:6px">
+              <div>
+                <div style="font-size:12.5px;font-weight:600;color:var(--text)">${tx.description}</div>
+                <div style="font-size:11px;color:var(--text-3)">${tx.date} · <span style="color:var(--red)">-${fmtR(tx.amount)}</span></div>
+              </div>
+              <button onclick="matchPayrollTransaction('${runId}','${tx.id}','${paymentType}');document.getElementById('matchPayrollOverlay').remove()" style="background:var(--green);color:#0f1520;border:none;padding:6px 14px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;flex-shrink:0">Match</button>
+            </div>`).join('')}
+        ` : `<div style="text-align:center;padding:24px;color:var(--text-3);font-size:13px">No matching debit transactions found.<br><span style="font-size:11px">Upload your bank statement and run auto-match first.</span></div>`}
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', panel);
+}
+
+async function matchPayrollTransaction(runId, txId, paymentType) {
+  const run = payrollRuns.find(r => r.id === runId);
+  const tx  = reconTransactions.find(t => t.id === txId);
+  if (!run || !tx) return;
+
+  const invoiceId = paymentType === 'salary' ? run.salary_invoice_id : run.paye_invoice_id;
+
+  // Mark bank transaction as matched
+  await sb.from('bank_transactions').update({
+    match_status: 'matched', matched_invoice_id: invoiceId || null,
+    match_type: paymentType === 'salary' ? 'payroll_salary' : 'payroll_sars',
+    classification: paymentType === 'salary' ? 'payroll_salary' : 'payroll_sars',
+  }).eq('id', txId);
+  tx.match_status = 'matched';
+  tx.match_type = paymentType === 'salary' ? 'payroll_salary' : 'payroll_sars';
+
+  // Mark all payroll expense invoices for this run as reconciled
+  const invIds = [run.salary_invoice_id, run.paye_invoice_id, run.uif_invoice_id, run.sdl_invoice_id].filter(Boolean);
+  if (paymentType === 'salary' && run.salary_invoice_id) {
+    await sb.from('invoices').update({ reconciled: true, status: 'paid' }).eq('id', run.salary_invoice_id);
+  }
+  if (paymentType === 'sars') {
+    for (const id of [run.paye_invoice_id, run.uif_invoice_id, run.sdl_invoice_id].filter(Boolean)) {
+      await sb.from('invoices').update({ reconciled: true, status: 'paid' }).eq('id', id);
+    }
+  }
+
+  // Advance payroll_run status
+  const updates = { updated_at: new Date().toISOString() };
+  if (paymentType === 'salary') updates.salary_tx_id = txId;
+  else updates.sars_tx_id = txId;
+
+  // Determine new status
+  const salaryDone = paymentType === 'salary' ? true : !!run.salary_tx_id;
+  const sarsDone   = paymentType === 'sars'   ? true : !!run.sars_tx_id;
+  const hasSars    = (run.total_paye||0) + (run.total_uif_emp||0) + (run.total_uif_er||0) + (run.total_sdl||0) > 0;
+  updates.status = (salaryDone && (sarsDone || !hasSars)) ? 'verified' : 'paid';
+
+  await sb.from('payroll_runs').update(updates).eq('id', runId);
+  addReconAudit('manual', `Payroll ${paymentType} matched: ${run.period_label} — ${fmtR(tx.amount)}`);
+
+  await loadInvoices();
+  await loadPayrollRuns();
+  updateReconUI(); renderTxTable(); renderInvoiceReconTable(); renderUnrecorded(); detectConflicts();
+  renderEMP201();
+  showToast(updates.status === 'verified' ? '✅ Payroll fully verified!' : '✅ Payroll payment matched', 'var(--green)');
+}
 
 
 // ════════════════════════════════════════════
