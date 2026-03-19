@@ -4726,6 +4726,7 @@ function switchHistTab(tab) {
     if (btn) btn.classList.toggle('active', t===tab);
     if (content) content.style.display = t===tab?'block':'none';
   });
+  if (tab==='monthly') loadMonthlyHistory();
   if (tab==='statements') loadStatementHistory();
   if (tab==='docs') loadDocHistory();
   if (tab==='opening') loadOpeningBalances();
@@ -4836,17 +4837,32 @@ async function loadStatementHistory() {
 }
 
 async function loadDocHistory() {
+  const badge = document.getElementById('docHistBadge');
+  const list = document.getElementById('docHistList'); if (!list) return;
   let data = null;
-  try { const r = await sb.from('doc_history').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(20); data = r.data; } catch(e) { data = null; }
-  const list = document.getElementById('docHistList'); if (!list||!data||!data.length) return;
-  list.innerHTML = data.map(d=>`<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)">
+  try {
+    const r = await sb.from('doc_history').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(20);
+    if (r.error) throw r.error;
+    data = r.data;
+  } catch(e) {
+    if (badge) badge.textContent = 'Error';
+    console.error('loadDocHistory:', e.message);
+    return;
+  }
+  if (badge) badge.textContent = data && data.length ? data.length + ' doc' + (data.length===1?'':'s') : 'None';
+  if (!data||!data.length) {
+    list.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text-3)"><div style="font-size:36px;margin-bottom:10px">📄</div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:5px">No documents generated yet</div><div style="font-size:12px">Every PDF you generate is logged here automatically.</div></div>';
+    return;
+  }
+  list.innerHTML = data.map(d=>`<div style="display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--border)">
     <div style="font-size:18px">📄</div>
     <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">${d.doc_type||'Document'}</div><div style="font-size:11px;color:var(--text-3)">${new Date(d.created_at).toLocaleDateString('en-ZA')}</div></div>
   </div>`).join('');
 }
 
 async function logDocGenerated(type, ref) {
-  await sb.from('doc_history').insert({user_id:currentUser.id,doc_type:type,reference:ref,created_at:new Date().toISOString()}).catch(()=>{});
+  const { error } = await sb.from('doc_history').insert({user_id:currentUser.id,doc_type:type,reference:ref,created_at:new Date().toISOString()});
+  if (error) console.error('logDocGenerated failed:', error.message);
 }
 
 async function loadOpeningBalances() {
