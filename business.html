@@ -3547,7 +3547,21 @@ function resetAnalysis() {
 }
 
 async function saveStatement(file, result) {
-  await sb.from('statements').insert({user_id:currentUser.id,filename:file.name,period:result.period,total_income:parseFloat((result.totalIncome||'0').replace(/[^0-9.]/g,'')),total_expenses:parseFloat((result.totalExpenses||'0').replace(/[^0-9.]/g,'')),vat_liability:parseFloat((result.estimatedVatLiability||'0').replace(/[^0-9.]/g,'')),flag_count:result.flaggedCount||0,created_at:new Date().toISOString()});
+  const { error } = await sb.from('statements').insert({
+    user_id: currentUser.id,
+    filename: file.name,
+    period: result.period,
+    total_income: parseFloat((result.totalIncome||'0').replace(/[^0-9.]/g,'')),
+    total_expenses: parseFloat((result.totalExpenses||'0').replace(/[^0-9.]/g,'')),
+    vat_liability: parseFloat((result.estimatedVatLiability||'0').replace(/[^0-9.]/g,'')),
+    flag_count: result.flaggedCount||0,
+    created_at: new Date().toISOString()
+  });
+  if (error) {
+    console.error('saveStatement error:', error);
+    showToast('⚠ Statement analysed but not saved to history: ' + error.message, 'var(--amber)');
+    return;
+  }
   loadStatementHistory();
 }
 
@@ -4643,7 +4657,10 @@ async function revokeAccountantLink() {
   if (!confirm('Revoke accountant link?')) return;
   await sb.from('profiles').update({share_token:null,share_token_email:null,share_token_expiry:null}).eq('id',currentUser.id);
   userProfile.share_token=null;
+  userProfile.share_token_email=null;
+  userProfile.share_token_expiry=null;
   showToast('Accountant link revoked','var(--amber)');
+  checkAccountantLinkStatus();
 }
 function checkAccountantLinkStatus() {
   const form = document.getElementById('accLinkForm');

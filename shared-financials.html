@@ -162,13 +162,20 @@ async function loadSharedData() {
 
   if (!token) { showError('Invalid Link', 'No access token found in this URL.'); return; }
 
-  // Use SECURITY DEFINER RPC to bypass RLS — no service key needed
-  const { data: result, error: rpcError } = await sb.rpc('get_shared_financials', { p_token: token });
-  if (rpcError) { showError('Connection Error', rpcError.message); return; }
-  if (!result || result.error === 'not_found') { showError('Link Not Found', 'This access link is invalid or has been revoked.'); return; }
-  if (result.error === 'expired') {
-    const expiry = new Date(result.expiry);
-    showError('Link Expired', `This access link expired on ${expiry.toLocaleDateString('en-ZA')}. Ask the business owner to send a new link.`);
+  // Fetch via serverless API (bypasses RLS using service role key)
+  let result;
+  try {
+    const resp = await fetch('/api/shared-data?token=' + encodeURIComponent(token));
+    result = await resp.json();
+    if (resp.status === 404 || result.error === 'not_found') { showError('Link Not Found', 'This access link is invalid or has been revoked.'); return; }
+    if (resp.status === 410 || result.error === 'expired') {
+      const expiry = new Date(result.expiry);
+      showError('Link Expired', `This access link expired on ${expiry.toLocaleDateString('en-ZA')}. Ask the business owner to send a new link.`);
+      return;
+    }
+    if (!resp.ok) { showError('Connection Error', result.error || 'Could not load financial data.'); return; }
+  } catch (err) {
+    showError('Connection Error', 'Could not reach the server. Please try again.');
     return;
   }
 
