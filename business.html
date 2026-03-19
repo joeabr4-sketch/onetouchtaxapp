@@ -3755,10 +3755,19 @@ function updateCloseBtn() {
   }
 
   // Save confidence
-  if (reconSession && confidence !== reconSession.confidence) {
-    sb.from('reconciliation_sessions').update({ confidence }).eq('id', reconSession.id);
+  if (reconSession?.id && confidence !== reconSession.confidence) {
     reconSession.confidence = confidence;
+    sb.from('reconciliation_sessions').update({ confidence }).eq('id', reconSession.id)
+      .then(({ error }) => { if (error) console.error('Confidence save failed:', error.message); });
   }
+}
+
+async function saveConfidence() {
+  if (!reconSession?.id) return;
+  const confidence = calcConfidence();
+  const { error } = await sb.from('reconciliation_sessions').update({ confidence }).eq('id', reconSession.id);
+  if (error) { showToast('⚠ Could not save progress: ' + error.message, 'var(--red)'); return; }
+  reconSession.confidence = confidence;
 }
 
 // ── UPLOAD STATEMENT ──
@@ -3832,12 +3841,14 @@ async function processReconFile(file) {
     const totalCredits = rows.filter(r=>r.type==='credit').reduce((s,r)=>s+r.amount,0);
     const totalDebits  = rows.filter(r=>r.type==='debit').reduce((s,r)=>s+r.amount,0);
     const dates = rows.map(r=>r.date).filter(Boolean).sort();
-    const period = dates.length ? dates[0] + ' – ' + dates[dates.length-1] : getCurrentPeriod();
-    sb.from('statements').insert({
-      user_id: currentUser.id, filename: file.name, period,
+    const stmtPeriod = dates.length ? dates[0] + ' – ' + dates[dates.length-1] : getCurrentPeriod();
+    const { error: stmtErr } = await sb.from('statements').insert({
+      user_id: currentUser.id, filename: file.name, period: stmtPeriod,
       total_income: totalCredits, total_expenses: totalDebits,
       vat_liability: 0, flag_count: 0, created_at: new Date().toISOString()
-    }).then(({error:se}) => { if (!se) loadStatementHistory(); });
+    });
+    if (stmtErr) console.error('Statement history save failed:', stmtErr.message);
+    else loadStatementHistory();
 
     const fn = document.getElementById('reconFileName');
     if (fn) fn.textContent = file.name;
@@ -3969,6 +3980,7 @@ async function runReconciliationEngine() {
     renderInvoiceReconTable();
     renderUnrecorded();
     detectConflicts();
+    await saveConfidence();
     if (btn) { btn.disabled = false; btn.textContent = '⚡ Auto-Match'; }
     showToast(`✅ ${exactCount} matched · 🟡 ${fuzzyCount} suggested`, 'var(--green)');
   } catch(e) {
