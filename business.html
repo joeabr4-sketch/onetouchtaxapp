@@ -2812,9 +2812,10 @@ function exportInvoicePDF(inv) {
   doc.text('Thank you for your business!', W/2, y+15, {align:'center'});
 
   const filename = 'Invoice_' + (inv.invoice_number||'001') + '_' + (inv.client_name||'Client').replace(/\s/g,'_') + '.pdf';
+  const pdfData = doc.output('datauristring');
   doc.save(filename);
   showPDFToast(filename + ' saved to downloads');
-  logDocGenerated('Invoice PDF', inv.invoice_number||'');
+  logDocGenerated('Invoice PDF', inv.invoice_number||'', pdfData);
 }
 
 // ── SETTINGS ──
@@ -3134,8 +3135,9 @@ function genVAT201() {
   doc.text(net>=0?'VAT PAYABLE TO SARS':'VAT REFUND DUE', M+6, y+10);
   doc.text('R '+Math.abs(net).toLocaleString('en-ZA',{minimumFractionDigits:2}), 210-M-4, y+10, {align:'right'});
   makePDFFooter(doc);
+  const _vat201data = doc.output('datauristring');
   doc.save('VAT201_'+(userProfile?.biz_name||'Business').replace(/\s/g,'_')+'.pdf');
-  showPDFToast('VAT201 downloaded'); logDocGenerated('VAT201','');
+  showPDFToast('VAT201 downloaded'); logDocGenerated('VAT201','',_vat201data);
 }
 
 // Auto-calculate UIF and SDL from gross salaries
@@ -3177,8 +3179,9 @@ function genEMP201() {
   doc.text('TOTAL PAYABLE TO SARS', M+6, y+10);
   doc.text('R '+total.toLocaleString('en-ZA',{minimumFractionDigits:2}), 210-M-4, y+10, {align:'right'});
   makePDFFooter(doc);
+  const _emp201data = doc.output('datauristring');
   doc.save('EMP201_'+(document.getElementById('e-month')?.value||'Month').replace(/\s/g,'_')+'.pdf');
-  showPDFToast('EMP201 downloaded'); logDocGenerated('EMP201','');
+  showPDFToast('EMP201 downloaded'); logDocGenerated('EMP201','',_emp201data);
 }
 
 function genIRP6() {
@@ -3225,8 +3228,9 @@ function genIRP6() {
   doc.text('PROVISIONAL TAX DUE ('+period+')', M+6, y+10);
   doc.text('R '+provisional.toFixed(2), 210-M-4, y+10, {align:'right'});
   makePDFFooter(doc);
+  const _irp6data = doc.output('datauristring');
   doc.save('IRP6_'+(userProfile?.biz_name||'Business').replace(/\s/g,'_')+'.pdf');
-  showPDFToast('IRP6 Estimate downloaded'); logDocGenerated('IRP6','');
+  showPDFToast('IRP6 Estimate downloaded'); logDocGenerated('IRP6','',_irp6data);
 }
 
 function genITR14() {
@@ -3257,8 +3261,9 @@ function genITR14() {
   doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(255,255,255);
   doc.text('HAND THIS PACK TO YOUR TAX PRACTITIONER', M+6, y+10);
   makePDFFooter(doc);
+  const _itr14data = doc.output('datauristring');
   doc.save('ITR14_PrepPack_'+(userProfile?.biz_name||'Business').replace(/\s/g,'_')+'.pdf');
-  showPDFToast('ITR14 Prep Pack downloaded'); logDocGenerated('ITR14','');
+  showPDFToast('ITR14 Prep Pack downloaded'); logDocGenerated('ITR14','',_itr14data);
 }
 
 // ── FINANCIALS ──
@@ -4861,6 +4866,23 @@ function toggleStmtDetail(id) {
   el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
 
+// Keyed by index set during loadDocHistory render
+const _storedDocs = {};
+
+function viewStoredDoc(idx) {
+  const data = _storedDocs[idx];
+  if (!data) return;
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>Document</title><style>*{margin:0;padding:0}body{background:#1a1a1a}</style></head><body><iframe src="${data}" style="width:100vw;height:100vh;border:none"></iframe></body></html>`);
+}
+
+function downloadStoredDoc(idx, filename) {
+  const data = _storedDocs[idx];
+  if (!data) return;
+  const a = document.createElement('a');
+  a.href = data; a.download = filename; a.click();
+}
+
 async function loadDocHistory() {
   const badge = document.getElementById('docHistBadge');
   const list = document.getElementById('docHistList'); if (!list) return;
@@ -4884,21 +4906,30 @@ async function loadDocHistory() {
     'EMP201': "showSarsDisclaimer('genEMP201')",
     'IRP6':   "showSarsDisclaimer('genIRP6')",
     'ITR14':  "showSarsDisclaimer('genITR14')",
-    'Invoice PDF': 'showSection(\'invoices\',document.querySelector(\'.s-btn[onclick*=invoices]\'))',
+    'Invoice PDF': "showSection('invoices',document.querySelector('.s-btn[onclick*=invoices]'))",
     'Bookkeeper Pack': "showSarsDisclaimer('downloadFullPack')"
   };
-  list.innerHTML = data.map(d => {
-    const action = regenMap[d.doc_type];
-    return `<div style="display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--border)">
+  // Populate lookup map for view/download
+  Object.keys(_storedDocs).forEach(k => delete _storedDocs[k]);
+  data.forEach((d,i) => { if (d.pdf_data) _storedDocs[i] = d.pdf_data; });
+
+  list.innerHTML = data.map((d,i) => {
+    const hasPdf = !!d.pdf_data;
+    const regenAction = regenMap[d.doc_type];
+    const fname = `${(d.doc_type||'doc').replace(/\s/g,'_')}_${new Date(d.created_at).toISOString().split('T')[0]}.pdf`;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--border)">
       <div style="font-size:18px">📄</div>
       <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">${d.doc_type||'Document'}</div><div style="font-size:11px;color:var(--text-3)">${new Date(d.created_at).toLocaleDateString('en-ZA')}${d.reference?' · '+d.reference:''}</div></div>
-      ${action ? `<button onclick="${action}" style="background:var(--surface2);border:1px solid var(--border);color:var(--text-2);padding:6px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap">↓ Re-download</button>` : ''}
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        ${hasPdf ? `<button onclick="viewStoredDoc(${i})" style="background:var(--blue-dim);border:1px solid rgba(184,196,216,.2);color:var(--blue);padding:6px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">👁 View</button>` : ''}
+        ${hasPdf ? `<button onclick="downloadStoredDoc(${i},'${fname}')" style="background:var(--surface2);border:1px solid var(--border);color:var(--text-2);padding:6px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">↓ Download</button>` : (regenAction ? `<button onclick="${regenAction}" style="background:var(--surface2);border:1px solid var(--border);color:var(--text-2);padding:6px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">↺ Regenerate</button>` : '')}
+      </div>
     </div>`;
   }).join('');
 }
 
-async function logDocGenerated(type, ref) {
-  const { error } = await sb.from('doc_history').insert({user_id:currentUser.id,doc_type:type,reference:ref,created_at:new Date().toISOString()});
+async function logDocGenerated(type, ref, pdfData) {
+  const { error } = await sb.from('doc_history').insert({user_id:currentUser.id,doc_type:type,reference:ref||'',pdf_data:pdfData||null,created_at:new Date().toISOString()});
   if (error) console.error('logDocGenerated failed:', error.message);
 }
 
