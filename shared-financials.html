@@ -162,22 +162,13 @@ async function loadSharedData() {
 
   if (!token) { showError('Invalid Link', 'No access token found in this URL.'); return; }
 
-  // Fetch via server-side proxy to bypass Supabase RLS on profiles/invoices
-  let result;
-  try {
-    const resp = await fetch('/api/shared-data?token=' + encodeURIComponent(token));
-    result = await resp.json();
-    if (!resp.ok) {
-      if (result.error === 'expired') {
-        const expiry = new Date(result.expiry);
-        showError('Link Expired', `This access link expired on ${expiry.toLocaleDateString('en-ZA')}. Ask the business owner to send a new link.`);
-      } else {
-        showError('Link Not Found', 'This access link is invalid or has been revoked.');
-      }
-      return;
-    }
-  } catch (e) {
-    showError('Connection Error', 'Could not load financial data. Please try again.');
+  // Use SECURITY DEFINER RPC to bypass RLS — no service key needed
+  const { data: result, error: rpcError } = await sb.rpc('get_shared_financials', { p_token: token });
+  if (rpcError) { showError('Connection Error', rpcError.message); return; }
+  if (!result || result.error === 'not_found') { showError('Link Not Found', 'This access link is invalid or has been revoked.'); return; }
+  if (result.error === 'expired') {
+    const expiry = new Date(result.expiry);
+    showError('Link Expired', `This access link expired on ${expiry.toLocaleDateString('en-ZA')}. Ask the business owner to send a new link.`);
     return;
   }
 

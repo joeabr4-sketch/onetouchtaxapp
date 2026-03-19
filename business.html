@@ -522,7 +522,7 @@ h1,h2,h3,.logo-text,.stat-value{font-family:'Syne',sans-serif}
 /* ── SARS DISCLAIMER MODAL ── */
 .sars-modal{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9000;display:none;align-items:center;justify-content:center;padding:20px}
 .sars-modal.open{display:flex}
-.sars-modal-card{background:var(--surface);border-radius:16px;max-width:480px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.5);overflow:hidden;animation:fadeUp .3s ease}
+.sars-modal-card{background:#0f1520;border-radius:16px;max-width:480px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.8);overflow:hidden;animation:fadeUp .3s ease;border:1px solid rgba(255,255,255,.1)}
 
 /* ── POPIA BANNER ── */
 .popia-banner{position:fixed;bottom:0;left:0;right:0;z-index:800;padding:14px 28px;background:var(--surface);border-top:2px solid var(--gold);display:flex;align-items:center;gap:20px;flex-wrap:wrap;transform:translateY(100%);transition:transform .4s cubic-bezier(.16,1,.3,1);box-shadow:0 -8px 40px rgba(0,0,0,.4)}
@@ -3056,16 +3056,17 @@ function autoFillVAT201() {
 function showSarsDisclaimer(fnName) { pendingDocFn = fnName; document.getElementById('sarsDisclaimerModal').classList.add('open'); }
 function closeSarsDisclaimer() { document.getElementById('sarsDisclaimerModal').classList.remove('open'); pendingDocFn = null; }
 function confirmSarsDisclaimer() {
+  const fn = pendingDocFn;
   closeSarsDisclaimer();
-  if (pendingDocFn === 'genVAT201') {
+  if (fn === 'genVAT201') {
     if (!canUse('vat201')) { showUpgradePrompt('pro'); return; } genVAT201();
-  } else if (pendingDocFn === 'genEMP201') {
+  } else if (fn === 'genEMP201') {
     if (!canUse('emp201')) { showUpgradePrompt('full'); return; } genEMP201();
-  } else if (pendingDocFn === 'genIRP6') {
+  } else if (fn === 'genIRP6') {
     if (!isPlan('full')) { showUpgradePrompt('full'); return; } genIRP6();
-  } else if (pendingDocFn === 'genITR14') {
+  } else if (fn === 'genITR14') {
     if (!isPlan('full')) { showUpgradePrompt('full'); return; } genITR14();
-  } else if (pendingDocFn === 'downloadFullPack') {
+  } else if (fn === 'downloadFullPack') {
     downloadFullPack();
   }
 }
@@ -4520,7 +4521,7 @@ async function sendAccountantLink() {
 
   const token = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : (Math.random().toString(36).substring(2,15) + Math.random().toString(36).substring(2,15) + Date.now().toString(36));
   const expiry = new Date(); expiry.setDate(expiry.getDate() + 30);
-  const link = `${window.location.origin}/shared-financials.html?token=${token}`;
+  const link = `${window.location.origin}/shared/financials/${token}`;
   const bizName = userProfile?.biz_name || 'Your client';
   const ownerName = userProfile?.owner_name || '';
   const expiryStr = expiry.toLocaleDateString('en-ZA', { day:'numeric', month:'long', year:'numeric' });
@@ -4767,10 +4768,24 @@ async function saveMonthlySnapshot() {
 }
 
 async function loadStatementHistory() {
-  let data = null;
-  try { const r = await sb.from('statements').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false}); data = r.data; } catch(e) { data = null; }
+  const badge = document.getElementById('histBadge');
   const list = document.getElementById('historyList'); if (!list) return;
-  if (!data||!data.length) { list.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--text-3)"><div style="font-size:36px;margin-bottom:10px">🏦</div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:5px">No statements yet</div></div>'; return; }
+  let data = null;
+  try {
+    const r = await sb.from('statements').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+    if (r.error) throw r.error;
+    data = r.data;
+  } catch(e) {
+    if (badge) badge.textContent = 'Error';
+    console.warn('loadStatementHistory:', e.message);
+    list.innerHTML = `<div style="text-align:center;padding:32px;color:var(--red);font-size:13px">Could not load statements: ${e.message}</div>`;
+    return;
+  }
+  if (badge) badge.textContent = data && data.length ? data.length + ' statement' + (data.length===1?'':'s') : 'None';
+  if (!data||!data.length) {
+    list.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--text-3)"><div style="font-size:36px;margin-bottom:10px">🏦</div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:5px">No statements yet</div><div style="font-size:12px">Upload a bank statement via the Reconciliation section — it saves here automatically.</div></div>';
+    return;
+  }
   list.innerHTML = data.map(s=>`<div style="display:flex;align-items:center;gap:14px;padding:13px 20px;border-bottom:1px solid var(--border)">
     <div style="font-size:20px">🏦</div>
     <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--text)">${s.filename||'Statement'}</div><div style="font-size:11.5px;color:var(--text-3)">${s.period||''} · ${new Date(s.created_at).toLocaleDateString('en-ZA')}</div></div>
