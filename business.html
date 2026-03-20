@@ -4211,12 +4211,12 @@ function renderTxTable() {
       ? '<span style="background:rgba(255,255,255,.06);color:var(--text-3);padding:3px 9px;border-radius:6px;font-size:11px">🚫 Ignored</span>'
       : tx.match_status === 'matched' ? '<span class="tx-status-matched">🟢 Matched</span>'
       : tx.match_status === 'suggested' ? '<span class="tx-status-suggested">🟡 Suggested</span>'
-      : tx.classification ? `<span style="background:rgba(184,196,216,.08);color:var(--text-2);padding:3px 9px;border-radius:6px;font-size:11px">📋 ${tx.classification}</span>`
+      : tx.classification ? `<span style="background:rgba(184,196,216,.08);color:var(--text-2);padding:3px 9px;border-radius:6px;font-size:11px">📋 ${escHtml(tx.classification)}</span>`
       : '<span class="tx-status-unmatched">🔴 Unmatched</span>';
 
     const linkedLabel = tx.ignored ? '<span style="font-size:11px;color:var(--text-3)">Ignored</span>'
-      : inv ? `<div><span style="font-size:11px;color:${hasMismatch?'var(--amber)':' var(--green)'}">${inv.invoice_number||'INV'} — ${inv.client_name||''}</span>${hasMismatch?`<button onclick="editInvoice('${inv.id}')" style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:var(--amber);padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer;margin-left:4px;font-family:'DM Sans',sans-serif">Edit ⚠️</button>`:''}</div>`
-      : tx.classification ? `<span style="font-size:11px;color:var(--text-3)">${tx.classification}</span>`
+      : inv ? `<div><span style="font-size:11px;color:${hasMismatch?'var(--amber)':' var(--green)'}">${escHtml(inv.invoice_number||'INV')} — ${escHtml(inv.client_name||'')}</span>${hasMismatch?`<button onclick="editInvoice('${inv.id}')" style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:var(--amber);padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer;margin-left:4px;font-family:'DM Sans',sans-serif">Edit ⚠️</button>`:''}</div>`
+      : tx.classification ? `<span style="font-size:11px;color:var(--text-3)">${escHtml(tx.classification)}</span>`
       : '<span style="font-size:11px;color:var(--text-3)">—</span>';
 
     const actionBtns = tx.ignored
@@ -4228,8 +4228,8 @@ function renderTxTable() {
       : `<button class="recon-manual-btn" onclick="openAssignPanel('${tx.id}')">Assign →</button>`;
 
     return `<tr style="${tx.ignored?'opacity:.5':''}">
-      <td style="color:var(--text-3);font-size:12px">${tx.date||'—'}</td>
-      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px">${tx.description||'—'}</td>
+      <td style="color:var(--text-3);font-size:12px">${escHtml(tx.date||'—')}</td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px">${escHtml(tx.description||'—')}</td>
       <td style="font-family:'Syne',sans-serif;font-weight:700;color:${tx.type==='debit'?'var(--red)':' var(--green)'}">${tx.type==='debit'?'-':'+'} ${fmtR(txAmt)}</td>
       <td style="font-size:11px;color:var(--text-3)">${tx.type||'credit'}</td>
       <td>${linkedLabel}</td>
@@ -4255,8 +4255,8 @@ function renderInvoiceReconTable() {
     const statusColor = inv.status === 'paid' ? 'var(--green)' : inv.status === 'partial' ? 'var(--amber)' : 'var(--red)';
     const reconIcon = inv.reconciled ? '✅' : paid > 0 ? '🟡' : '⏳';
     return `<tr>
-      <td style="font-family:'Syne',sans-serif;font-size:12px;color:var(--blue)">${inv.invoice_number||'INV'}</td>
-      <td style="font-weight:500">${inv.client_name||'—'}</td>
+      <td style="font-family:'Syne',sans-serif;font-size:12px;color:var(--blue)">${escHtml(inv.invoice_number||'INV')}</td>
+      <td style="font-weight:500">${escHtml(inv.client_name||'—')}</td>
       <td style="font-family:'Syne',sans-serif;font-weight:700">${fmtR(total)}</td>
       <td style="color:var(--green)">${paid > 0 ? fmtR(paid) : '—'}</td>
       <td style="color:${outstanding > 0?'var(--amber)':' var(--green)'}">${outstanding > 0 ? fmtR(outstanding) : '✓'}</td>
@@ -5679,7 +5679,7 @@ function addSupportMsg(role, text) {
   const msgs = document.getElementById('supportMsgs');
   const div = document.createElement('div');
   div.className = role === 'user' ? 'sup-msg-user' : 'sup-msg-ai';
-  div.innerHTML = text.replace(/\n/g, '<br>');
+  div.innerHTML = escHtml(text).replace(/\n/g, '<br>');
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
 }
@@ -6172,10 +6172,10 @@ function renderEmployees() {
     return `
     <div class="emp-card" style="margin:8px 12px;border-radius:10px">
       <div class="emp-info">
-        <div class="emp-avatar">${e.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>
+        <div class="emp-avatar">${escHtml(e.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase())}</div>
         <div>
-          <div class="emp-name">${e.name}</div>
-          <div class="emp-role">${e.role || e.emp_type} · ${e.period}${e.uif_applicable===false?' · No UIF':''}${e.sdl_applicable===false?' · No SDL':''}</div>
+          <div class="emp-name">${escHtml(e.name)}</div>
+          <div class="emp-role">${escHtml(e.role || e.emp_type)} · ${escHtml(e.period)}${e.uif_applicable===false?' · No UIF':''}${e.sdl_applicable===false?' · No SDL':''}</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:16px">
@@ -6841,8 +6841,8 @@ function renderRecentlyDeleted() {
     const num = inv.invoice_number || prefix + '-' + String(inv.id||'').slice(-4);
     const deletedAt = new Date(inv.deleted_at).toLocaleDateString('en-ZA');
     return `<div class="deleted-row">
-      <span style="font-family:'Syne',sans-serif;font-size:12px;color:var(--text-2)">${num}</span>
-      <span>${inv.client_name || '—'}</span>
+      <span style="font-family:'Syne',sans-serif;font-size:12px;color:var(--text-2)">${escHtml(num)}</span>
+      <span>${escHtml(inv.client_name || '—')}</span>
       <span style="color:var(--text-3)">${fmtR(inv.total||inv.amount)}</span>
       <span style="color:var(--text-3);font-size:11px">Deleted ${deletedAt}</span>
       <button class="restore-btn" onclick="restoreInvoice('${inv.id}')">↩ Restore</button>
@@ -7084,11 +7084,11 @@ function showImportPreview() {
   if (tbody) {
     tbody.innerHTML = importData.mapped.map(r => `
       <tr style="border-top:1px solid rgba(255,255,255,.05)">
-        <td style="padding:10px 12px;font-family:'Syne',sans-serif;font-size:11px;color:var(--blue)">${r.ref || '—'}</td>
-        <td style="padding:10px 12px;font-weight:500;color:var(--text)">${r.client}</td>
+        <td style="padding:10px 12px;font-family:'Syne',sans-serif;font-size:11px;color:var(--blue)">${escHtml(r.ref || '—')}</td>
+        <td style="padding:10px 12px;font-weight:500;color:var(--text)">${escHtml(r.client)}</td>
         <td style="padding:10px 12px;font-family:'Syne',sans-serif;font-weight:700;color:var(--green)">${fmtR(r.amount)}</td>
-        <td style="padding:10px 12px;color:var(--text-3)">${r.date}</td>
-        <td style="padding:10px 12px"><span style="background:${r.status==='paid'?'rgba(34,197,94,.12)':'rgba(245,158,11,.1)'};color:${r.status==='paid'?'var(--green)':'var(--amber)'};padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">${r.status}</span></td>
+        <td style="padding:10px 12px;color:var(--text-3)">${escHtml(r.date)}</td>
+        <td style="padding:10px 12px"><span style="background:${r.status==='paid'?'rgba(34,197,94,.12)':'rgba(245,158,11,.1)'};color:${r.status==='paid'?'var(--green)':'var(--amber)'};padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">${escHtml(r.status)}</span></td>
       </tr>`).join('');
   }
 }
