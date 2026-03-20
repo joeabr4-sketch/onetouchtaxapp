@@ -3,189 +3,504 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OneTouch Admin</title>
+<title>OneTouch · Admin</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<!--
+  SUPABASE ADMIN POLICIES REQUIRED
+  Run this in Supabase SQL Editor so the admin account can read all data:
+
+  CREATE POLICY "Admins read all profiles" ON profiles
+    FOR SELECT USING (auth.email() IN ('joeabr4@gmail.com'));
+  CREATE POLICY "Admins update all profiles" ON profiles
+    FOR UPDATE USING (auth.email() IN ('joeabr4@gmail.com'));
+  CREATE POLICY "Admins read all invoices" ON invoices
+    FOR SELECT USING (auth.email() IN ('joeabr4@gmail.com'));
+  CREATE POLICY "Admins read all recon_audit" ON recon_audit
+    FOR SELECT USING (auth.email() IN ('joeabr4@gmail.com'));
+  CREATE POLICY "Admins read all doc_history" ON doc_history
+    FOR SELECT USING (auth.email() IN ('joeabr4@gmail.com'));
+-->
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#080d14;--surface:#0d1520;--surface2:#111d2e;--border:#1e3050;
-  --text:#e2e8f0;--text-2:#94a3b8;--text-3:#475569;
-  --blue:#3b82f6;--green:#10b981;--amber:#f59e0b;--red:#ef4444;
-  --gold:#c9a84c;
+  --bg:#070c14;--surface:#0d1520;--surface2:#111d2e;--surface3:#162035;
+  --border:#1e3050;--border2:#243a5e;
+  --text:#e2e8f0;--text-2:#94a3b8;--text-3:#475569;--text-4:#2d3f58;
+  --blue:#3b82f6;--blue-d:#2563eb;--blue-pale:rgba(59,130,246,.1);
+  --green:#10b981;--green-pale:rgba(16,185,129,.1);
+  --amber:#f59e0b;--amber-pale:rgba(245,158,11,.1);
+  --red:#ef4444;--red-pale:rgba(239,68,68,.1);
+  --purple:#8b5cf6;--purple-pale:rgba(139,92,246,.1);
+  --gold:#c9a84c;--gold-pale:rgba(201,168,76,.1);
+  --sidebar:220px;
+  --radius:10px;
 }
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 
 /* ── LOGIN ── */
-.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.login-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:100%;max-width:380px;text-align:center}
-.login-mark{width:52px;height:52px;background:var(--gold);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:var(--bg);margin:0 auto 20px}
-.login-title{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;margin-bottom:6px}
-.login-sub{font-size:13px;color:var(--text-2);margin-bottom:28px}
-.login-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;margin-bottom:12px;transition:border-color .15s}
-.login-input:focus{border-color:var(--blue)}
-.login-btn{width:100%;background:var(--gold);color:var(--bg);border:none;padding:13px;border-radius:9px;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s}
-.login-btn:hover{background:#e8c97a;transform:translateY(-1px)}
-.login-error{color:var(--red);font-size:12.5px;margin-top:10px;display:none}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);background-image:radial-gradient(ellipse at 50% 0%, rgba(59,130,246,.08) 0%, transparent 60%)}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:44px 40px;width:100%;max-width:400px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.login-mark{width:56px;height:56px;background:linear-gradient(135deg,var(--gold),#e8c97a);border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:#070c14;margin:0 auto 22px;box-shadow:0 8px 24px rgba(201,168,76,.25)}
+.login-title{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;margin-bottom:6px}
+.login-sub{font-size:13.5px;color:var(--text-2);margin-bottom:30px;line-height:1.6}
+.login-divider{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.login-divider span{font-size:11.5px;color:var(--text-3);white-space:nowrap}
+.google-btn{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:13px;border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px}
+.google-btn:hover{border-color:var(--blue);background:rgba(59,130,246,.05);transform:translateY(-1px)}
+.login-error{color:var(--red);font-size:12.5px;margin-top:12px;padding:10px 14px;background:var(--red-pale);border:1px solid rgba(239,68,68,.2);border-radius:8px;display:none;text-align:left}
+.login-loading{color:var(--text-3);font-size:13px;margin-top:12px}
+.login-note{font-size:11.5px;color:var(--text-3);margin-top:18px;line-height:1.6;padding-top:18px;border-top:1px solid var(--border)}
 
-/* ── MAIN LAYOUT ── */
-.admin-wrap{display:none;min-height:100vh}
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;justify-content:space-between}
-.topbar-logo{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;display:flex;align-items:center;gap:10px}
-.topbar-mark{width:30px;height:30px;background:var(--gold);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--bg)}
-.topbar-badge{font-size:10px;background:var(--red);color:#fff;padding:2px 8px;border-radius:100px;font-weight:600;letter-spacing:.5px}
-.topbar-right{display:flex;align-items:center;gap:16px}
-.admin-name{font-size:13px;color:var(--text-2)}
-.logout-btn{background:transparent;border:1px solid var(--border);color:var(--text-2);padding:6px 14px;border-radius:7px;font-size:12.5px;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif}
-.logout-btn:hover{border-color:var(--red);color:var(--red)}
+/* ── LAYOUT ── */
+.admin-wrap{display:none;min-height:100vh;flex-direction:row}
 
-.main{padding:32px}
-.page-title{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;margin-bottom:6px}
-.page-sub{font-size:13px;color:var(--text-2);margin-bottom:28px}
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100}
+.sb-logo{padding:22px 20px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px}
+.sb-mark{width:32px;height:32px;background:linear-gradient(135deg,var(--gold),#e8c97a);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:#070c14;flex-shrink:0}
+.sb-brand{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;line-height:1.2}
+.sb-badge{font-size:9px;background:var(--red);color:#fff;padding:1px 6px;border-radius:100px;font-weight:700;letter-spacing:.6px;display:block;margin-top:2px}
+.sb-nav{flex:1;padding:14px 10px;display:flex;flex-direction:column;gap:2px}
+.sb-section{font-size:10px;color:var(--text-4);text-transform:uppercase;letter-spacing:1px;font-weight:600;padding:10px 10px 6px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;transition:all .15s;color:var(--text-2);font-size:13.5px;font-weight:500;border:none;background:transparent;width:100%;text-align:left}
+.sb-item:hover{background:var(--surface2);color:var(--text)}
+.sb-item.active{background:var(--blue-pale);color:var(--blue)}
+.sb-item svg{opacity:.7;flex-shrink:0}
+.sb-item.active svg{opacity:1}
+.sb-count{margin-left:auto;font-size:11px;background:var(--surface2);color:var(--text-3);padding:2px 7px;border-radius:100px;font-weight:600}
+.sb-item.active .sb-count{background:rgba(59,130,246,.15);color:var(--blue)}
+.sb-footer{padding:14px 14px 20px;border-top:1px solid var(--border)}
+.sb-user{font-size:11.5px;color:var(--text-3);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-logout{width:100%;background:transparent;border:1px solid var(--border);color:var(--text-3);padding:8px;border-radius:8px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.sb-logout:hover{border-color:var(--red);color:var(--red)}
 
-/* ── STATS ── */
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
-.stat-label{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
-.stat-val{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700}
-.stat-sub{font-size:11.5px;color:var(--text-3);margin-top:4px}
+/* ── MAIN ── */
+.main-area{margin-left:var(--sidebar);flex:1;min-width:0}
 
-/* ── FILTERS ── */
-.filters{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
-.filter-btn{background:var(--surface);border:1px solid var(--border);color:var(--text-2);padding:7px 16px;border-radius:8px;font-size:12.5px;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif}
-.filter-btn:hover,.filter-btn.active{border-color:var(--blue);color:var(--blue);background:rgba(59,130,246,.08)}
-.search-input{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:border-color .15s;margin-left:auto;width:220px}
+/* ── TOPBAR ── */
+.topbar{padding:16px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(7,12,20,.8);backdrop-filter:blur(12px);position:sticky;top:0;z-index:50}
+.tb-left{display:flex;flex-direction:column}
+.tb-title{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700}
+.tb-sub{font-size:12px;color:var(--text-3);margin-top:1px}
+.tb-right{display:flex;align-items:center;gap:10px}
+.tb-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text-2);padding:8px 14px;border-radius:8px;font-size:12.5px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;display:flex;align-items:center;gap:6px;font-weight:500}
+.tb-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-pale)}
+.tb-btn-primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.tb-btn-primary:hover{background:var(--blue-d);border-color:var(--blue-d);color:#fff}
+
+/* ── CONTENT ── */
+.content{padding:28px 32px}
+.section{display:none}
+.section.active{display:block}
+
+/* ── METRICS ── */
+.metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px}
+@media(max-width:1200px){.metrics-grid{grid-template-columns:repeat(2,1fr)}}
+.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;transition:border-color .15s;position:relative;overflow:hidden}
+.metric-card:hover{border-color:var(--border2)}
+.metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--radius) var(--radius) 0 0}
+.metric-card.blue::before{background:var(--blue)}
+.metric-card.green::before{background:var(--green)}
+.metric-card.gold::before{background:var(--gold)}
+.metric-card.purple::before{background:var(--purple)}
+.metric-card.amber::before{background:var(--amber)}
+.metric-card.text-3::before{background:var(--text-3)}
+.m-label{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;font-weight:600}
+.m-val{font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:700;line-height:1;margin-bottom:6px}
+.metric-card.blue .m-val{color:var(--blue)}
+.metric-card.green .m-val{color:var(--green)}
+.metric-card.gold .m-val{color:var(--gold)}
+.metric-card.purple .m-val{color:var(--purple)}
+.metric-card.amber .m-val{color:var(--amber)}
+.metric-card.text-3 .m-val{color:var(--text-3)}
+.m-sub{font-size:12px;color:var(--text-3);display:flex;align-items:center;gap:4px}
+.m-delta{font-size:11px;font-weight:600;padding:2px 7px;border-radius:100px}
+.m-delta.up{background:var(--green-pale);color:var(--green)}
+.m-delta.neutral{background:var(--surface2);color:var(--text-3)}
+
+/* ── SECTION HEADER ── */
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.section-hd-left{display:flex;flex-direction:column;gap:2px}
+.section-hd-title{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700}
+.section-hd-sub{font-size:12px;color:var(--text-3)}
+.hd-actions{display:flex;gap:8px}
+
+/* ── FILTER BAR ── */
+.filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-pills{display:flex;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:4px}
+.filter-pill{padding:5px 14px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--text-3);font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap}
+.filter-pill:hover{color:var(--text-2)}
+.filter-pill.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.filter-sep{width:1px;background:var(--border);margin:4px 4px}
+.search-wrap{position:relative;margin-left:auto}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-3)}
+.search-input{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:8px 14px 8px 34px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:border-color .15s;width:240px}
 .search-input:focus{border-color:var(--blue)}
+.search-input::placeholder{color:var(--text-4)}
 
 /* ── TABLE ── */
-.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-.table-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.table-title{font-size:14px;font-weight:600;color:var(--text)}
-.refresh-btn{background:transparent;border:1px solid var(--border);color:var(--text-2);padding:6px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
-.refresh-btn:hover{border-color:var(--blue);color:var(--blue)}
+.table-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
 table{width:100%;border-collapse:collapse}
-th{padding:10px 16px;text-align:left;font-size:10.5px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--border);background:var(--surface2)}
-td{padding:14px 16px;border-bottom:1px solid rgba(30,48,80,.5);font-size:13px;vertical-align:middle}
+th{padding:11px 16px;text-align:left;font-size:10.5px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap}
+td{padding:14px 16px;border-bottom:1px solid rgba(30,48,80,.4);font-size:13px;vertical-align:middle}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(255,255,255,.01)}
+tbody tr{transition:background .1s}
+tbody tr:hover td{background:rgba(255,255,255,.015)}
 
-/* ── PLAN BADGES ── */
-.plan-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.3px}
-.plan-free{background:rgba(71,85,105,.2);color:var(--text-3)}
-.plan-pro{background:rgba(16,185,129,.15);color:var(--green)}
-.plan-full{background:rgba(201,168,76,.15);color:var(--gold)}
+/* ── USER CELL ── */
+.user-cell{display:flex;align-items:center;gap:11px}
+.user-av{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.user-name{font-size:13px;color:var(--text);font-weight:500;white-space:nowrap}
+.user-biz{font-size:11.5px;color:var(--text-3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+.email-cell{font-size:12.5px;color:var(--text-2);white-space:nowrap}
 
-/* ── PLAN SELECTOR ── */
-.plan-select{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:5px 8px;color:var(--text);font-family:'Inter',sans-serif;font-size:12.5px;outline:none;cursor:pointer;transition:border-color .15s}
+/* ── PLAN BADGE ── */
+.plan-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.3px;white-space:nowrap}
+.plan-free{background:var(--surface2);color:var(--text-3);border:1px solid var(--border)}
+.plan-pro{background:var(--green-pale);color:var(--green);border:1px solid rgba(16,185,129,.2)}
+.plan-full{background:var(--gold-pale);color:var(--gold);border:1px solid rgba(201,168,76,.2)}
+
+/* ── STATUS BADGE ── */
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:600;white-space:nowrap}
+.status-badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.status-active{background:var(--green-pale);color:var(--green)}
+.status-active::before{background:var(--green)}
+.status-new{background:var(--blue-pale);color:var(--blue)}
+.status-new::before{background:var(--blue)}
+.status-inactive{background:var(--surface2);color:var(--text-3)}
+.status-inactive::before{background:var(--text-4)}
+
+/* ── PLAN SELECTOR IN TABLE ── */
+.plan-select{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 8px;color:var(--text);font-family:'Inter',sans-serif;font-size:12.5px;outline:none;cursor:pointer;transition:border-color .15s;min-width:130px}
 .plan-select:focus{border-color:var(--blue)}
-.save-btn{background:var(--blue);color:#fff;border:none;padding:6px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;margin-left:6px}
-.save-btn:hover{background:#2563eb}
-.save-btn.saving{background:var(--text-3);cursor:not-allowed}
-.save-btn.saved{background:var(--green)}
 
-/* ── USER DETAIL ── */
-.user-info{display:flex;align-items:center;gap:10px}
-.user-av{width:32px;height:32px;border-radius:8px;background:var(--blue);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
-.user-email{font-size:13px;color:var(--text);font-weight:500}
-.user-biz{font-size:11.5px;color:var(--text-3);margin-top:2px}
-.joined-date{font-size:12px;color:var(--text-3)}
-.last-active{font-size:12px;color:var(--text-2)}
-.invoice-count{font-size:13px;font-weight:600;color:var(--text)}
+/* ── ROW ACTIONS ── */
+.row-actions{display:flex;align-items:center;gap:6px;opacity:0;transition:opacity .15s}
+tbody tr:hover .row-actions{opacity:1}
+.row-btn{background:transparent;border:1px solid var(--border);color:var(--text-3);padding:5px 10px;border-radius:6px;font-size:11.5px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;white-space:nowrap}
+.row-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-pale)}
+.row-btn.danger:hover{border-color:var(--red);color:var(--red);background:var(--red-pale)}
+.row-btn.success:hover{border-color:var(--green);color:var(--green);background:var(--green-pale)}
+
+/* ── ACTIVITY FEED ── */
+.activity-list{display:flex;flex-direction:column;gap:0}
+.activity-item{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;border-bottom:1px solid rgba(30,48,80,.4);transition:background .1s}
+.activity-item:last-child{border-bottom:none}
+.activity-item:hover{background:rgba(255,255,255,.012)}
+.activity-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.activity-body{flex:1;min-width:0}
+.activity-msg{font-size:13px;color:var(--text);line-height:1.5}
+.activity-meta{font-size:11.5px;color:var(--text-3);margin-top:3px}
+.activity-time{font-size:11.5px;color:var(--text-3);white-space:nowrap;flex-shrink:0}
+
+/* ── MODALS ── */
+.modal-backdrop{position:fixed;inset:0;background:rgba(7,12,20,.85);backdrop-filter:blur(6px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-backdrop.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:28px;width:100%;max-width:420px;box-shadow:0 24px 64px rgba(0,0,0,.6)}
+.modal-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:18px}
+.modal-icon.amber{background:var(--amber-pale);border:1px solid rgba(245,158,11,.2)}
+.modal-icon.red{background:var(--red-pale);border:1px solid rgba(239,68,68,.2)}
+.modal-title{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;margin-bottom:8px}
+.modal-body{font-size:13.5px;color:var(--text-2);line-height:1.65;margin-bottom:22px}
+.modal-detail{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--text);margin-bottom:22px}
+.modal-detail strong{color:var(--text);font-weight:600}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
+.modal-btn{padding:10px 20px;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;border:none;transition:all .15s}
+.modal-btn-cancel{background:var(--surface2);color:var(--text-2);border:1px solid var(--border)}
+.modal-btn-cancel:hover{border-color:var(--border2);color:var(--text)}
+.modal-btn-confirm{background:var(--blue);color:#fff}
+.modal-btn-confirm:hover{background:var(--blue-d)}
+.modal-btn-danger{background:var(--red);color:#fff}
+.modal-btn-danger:hover{background:#dc2626}
 
 /* ── TOAST ── */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13px;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,.4);transform:translateY(20px);opacity:0;transition:all .25s;z-index:999;pointer-events:none}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13px;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,.4);transform:translateY(20px);opacity:0;transition:all .25s;z-index:300;pointer-events:none;display:flex;align-items:center;gap:10px;max-width:340px}
 .toast.show{transform:translateY(0);opacity:1}
+.toast-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 
-/* ── EMPTY ── */
-.empty-state{text-align:center;padding:60px 20px;color:var(--text-3)}
-.empty-icon{font-size:40px;margin-bottom:12px}
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:64px 24px}
+.empty-icon{font-size:36px;margin-bottom:14px;opacity:.4}
+.empty-title{font-size:14px;font-weight:600;color:var(--text-2);margin-bottom:6px}
+.empty-sub{font-size:13px;color:var(--text-3)}
 
 /* ── LOADING ── */
-.loading{text-align:center;padding:40px;color:var(--text-3);font-size:13px}
+.loading{padding:40px;text-align:center;color:var(--text-3);font-size:13px}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── OVERVIEW BLOCKS ── */
+.overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px}
+.ov-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.ov-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.plan-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.plan-bar-label{font-size:12px;color:var(--text-2);width:40px;flex-shrink:0}
+.plan-bar-track{flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.plan-bar-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.plan-bar-count{font-size:12px;color:var(--text-3);width:28px;text-align:right;flex-shrink:0}
+.conv-number{font-family:'Space Grotesk',sans-serif;font-size:36px;font-weight:700;color:var(--green);margin-bottom:4px}
+.conv-label{font-size:12.5px;color:var(--text-3)}
+
+/* ── INVOICE ACTIVITY ── */
+.inv-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(30,48,80,.35)}
+.inv-row:last-child{border-bottom:none}
+.inv-name{font-size:12.5px;color:var(--text-2)}
+.inv-count{font-size:12px;font-weight:600;color:var(--text)}
+
+/* ── SETUP NOTICE ── */
+.setup-notice{background:var(--amber-pale);border:1px solid rgba(245,158,11,.25);border-radius:10px;padding:14px 18px;margin-bottom:22px;font-size:13px;color:#d97706;line-height:1.7;display:none}
+.setup-notice strong{font-weight:700;color:var(--amber)}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- ── LOGIN ── -->
 <div class="login-wrap" id="loginWrap">
   <div class="login-card">
     <div class="login-mark">OT</div>
     <div class="login-title">Admin Panel</div>
-    <div class="login-sub">OneTouch internal use only</div>
-    <button class="login-btn" onclick="adminLogin()" style="display:flex;align-items:center;justify-content:center;gap:10px">
+    <div class="login-sub">OneTouch internal control panel.<br>Restricted to authorised admins only.</div>
+    <button class="google-btn" onclick="adminLogin()" id="googleBtn">
       <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       Sign in with Google
     </button>
-    <div class="login-error" id="loginError" style="display:none">Access denied — admin only</div>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-note">Access is restricted. If you see "Access denied", your Google account is not on the admin list.</div>
   </div>
 </div>
 
-<!-- MAIN ADMIN -->
+<!-- ── ADMIN PANEL ── -->
 <div class="admin-wrap" id="adminWrap">
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <div class="topbar-logo">
-      <div class="topbar-mark">OT</div>
-      OneTouch Admin
-      <span class="topbar-badge">PRIVATE</span>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-mark">OT</div>
+      <div>
+        <div class="sb-brand">OneTouch</div>
+        <span class="sb-badge">ADMIN</span>
+      </div>
     </div>
-    <div class="topbar-right">
-      <span class="admin-name" id="adminName"></span>
-      <button class="logout-btn" onclick="adminLogout()">Sign Out</button>
+
+    <nav class="sb-nav">
+      <div class="sb-section">Navigation</div>
+      <button class="sb-item active" id="nav-overview" onclick="showSection('overview')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Overview
+      </button>
+      <button class="sb-item" id="nav-users" onclick="showSection('users')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Users
+        <span class="sb-count" id="sb-user-count">—</span>
+      </button>
+      <button class="sb-item" id="nav-activity" onclick="showSection('activity')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Activity Feed
+        <span class="sb-count" id="sb-activity-count">—</span>
+      </button>
+    </nav>
+
+    <div class="sb-footer">
+      <div class="sb-user" id="sbAdminEmail">—</div>
+      <button class="sb-logout" onclick="adminLogout()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
     </div>
   </div>
 
-  <div class="main">
-    <div class="page-title">User Management</div>
-    <div class="page-sub">View all users, manage plan tiers and monitor activity.</div>
+  <!-- MAIN AREA -->
+  <div class="main-area">
 
-    <!-- STATS -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-label">Total Users</div>
-        <div class="stat-val" id="stat-total" style="color:var(--blue)">—</div>
-        <div class="stat-sub">registered accounts</div>
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="tb-left">
+        <div class="tb-title" id="tb-title">Overview</div>
+        <div class="tb-sub" id="tb-sub">Platform health at a glance</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Paying Users</div>
-        <div class="stat-val" id="stat-paying" style="color:var(--green)">—</div>
-        <div class="stat-sub">pro + full</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Monthly Revenue</div>
-        <div class="stat-val" id="stat-revenue" style="color:var(--gold)">—</div>
-        <div class="stat-sub">estimated MRR</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Free Users</div>
-        <div class="stat-val" id="stat-free" style="color:var(--text-3)">—</div>
-        <div class="stat-sub">conversion opportunities</div>
+      <div class="tb-right">
+        <button class="tb-btn" onclick="loadAll()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Refresh
+        </button>
+        <button class="tb-btn" onclick="exportCSV()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
       </div>
     </div>
 
-    <!-- FILTERS -->
-    <div class="filters">
-      <button class="filter-btn active" onclick="filterUsers('all',this)">All Users</button>
-      <button class="filter-btn" onclick="filterUsers('free',this)">Free</button>
-      <button class="filter-btn" onclick="filterUsers('pro',this)">Pro</button>
-      <button class="filter-btn" onclick="filterUsers('full',this)">Full</button>
-      <input type="text" class="search-input" id="searchInput" placeholder="Search email or business..." oninput="searchUsers(this.value)" />
-    </div>
+    <!-- CONTENT -->
+    <div class="content">
 
-    <!-- TABLE -->
-    <div class="table-wrap">
-      <div class="table-head">
-        <div class="table-title">Users <span id="userCount" style="color:var(--text-3);font-weight:400;font-size:13px"></span></div>
-        <button class="refresh-btn" onclick="loadUsers()">↻ Refresh</button>
+      <!-- SETUP NOTICE -->
+      <div class="setup-notice" id="setupNotice">
+        <strong>⚠ Supabase admin policies required.</strong> To view all users, run the SQL policies from the HTML comment at the top of this file in your Supabase SQL Editor. Without them, RLS will only return your own profile.
       </div>
-      <div id="tableBody"><div class="loading">Loading users...</div></div>
+
+      <!-- ── OVERVIEW SECTION ── -->
+      <div class="section active" id="section-overview">
+        <!-- Metrics -->
+        <div class="section-hd" style="margin-bottom:18px">
+          <div class="section-hd-left">
+            <div class="section-hd-title">Key Metrics</div>
+            <div class="section-hd-sub">Updated on load</div>
+          </div>
+        </div>
+
+        <div class="metrics-grid" id="metricsGrid">
+          <div class="metric-card blue">
+            <div class="m-label">Total Users</div>
+            <div class="m-val" id="m-total">—</div>
+            <div class="m-sub">registered accounts</div>
+          </div>
+          <div class="metric-card green">
+            <div class="m-label">Paying Users</div>
+            <div class="m-val" id="m-paying">—</div>
+            <div class="m-sub">Pro + Full plans</div>
+          </div>
+          <div class="metric-card gold">
+            <div class="m-label">Est. MRR</div>
+            <div class="m-val" id="m-mrr">—</div>
+            <div class="m-sub">monthly recurring</div>
+          </div>
+          <div class="metric-card purple">
+            <div class="m-label">Conversion Rate</div>
+            <div class="m-val" id="m-conv">—</div>
+            <div class="m-sub">free → paid</div>
+          </div>
+          <div class="metric-card amber">
+            <div class="m-label">ARPU</div>
+            <div class="m-val" id="m-arpu">—</div>
+            <div class="m-sub">avg revenue per user</div>
+          </div>
+          <div class="metric-card text-3">
+            <div class="m-label">New (Last 7 Days)</div>
+            <div class="m-val" id="m-new7">—</div>
+            <div class="m-sub">new signups</div>
+          </div>
+        </div>
+
+        <!-- Plan distribution + conversion -->
+        <div class="overview-grid">
+          <div class="ov-card">
+            <div class="ov-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+              Plan Distribution
+            </div>
+            <div id="planBarsWrap">
+              <div class="loading"><span class="spinner"></span>Loading...</div>
+            </div>
+          </div>
+          <div class="ov-card">
+            <div class="ov-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Top Users by Invoices
+            </div>
+            <div id="topUsersWrap">
+              <div class="loading"><span class="spinner"></span>Loading...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── USERS SECTION ── -->
+      <div class="section" id="section-users">
+        <div class="section-hd">
+          <div class="section-hd-left">
+            <div class="section-hd-title">User Management</div>
+            <div class="section-hd-sub" id="users-count-sub">Loading...</div>
+          </div>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="filter-bar">
+          <div class="filter-pills" id="planPills">
+            <button class="filter-pill active" onclick="setPlanFilter('all',this)">All</button>
+            <div class="filter-sep"></div>
+            <button class="filter-pill" onclick="setPlanFilter('free',this)">Free</button>
+            <button class="filter-pill" onclick="setPlanFilter('pro',this)">Pro</button>
+            <button class="filter-pill" onclick="setPlanFilter('full',this)">Full</button>
+          </div>
+          <div class="filter-pills" id="statusPills">
+            <button class="filter-pill active" onclick="setStatusFilter('all',this)">Any Status</button>
+            <div class="filter-sep"></div>
+            <button class="filter-pill" onclick="setStatusFilter('new',this)">New</button>
+            <button class="filter-pill" onclick="setStatusFilter('active',this)">Active</button>
+            <button class="filter-pill" onclick="setStatusFilter('inactive',this)">Inactive</button>
+          </div>
+          <div class="search-wrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search email or business..." oninput="applyFilters()">
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-card" id="usersTableCard">
+          <div class="loading" id="usersLoading"><span class="spinner"></span>Loading users...</div>
+          <div id="usersTableWrap" style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- ── ACTIVITY SECTION ── -->
+      <div class="section" id="section-activity">
+        <div class="section-hd">
+          <div class="section-hd-left">
+            <div class="section-hd-title">Activity Feed</div>
+            <div class="section-hd-sub">Recent platform events across all users</div>
+          </div>
+        </div>
+
+        <div class="table-card" id="activityCard">
+          <div class="loading" id="activityLoading"><span class="spinner"></span>Loading activity...</div>
+          <div id="activityWrap" style="display:none"></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main-area -->
+</div><!-- /admin-wrap -->
+
+<!-- ── MODAL: Confirm Plan Change ── -->
+<div class="modal-backdrop" id="planModal">
+  <div class="modal">
+    <div class="modal-icon amber">⚙️</div>
+    <div class="modal-title">Change Plan</div>
+    <div class="modal-body">You're about to update this user's plan. This takes effect immediately.</div>
+    <div class="modal-detail" id="planModalDetail">—</div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="closePlanModal()">Cancel</button>
+      <button class="modal-btn modal-btn-confirm" onclick="confirmPlanChange()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: Confirm Delete ── -->
+<div class="modal-backdrop" id="deleteModal">
+  <div class="modal">
+    <div class="modal-icon red">🗑</div>
+    <div class="modal-title">Delete User Profile</div>
+    <div class="modal-body">This permanently removes this user's profile and all associated data. This action cannot be undone.</div>
+    <div class="modal-detail" id="deleteModalDetail">—</div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+      <button class="modal-btn modal-btn-danger" onclick="confirmDelete()">Delete Profile</button>
     </div>
   </div>
 </div>
 
 <!-- TOAST -->
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast"><span class="toast-dot" id="toastDot"></span><span id="toastMsg"></span></div>
 
 <script>
 const { createClient } = supabase;
@@ -194,189 +509,536 @@ const sb = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0Y3hsZGpjYWd5eGpmd2Zmb3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MjI3ODUsImV4cCI6MjA4ODE5ODc4NX0.kGmiqXZ9TYsO58pCSLuZg7kUiwknxFpF14N2i0Q-Wis'
 );
 
-// ── ADMIN EMAILS — only these can access ──
-const ADMIN_EMAILS = ['joeabr4@gmail.com']; // add more admins here
+const ADMIN_EMAILS = ['joeabr4@gmail.com'];
+const PLAN_PRICES  = { free: 0, pro: 299, full: 499 };
+const PLAN_LABELS  = { free: 'Free', pro: 'Pro', full: 'Full' };
+const AV_COLORS    = ['#3b82f6','#10b981','#8b5cf6','#f59e0b','#ef4444','#06b6d4','#ec4899'];
 
-const PLAN_PRICES = { free: 0, pro: 299, full: 499 };
-let allUsers = [];
-let currentFilter = 'all';
+let allUsers    = [];
+let allActivity = [];
+let planFilter  = 'all';
+let statusFilter= 'all';
+let pendingPlan = null;  // { userId, oldPlan, newPlan, name }
+let pendingDel  = null;  // { userId, name }
 
-// ── AUTH ──
+// ── SECTION TITLES ──
+const SECTION_META = {
+  overview: { title: 'Overview',      sub: 'Platform health at a glance' },
+  users:    { title: 'User Management', sub: 'Search, filter and manage user accounts' },
+  activity: { title: 'Activity Feed',   sub: 'Recent platform events across all users' }
+};
+
+// ─────────────────────────────────────────────
+// AUTH
+// ─────────────────────────────────────────────
 async function adminLogin() {
   const errEl = document.getElementById('loginError');
+  const btn   = document.getElementById('googleBtn');
   errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Redirecting to Google...';
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo: window.location.href }
   });
-  if (error) { errEl.textContent = error.message; errEl.style.display = 'block'; }
+  if (error) {
+    errEl.textContent = error.message;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>Sign in with Google';
+  }
 }
 
 async function adminLogout() {
   await sb.auth.signOut();
-  document.getElementById('loginWrap').style.display = 'flex';
-  document.getElementById('adminWrap').style.display = 'none';
+  location.reload();
 }
 
-// Check if already logged in
+function showAdmin(email) {
+  document.getElementById('loginWrap').style.display  = 'none';
+  document.getElementById('adminWrap').style.display  = 'flex';
+  document.getElementById('sbAdminEmail').textContent = email;
+  loadAll();
+}
+
+// Check session on page load + listen for changes
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) {
+    if (ADMIN_EMAILS.includes(session.user.email)) {
+      showAdmin(session.user.email);
+    } else {
+      const err = document.getElementById('loginError');
+      err.textContent = 'Access denied — ' + session.user.email + ' is not an admin.';
+      err.style.display = 'block';
+      await sb.auth.signOut();
+    }
+  }
+})();
+
 sb.auth.onAuthStateChange((event, session) => {
-  if (session?.user && ADMIN_EMAILS.includes(session.user.email)) {
-    document.getElementById('adminName').textContent = session.user.email;
-    document.getElementById('loginWrap').style.display = 'none';
-    document.getElementById('adminWrap').style.display = 'block';
-    loadUsers();
+  if (event === 'SIGNED_IN' && session?.user) {
+    if (ADMIN_EMAILS.includes(session.user.email)) {
+      showAdmin(session.user.email);
+    } else {
+      const err = document.getElementById('loginError');
+      err.textContent = 'Access denied — ' + session.user.email + ' is not on the admin list.';
+      err.style.display = 'block';
+      sb.auth.signOut();
+    }
   }
 });
 
-// ── LOAD USERS ──
+// ─────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('section-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  document.getElementById('tb-title').textContent = SECTION_META[name].title;
+  document.getElementById('tb-sub').textContent   = SECTION_META[name].sub;
+}
+
+// ─────────────────────────────────────────────
+// DATA LOADING
+// ─────────────────────────────────────────────
+async function loadAll() {
+  await Promise.all([loadUsers(), loadActivity()]);
+  renderOverview();
+}
+
 async function loadUsers() {
-  document.getElementById('tableBody').innerHTML = '<div class="loading">Loading users...</div>';
+  document.getElementById('usersLoading').style.display = 'block';
+  document.getElementById('usersTableWrap').style.display = 'none';
 
   const { data: profiles, error } = await sb
     .from('profiles')
     .select('*')
     .order('created_at', { ascending: false });
 
-  if (error) { showToast('Error loading users: ' + error.message, 'var(--red)'); return; }
+  if (error) { showToast('Error loading users: ' + error.message, 'red'); return; }
 
-  // Load invoice counts per user
-  const { data: invoiceCounts } = await sb
-    .from('invoices')
-    .select('user_id')
+  // Count invoices per user
+  const { data: invoices } = await sb.from('invoices').select('user_id');
+  const invMap = {};
+  (invoices || []).forEach(i => { invMap[i.user_id] = (invMap[i.user_id] || 0) + 1; });
 
-  const countMap = {};
-  (invoiceCounts || []).forEach(i => { countMap[i.user_id] = (countMap[i.user_id] || 0) + 1; });
+  allUsers = (profiles || []).map(p => ({ ...p, invoiceCount: invMap[p.id] || 0 }));
 
-  allUsers = (profiles || []).map(p => ({ ...p, invoiceCount: countMap[p.id] || 0 }));
-
-  updateStats();
-  renderTable(allUsers);
-}
-
-function updateStats() {
-  const total = allUsers.length;
-  const paying = allUsers.filter(u => u.plan === 'pro' || u.plan === 'full').length;
-  const free = allUsers.filter(u => u.plan === 'free').length;
-  const mrr = allUsers.reduce((s, u) => s + (PLAN_PRICES[u.plan] || 0), 0);
-
-  document.getElementById('stat-total').textContent = total;
-  document.getElementById('stat-paying').textContent = paying;
-  document.getElementById('stat-free').textContent = free;
-  document.getElementById('stat-revenue').textContent = 'R' + mrr.toLocaleString('en-ZA');
-}
-
-// ── RENDER TABLE ──
-function renderTable(users) {
-  document.getElementById('userCount').textContent = '(' + users.length + ')';
-
-  if (!users.length) {
-    document.getElementById('tableBody').innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div>No users found</div>';
-    return;
+  // Check if RLS is blocking (only see our own profile)
+  if (allUsers.length <= 1) {
+    document.getElementById('setupNotice').style.display = 'block';
   }
 
-  const rows = users.map(u => {
-    const initials = (u.biz_name || u.owner_name || '?').substring(0, 2).toUpperCase();
-    const joined = u.created_at ? new Date(u.created_at).toLocaleDateString('en-ZA') : '—';
-    const planClass = 'plan-' + (u.plan || 'free');
-    const planLabel = { free: 'Free', pro: 'Pro', full: 'Full' }[u.plan] || 'Free';
-
-    return `<tr>
-      <td>
-        <div class="user-info">
-          <div class="user-av">${initials}</div>
-          <div>
-            <div class="user-email">${u.owner_name || u.biz_name || 'Unknown'}</div>
-            <div class="user-biz">${u.biz_name || '—'}</div>
-          </div>
-        </div>
-      </td>
-      <td><span class="plan-badge ${planClass}">${planLabel}</span></td>
-      <td>
-        <select class="plan-select" id="sel-${u.id}" onchange="markChanged('${u.id}')">
-          <option value="free" ${u.plan==='free'?'selected':''}>Free</option>
-          <option value="pro" ${u.plan==='pro'?'selected':''}>Pro — R299/mo</option>
-          <option value="full" ${u.plan==='full'?'selected':''}>Full — R499/mo</option>
-        </select>
-        <button class="save-btn" id="btn-${u.id}" onclick="upgradePlan('${u.id}')">Save</button>
-        ${u.plan_expires_at ? `<div style="font-size:10px;color:#94a3b8;margin-top:3px">exp: ${new Date(u.plan_expires_at).toLocaleDateString('en-ZA')}</div>` : ''}
-      </td>
-      <td><span class="invoice-count">${u.invoiceCount}</span></td>
-      <td><span class="joined-date">${joined}</span></td>
-    </tr>`;
-  }).join('');
-
-  document.getElementById('tableBody').innerHTML = `
-    <table>
-      <thead>
-        <tr>
-          <th>User</th>
-          <th>Current Plan</th>
-          <th>Change Plan</th>
-          <th>Invoices</th>
-          <th>Joined</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>`;
-}
-
-function markChanged(userId) {
-  const btn = document.getElementById('btn-' + userId);
-  if (btn) { btn.textContent = 'Save'; btn.className = 'save-btn'; }
-}
-
-// ── UPGRADE PLAN ──
-async function upgradePlan(userId) {
-  const sel = document.getElementById('sel-' + userId);
-  const btn = document.getElementById('btn-' + userId);
-  const newPlan = sel.value;
-
-  btn.textContent = 'Saving...'; btn.className = 'save-btn saving'; btn.disabled = true;
-
-  const { error } = await sb.from('profiles').update({ plan: newPlan }).eq('id', userId);
-
-  if (error) {
-    btn.textContent = 'Error'; btn.className = 'save-btn';  btn.disabled = false;
-    showToast('Failed: ' + error.message, 'var(--red)');
-    return;
-  }
-
-  // Update local data
-  const user = allUsers.find(u => u.id === userId);
-  if (user) user.plan = newPlan;
-  updateStats();
-
-  btn.textContent = '✓ Saved'; btn.className = 'save-btn saved'; btn.disabled = false;
-  showToast(`✅ Plan updated to ${newPlan}`);
-  setTimeout(() => { btn.textContent = 'Save'; btn.className = 'save-btn'; }, 3000);
-}
-
-// ── FILTER & SEARCH ──
-function filterUsers(plan, el) {
-  currentFilter = plan;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
+  document.getElementById('sb-user-count').textContent = allUsers.length;
+  document.getElementById('usersLoading').style.display = 'none';
+  document.getElementById('usersTableWrap').style.display = 'block';
   applyFilters();
+  updateMetrics();
 }
 
-function searchUsers(query) { applyFilters(query); }
+async function loadActivity() {
+  document.getElementById('activityLoading').style.display = 'block';
+  document.getElementById('activityWrap').style.display = 'none';
 
-function applyFilters(query) {
-  const q = (query || document.getElementById('searchInput').value).toLowerCase();
-  let filtered = currentFilter === 'all' ? allUsers : allUsers.filter(u => u.plan === currentFilter);
+  // Pull from recon_audit (recent activity across users)
+  const { data: auditRows } = await sb
+    .from('recon_audit')
+    .select('user_id, type, message, created_at')
+    .order('created_at', { ascending: false })
+    .limit(60);
+
+  // Pull from doc_history
+  const { data: docRows } = await sb
+    .from('doc_history')
+    .select('user_id, doc_type, reference, created_at')
+    .order('created_at', { ascending: false })
+    .limit(30);
+
+  // Pull recent signups from profiles
+  const { data: signupRows } = await sb
+    .from('profiles')
+    .select('id, biz_name, owner_name, created_at')
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  // Merge + sort
+  const activity = [];
+  (auditRows || []).forEach(r => activity.push({ type: 'recon', ...r, ts: r.created_at }));
+  (docRows || []).forEach(r => activity.push({ type: 'doc',   ...r, ts: r.created_at }));
+  (signupRows || []).forEach(r => activity.push({
+    type: 'signup', user_id: r.id,
+    message: (r.biz_name || r.owner_name || 'Unknown') + ' joined',
+    ts: r.created_at
+  }));
+  activity.sort((a, b) => new Date(b.ts) - new Date(a.ts));
+  allActivity = activity.slice(0, 80);
+
+  document.getElementById('sb-activity-count').textContent = allActivity.length;
+  document.getElementById('activityLoading').style.display = 'none';
+  document.getElementById('activityWrap').style.display = 'block';
+  renderActivity();
+}
+
+// ─────────────────────────────────────────────
+// METRICS
+// ─────────────────────────────────────────────
+function updateMetrics() {
+  const total   = allUsers.length;
+  const paying  = allUsers.filter(u => u.plan === 'pro' || u.plan === 'full').length;
+  const mrr     = allUsers.reduce((s, u) => s + (PLAN_PRICES[u.plan] || 0), 0);
+  const conv    = total ? ((paying / total) * 100).toFixed(1) : '0.0';
+  const arpu    = total ? Math.round(mrr / total) : 0;
+  const seven   = allUsers.filter(u => {
+    if (!u.created_at) return false;
+    return (Date.now() - new Date(u.created_at)) < 7 * 86400000;
+  }).length;
+
+  document.getElementById('m-total').textContent   = total;
+  document.getElementById('m-paying').textContent  = paying;
+  document.getElementById('m-mrr').textContent     = 'R' + mrr.toLocaleString('en-ZA');
+  document.getElementById('m-conv').textContent    = conv + '%';
+  document.getElementById('m-arpu').textContent    = 'R' + arpu.toLocaleString('en-ZA');
+  document.getElementById('m-new7').textContent    = seven;
+}
+
+// ─────────────────────────────────────────────
+// OVERVIEW RENDER
+// ─────────────────────────────────────────────
+function renderOverview() {
+  // Plan distribution bars
+  const total   = allUsers.length || 1;
+  const free    = allUsers.filter(u => !u.plan || u.plan === 'free').length;
+  const pro     = allUsers.filter(u => u.plan === 'pro').length;
+  const full    = allUsers.filter(u => u.plan === 'full').length;
+  const plans   = [
+    { label: 'Free', count: free,  color: 'var(--text-3)', bg: 'rgba(71,85,105,.4)' },
+    { label: 'Pro',  count: pro,   color: 'var(--green)',  bg: 'var(--green)' },
+    { label: 'Full', count: full,  color: 'var(--gold)',   bg: 'var(--gold)' },
+  ];
+  document.getElementById('planBarsWrap').innerHTML = plans.map(p => `
+    <div class="plan-bar-row">
+      <div class="plan-bar-label" style="color:${p.color}">${p.label}</div>
+      <div class="plan-bar-track">
+        <div class="plan-bar-fill" style="width:${Math.round((p.count/total)*100)}%;background:${p.bg}"></div>
+      </div>
+      <div class="plan-bar-count">${p.count}</div>
+    </div>`).join('');
+
+  // Top users by invoices
+  const top = [...allUsers].sort((a,b) => b.invoiceCount - a.invoiceCount).slice(0,6);
+  if (!top.length || !top[0].invoiceCount) {
+    document.getElementById('topUsersWrap').innerHTML = '<div class="empty-state" style="padding:24px"><div class="empty-icon">📄</div><div class="empty-sub">No invoice data yet</div></div>';
+  } else {
+    document.getElementById('topUsersWrap').innerHTML = top.map(u => `
+      <div class="inv-row">
+        <span class="inv-name">${u.biz_name || u.owner_name || 'Unknown'}</span>
+        <span class="inv-count">${u.invoiceCount} invoices</span>
+      </div>`).join('');
+  }
+}
+
+// ─────────────────────────────────────────────
+// USER TABLE
+// ─────────────────────────────────────────────
+function getStatus(u) {
+  const age = Date.now() - new Date(u.created_at);
+  if (age < 7 * 86400000) return 'new';
+  if (u.invoiceCount > 0 || u.plan === 'pro' || u.plan === 'full') return 'active';
+  return 'inactive';
+}
+
+function applyFilters() {
+  const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  let filtered = allUsers;
+  if (planFilter !== 'all') filtered = filtered.filter(u => (u.plan || 'free') === planFilter);
+  if (statusFilter !== 'all') filtered = filtered.filter(u => getStatus(u) === statusFilter);
   if (q) filtered = filtered.filter(u =>
     (u.biz_name || '').toLowerCase().includes(q) ||
     (u.owner_name || '').toLowerCase().includes(q)
   );
-  renderTable(filtered);
+  document.getElementById('users-count-sub').textContent =
+    filtered.length + ' of ' + allUsers.length + ' users';
+  renderUsersTable(filtered);
 }
 
-// ── TOAST ──
-function showToast(msg, color = 'var(--green)') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.style.borderColor = color; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+function setPlanFilter(plan, el) {
+  planFilter = plan;
+  document.querySelectorAll('#planPills .filter-pill').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  applyFilters();
 }
+
+function setStatusFilter(st, el) {
+  statusFilter = st;
+  document.querySelectorAll('#statusPills .filter-pill').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  applyFilters();
+}
+
+function renderUsersTable(users) {
+  const wrap = document.getElementById('usersTableWrap');
+
+  if (!users.length) {
+    wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">No users found</div><div class="empty-sub">Try adjusting your search or filters.</div></div>`;
+    return;
+  }
+
+  const rows = users.map((u, i) => {
+    const initials  = (u.biz_name || u.owner_name || '?').substring(0, 2).toUpperCase();
+    const avColor   = AV_COLORS[i % AV_COLORS.length];
+    const plan      = u.plan || 'free';
+    const planLabel = PLAN_LABELS[plan] || 'Free';
+    const status    = getStatus(u);
+    const joined    = u.created_at ? new Date(u.created_at).toLocaleDateString('en-ZA', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+    const lastAct   = u.updated_at && u.updated_at !== u.created_at
+      ? timeAgo(u.updated_at) : (u.created_at ? timeAgo(u.created_at) : '—');
+
+    const statusMap = {
+      new:      '<span class="status-badge status-new">New</span>',
+      active:   '<span class="status-badge status-active">Active</span>',
+      inactive: '<span class="status-badge status-inactive">Inactive</span>'
+    };
+
+    return `<tr>
+      <td>
+        <div class="user-cell">
+          <div class="user-av" style="background:${avColor}">${initials}</div>
+          <div>
+            <div class="user-name">${u.owner_name || u.biz_name || 'Unknown'}</div>
+            <div class="user-biz">${u.biz_name || '—'}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="email-cell">${u.id.substring(0,8)}…</span></td>
+      <td><span class="plan-badge plan-${plan}">${planLabel}</span></td>
+      <td>${statusMap[status]}</td>
+      <td><span style="font-size:12.5px;color:var(--text-2)">${lastAct}</span></td>
+      <td><span style="font-size:12px;color:var(--text-3)">${joined}</span></td>
+      <td><span style="font-size:12.5px;font-weight:600;color:var(--text)">${u.invoiceCount}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <select class="plan-select" id="sel-${u.id}" onchange="initPlanChange('${u.id}')">
+            <option value="free"  ${plan==='free' ?'selected':''}>Free</option>
+            <option value="pro"   ${plan==='pro'  ?'selected':''}>Pro — R299/mo</option>
+            <option value="full"  ${plan==='full' ?'selected':''}>Full — R499/mo</option>
+          </select>
+        </div>
+      </td>
+      <td>
+        <div class="row-actions">
+          <button class="row-btn success" onclick="viewUser('${u.id}')">View</button>
+          <button class="row-btn danger"  onclick="initDelete('${u.id}', '${(u.biz_name || u.owner_name || 'Unknown').replace(/'/g,"\\'")}')">Delete</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  wrap.innerHTML = `<table>
+    <thead><tr>
+      <th>User</th>
+      <th>User ID</th>
+      <th>Plan</th>
+      <th>Status</th>
+      <th>Last Active</th>
+      <th>Joined</th>
+      <th>Invoices</th>
+      <th>Change Plan</th>
+      <th>Actions</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+// ─────────────────────────────────────────────
+// ACTIVITY FEED
+// ─────────────────────────────────────────────
+const ACTIVITY_CONFIG = {
+  auto:    { icon: '🤖', bg: 'var(--blue-pale)',   label: 'Auto-matched'   },
+  manual:  { icon: '✋', bg: 'var(--amber-pale)',  label: 'Manual match'   },
+  upload:  { icon: '📤', bg: 'var(--purple-pale)', label: 'Statement uploaded' },
+  close:   { icon: '🔒', bg: 'var(--green-pale)',  label: 'Month closed'   },
+  reset:   { icon: '↩️', bg: 'var(--amber-pale)',  label: 'Reset'          },
+  ignore:  { icon: '🚫', bg: 'var(--surface2)',    label: 'Ignored'        },
+  suggest: { icon: '💡', bg: 'var(--blue-pale)',   label: 'Suggestion'     },
+  clear:   { icon: '🧹', bg: 'var(--surface2)',    label: 'Cleared'        },
+  doc:     { icon: '📄', bg: 'var(--gold-pale)',   label: 'Document'       },
+  signup:  { icon: '🎉', bg: 'var(--green-pale)',  label: 'New signup'     },
+};
+
+function renderActivity() {
+  const wrap = document.getElementById('activityWrap');
+  if (!allActivity.length) {
+    wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">📡</div><div class="empty-title">No activity yet</div><div class="empty-sub">Activity will appear as users interact with the platform. Make sure the admin read policies are applied.</div></div>`;
+    return;
+  }
+
+  const items = allActivity.map(a => {
+    const cfg  = ACTIVITY_CONFIG[a.type] || ACTIVITY_CONFIG['doc'];
+    const text = a.message || (a.doc_type ? a.doc_type + ' document generated' : 'Platform event');
+    const sub  = 'User ' + (a.user_id ? a.user_id.substring(0,8) + '…' : '—');
+    return `<div class="activity-item">
+      <div class="activity-icon" style="background:${cfg.bg}">${cfg.icon}</div>
+      <div class="activity-body">
+        <div class="activity-msg">${escHtml(text)}</div>
+        <div class="activity-meta">${sub} · ${cfg.label}</div>
+      </div>
+      <div class="activity-time">${timeAgo(a.ts)}</div>
+    </div>`;
+  }).join('');
+
+  wrap.innerHTML = `<div class="activity-list">${items}</div>`;
+}
+
+// ─────────────────────────────────────────────
+// PLAN CHANGE
+// ─────────────────────────────────────────────
+function initPlanChange(userId) {
+  const sel = document.getElementById('sel-' + userId);
+  const u   = allUsers.find(x => x.id === userId);
+  if (!u) return;
+  const newPlan = sel.value;
+  if (newPlan === (u.plan || 'free')) return;
+
+  pendingPlan = { userId, oldPlan: u.plan || 'free', newPlan, name: u.biz_name || u.owner_name || 'Unknown' };
+
+  document.getElementById('planModalDetail').innerHTML =
+    `<strong>${pendingPlan.name}</strong><br>` +
+    `<span style="color:var(--text-3)">` +
+    `${PLAN_LABELS[pendingPlan.oldPlan]} → <strong style="color:var(--text)">${PLAN_LABELS[pendingPlan.newPlan]}</strong>` +
+    (PLAN_PRICES[pendingPlan.newPlan] ? ` (R${PLAN_PRICES[pendingPlan.newPlan]}/mo)` : ' (Free)') +
+    `</span>`;
+
+  document.getElementById('planModal').classList.add('open');
+}
+
+function closePlanModal() {
+  if (pendingPlan) {
+    const sel = document.getElementById('sel-' + pendingPlan.userId);
+    if (sel) sel.value = pendingPlan.oldPlan;
+  }
+  pendingPlan = null;
+  document.getElementById('planModal').classList.remove('open');
+}
+
+async function confirmPlanChange() {
+  if (!pendingPlan) return;
+  const { userId, newPlan, name } = pendingPlan;
+  document.getElementById('planModal').classList.remove('open');
+
+  const { error } = await sb.from('profiles').update({ plan: newPlan }).eq('id', userId);
+  if (error) { showToast('Update failed: ' + error.message, 'red'); return; }
+
+  const u = allUsers.find(x => x.id === userId);
+  if (u) u.plan = newPlan;
+  pendingPlan = null;
+  updateMetrics();
+  applyFilters();
+  renderOverview();
+  showToast(`✅ ${name} → ${PLAN_LABELS[newPlan]}`, 'green');
+}
+
+// ─────────────────────────────────────────────
+// DELETE USER
+// ─────────────────────────────────────────────
+function initDelete(userId, name) {
+  pendingDel = { userId, name };
+  document.getElementById('deleteModalDetail').innerHTML =
+    `<strong>${name}</strong><br><span style="color:var(--text-3)">User ID: ${userId.substring(0,8)}…</span>`;
+  document.getElementById('deleteModal').classList.add('open');
+}
+
+function closeDeleteModal() {
+  pendingDel = null;
+  document.getElementById('deleteModal').classList.remove('open');
+}
+
+async function confirmDelete() {
+  if (!pendingDel) return;
+  const { userId, name } = pendingDel;
+  document.getElementById('deleteModal').classList.remove('open');
+
+  const { error } = await sb.from('profiles').delete().eq('id', userId);
+  if (error) { showToast('Delete failed: ' + error.message, 'red'); return; }
+
+  allUsers = allUsers.filter(u => u.id !== userId);
+  pendingDel = null;
+  updateMetrics();
+  applyFilters();
+  renderOverview();
+  showToast(`🗑 ${name} removed`, 'amber');
+}
+
+// ─────────────────────────────────────────────
+// VIEW USER
+// ─────────────────────────────────────────────
+function viewUser(userId) {
+  const u = allUsers.find(x => x.id === userId);
+  if (!u) return;
+  showToast(`👤 ${u.biz_name || u.owner_name || 'Unknown'} · ${(u.plan||'free')} · ${u.invoiceCount} invoices`, 'blue');
+}
+
+// ─────────────────────────────────────────────
+// EXPORT CSV
+// ─────────────────────────────────────────────
+function exportCSV() {
+  const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  let data = planFilter === 'all' ? allUsers : allUsers.filter(u => (u.plan||'free') === planFilter);
+  if (q) data = data.filter(u => (u.biz_name||'').toLowerCase().includes(q) || (u.owner_name||'').toLowerCase().includes(q));
+
+  const header = ['UserID','BizName','OwnerName','Plan','Invoices','Joined'];
+  const rows   = data.map(u => [
+    u.id,
+    (u.biz_name||'').replace(/,/g,' '),
+    (u.owner_name||'').replace(/,/g,' '),
+    u.plan||'free',
+    u.invoiceCount,
+    u.created_at ? new Date(u.created_at).toLocaleDateString('en-ZA') : ''
+  ]);
+  const csv = [header, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'onetouch_users_' + new Date().toISOString().slice(0,10) + '.csv' });
+  a.click();
+  showToast('✅ CSV exported (' + data.length + ' users)', 'green');
+}
+
+// ─────────────────────────────────────────────
+// UTILITIES
+// ─────────────────────────────────────────────
+function timeAgo(ts) {
+  if (!ts) return '—';
+  const diff = Date.now() - new Date(ts);
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1)   return 'just now';
+  if (mins < 60)  return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24)   return hrs + 'h ago';
+  const days = Math.floor(hrs / 24);
+  if (days < 30)  return days + 'd ago';
+  return new Date(ts).toLocaleDateString('en-ZA', { day:'2-digit', month:'short' });
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg, type = 'green') {
+  const colors = { green: 'var(--green)', blue: 'var(--blue)', red: 'var(--red)', amber: 'var(--amber)' };
+  const col = colors[type] || colors.green;
+  document.getElementById('toastMsg').textContent = msg;
+  document.getElementById('toastDot').style.background = col;
+  const t = document.getElementById('toast');
+  t.style.borderColor = col;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// Close modals on backdrop click
+document.getElementById('planModal').addEventListener('click', function(e) { if (e.target === this) closePlanModal(); });
+document.getElementById('deleteModal').addEventListener('click', function(e) { if (e.target === this) closeDeleteModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closePlanModal(); closeDeleteModal(); } });
 </script>
 </body>
 </html>
