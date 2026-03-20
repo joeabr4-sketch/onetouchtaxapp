@@ -2254,8 +2254,8 @@ function isPlan(p) {
 }
 
 function canUse(feature) {
-  const proFeatures = ['invoices','financials','reconcile','vat201','exportpdf','handoff'];
-  const fullFeatures = ['irp6','itr14','accountant','payroll','emp201','tips','whatsapp'];
+  const proFeatures = ['invoices','financials','reconcile','vat201','exportpdf','handoff','bankanalysis','irp6','itr14'];
+  const fullFeatures = ['accountant','payroll','emp201','tips','whatsapp'];
   if (fullFeatures.includes(feature)) return isPlan('full');
   if (proFeatures.includes(feature)) return isPlan('pro');
   return true;
@@ -3331,9 +3331,9 @@ function confirmSarsDisclaimer() {
   } else if (fn === 'genEMP201') {
     if (!canUse('emp201')) { showUpgradePrompt('full'); return; } genEMP201();
   } else if (fn === 'genIRP6') {
-    if (!isPlan('full')) { showUpgradePrompt('full'); return; } genIRP6();
+    if (!canUse('irp6')) { showUpgradePrompt('pro'); return; } genIRP6();
   } else if (fn === 'genITR14') {
-    if (!isPlan('full')) { showUpgradePrompt('full'); return; } genITR14();
+    if (!canUse('itr14')) { showUpgradePrompt('pro'); return; } genITR14();
   } else if (fn === 'downloadFullPack') {
     downloadFullPack();
   }

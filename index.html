@@ -224,9 +224,9 @@ section{position:relative;z-index:1}
 .pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start}
 .price-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;position:relative;transition:all .3s}
 .price-card:hover{transform:translateY(-4px);box-shadow:0 20px 50px rgba(0,0,0,.3)}
-.price-card.popular{border-color:rgba(79,142,247,.4);background:linear-gradient(160deg,rgba(79,142,247,.07),var(--surface));transform:scale(1.03)}
-.price-card.popular:hover{transform:scale(1.03) translateY(-4px)}
-.popular-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;padding:4px 16px;border-radius:20px;letter-spacing:.5px;white-space:nowrap}
+.price-card.popular{border-color:rgba(79,142,247,.65);background:linear-gradient(160deg,rgba(79,142,247,.1),rgba(79,142,247,.03));transform:scale(1.04);box-shadow:0 0 0 1px rgba(79,142,247,.2),0 24px 64px rgba(79,142,247,.18),0 0 40px rgba(79,142,247,.08)}
+.price-card.popular:hover{transform:scale(1.04) translateY(-4px);box-shadow:0 0 0 1px rgba(79,142,247,.3),0 32px 80px rgba(79,142,247,.22)}
+.popular-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#4f8ef7,#6ba3ff);color:#fff;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;padding:5px 18px;border-radius:20px;letter-spacing:.5px;white-space:nowrap;box-shadow:0 4px 14px rgba(79,142,247,.45)}
 .price-top-bar{height:3px;border-radius:3px;margin-bottom:24px;margin:-32px -32px 24px}
 .price-tier{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-3);margin-bottom:6px}
 .price-amount{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:40px;font-weight:800;line-height:1;margin-bottom:4px}
@@ -740,18 +740,18 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
         <div class="price-tier">Free</div>
         <div class="price-amount" style="color:var(--green)"><sup>R</sup>0</div>
         <div class="price-period">forever free</div>
-        <div class="price-desc">Get started with the essentials — invoicing, compliance calendar and your full financial dashboard. No credit card. No time limit.</div>
+        <div class="price-desc">Start your bookkeeping the right way — no accountant needed.</div>
         <ul class="price-features">
           <li><span class="check">✓</span> 5 invoices &amp; quotes per month</li>
           <li><span class="check">✓</span> PDF export</li>
           <li><span class="check">✓</span> Financial Control Center dashboard</li>
-          <li><span class="check">✓</span> Financials &amp; P&amp;L (auto-updated)</li>
+          <li><span class="check">✓</span> Basic financial overview (limited detail)</li>
           <li><span class="check">✓</span> SARS compliance calendar &amp; deadline alerts</li>
           <li><span class="check">✓</span> Opening balances &amp; new business setup</li>
           <li><span class="check">✓</span> Guided onboarding — no accountant needed</li>
           <li><span class="check">✓</span> 5 South African languages</li>
           <li class="muted"><span class="x">—</span> VAT201 prep <span style="font-size:10px;opacity:.6">(Pro)</span></li>
-          <li class="muted"><span class="x">—</span> Bank analysis &amp; reconciliation <span style="font-size:10px;opacity:.6">(Pro)</span></li>
+          <li class="muted"><span class="x">—</span> Bank reconciliation &amp; audit trail <span style="font-size:10px;opacity:.6">(Pro)</span></li>
           <li class="muted"><span class="x">—</span> Payroll &amp; EMP201 <span style="font-size:10px;opacity:.6">(Full)</span></li>
         </ul>
         <a href="/business.html" class="price-cta outline">Get Started Free</a>
@@ -765,7 +765,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
         <div class="price-tier">Pro</div>
         <div class="price-amount" style="color:var(--blue)"><sup>R</sup>299</div>
         <div class="price-period">per month · billed monthly</div>
-        <div class="price-desc">For the solo founder who wants full visibility of their numbers and stays SARS compliant without an accountant on retainer.</div>
+        <div class="price-desc">Run your entire business without needing an accountant.</div>
         <ul class="price-features">
           <li><span class="check">✓</span> Everything in Free</li>
           <li><span class="check">✓</span> Unlimited invoices &amp; quotes</li>
@@ -792,7 +792,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
         <div class="price-tier">Full</div>
         <div class="price-amount" style="color:var(--gold)"><sup>R</sup>499</div>
         <div class="price-period">per month · billed monthly</div>
-        <div class="price-desc">For businesses that are growing, hiring and want everything automated — payroll, reconciliation, tax prep and accountant handoff all in one place.</div>
+        <div class="price-desc">Automate your business finances completely — from invoices to payroll to tax.</div>
         <ul class="price-features">
           <li><span class="check">✓</span> Everything in Pro</li>
           <li style="color:#fff;font-weight:600"><span class="check">✓</span> WhatsApp invoice delivery <span style="background:rgba(37,211,102,.15);color:#25d366;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:4px">NEW</span></li>
@@ -800,7 +800,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
           <li><span class="check">✓</span> PAYE / UIF / SDL calculator (SARS 2025/26 tables)</li>
           <li><span class="check">✓</span> Professional payslips (PDF)</li>
           <li><span class="check">✓</span> EMP201 prep — payroll auto-posts to books</li>
-          <li><span class="check">✓</span> Accountant access link (30-day, revokable)</li>
+          <li><span class="check">✓</span> Accountant access link (secure, read-only)</li>
           <li><span class="check">✓</span> AI business saving tips</li>
           <li><span class="check">✓</span> Unlimited AI assistant calls</li>
           <li><span class="check">✓</span> Priority support &amp; all future features</li>
