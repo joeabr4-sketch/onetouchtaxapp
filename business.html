@@ -1055,7 +1055,6 @@ h1,h2,h3,.logo-text,.stat-value{font-family:'Syne',sans-serif}
             <select id="inv-status-filter" onchange="renderInvoices()" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:5px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none">
               <option value="all">All Statuses</option>
               <option value="outstanding">Outstanding</option>
-              <option value="unpaid">Unpaid</option>
               <option value="partial">Partial</option>
               <option value="overdue">Overdue</option>
               <option value="deposit">Deposit Received</option>
@@ -1793,7 +1792,7 @@ h1,h2,h3,.logo-text,.stat-value{font-family:'Syne',sans-serif}
         <div class="inv-grid">
           <div class="inv-field"><label data-i18n="inv_status">Payment Status</label>
             <select id="inv-status">
-              <option value="unpaid">⏳ Unpaid</option>
+              <option value="outstanding">⏳ Outstanding</option>
               <option value="overdue">🔴 Overdue</option>
               <option value="deposit">💰 Deposit Received</option>
               <option value="balance">🔵 Balance Outstanding</option>
@@ -2368,7 +2367,9 @@ function getInvStatus(inv) {
   }
   // Deposit
   if (inv.status === 'deposit' && inv.deposit_paid > 0 && inv.total > inv.deposit_paid) return 'balance';
-  return inv.status || (inv.type === 'expense' ? 'paid' : 'unpaid');
+  const raw = inv.status || (inv.type === 'expense' ? 'paid' : 'outstanding');
+  // Normalise legacy 'unpaid' to 'outstanding'
+  return raw === 'unpaid' ? 'outstanding' : raw;
 }
 
 function getStatusBadge(status, inv) {
