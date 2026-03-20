@@ -797,8 +797,11 @@ h1,h2,h3,.serif{font-family:'DM Serif Display',serif}
 
       <!-- IRP5 CAPTURE -->
       <div style="margin-bottom:22px"><h2 class="serif" style="font-size:22px;margin-bottom:5px">🧾 IRP5 Income Capture</h2><p style="font-size:13px;color:var(--ink-3)">Enter the source codes from your IRP5 certificate to calculate your tax and estimated refund.</p></div>
-        <div style="background:var(--blue-pale);border:1px solid rgba(37,99,235,.15);border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:var(--ink-2);line-height:1.7">
-          📄 <strong>What is an IRP5?</strong> It's the tax certificate your employer gives you every year showing your salary, benefits, and all tax deducted. Your employer must provide it by March. All the numbers below come directly from the source codes printed on it.
+        <div style="background:var(--green-pale);border:1px solid rgba(22,163,74,.2);border-radius:10px;padding:14px 18px;margin-bottom:14px;font-size:13px;color:#14532d;line-height:1.75">
+          📄 <strong>You need your IRP5 from your employer before you start.</strong> Your employer is legally required to give you this certificate by the end of February each year. It shows your gross salary, all benefits, and the PAYE already deducted on your behalf. All the source codes below come directly from it — do not estimate these figures.
+        </div>
+        <div style="background:rgba(245,158,11,.09);border:1px solid rgba(217,119,6,.3);border-radius:10px;padding:12px 16px;margin-bottom:18px;font-size:13px;color:#92400e;line-height:1.7">
+          ⚠ <strong>This is a preparation tool, not a submission.</strong> Submission is done via SARS eFiling at <strong>efiling.sars.gov.za</strong>. Verify all figures here against your official IRP5 before filing.
         </div>
         <div class="card" style="margin-bottom:16px">
           <div class="card-head"><div class="card-title">Income (from your IRP5)</div><span class="badge b-blue">2025/26</span></div>
@@ -869,6 +872,10 @@ h1,h2,h3,.serif{font-family:'DM Serif Display',serif}
                 <div style="font-size:11px;margin-top:6px;opacity:.8">⚠ Estimate only — verify on SARS eFiling before submitting</div>
               </div>
             </div>
+          </div>
+          <div style="background:rgba(245,158,11,.09);border:1px solid rgba(217,119,6,.3);border-radius:10px;padding:14px 18px;margin-top:16px;font-size:13px;color:#92400e;line-height:1.75">
+            <strong>⚠ This tool prepares your tax information. Submission is done via SARS eFiling.</strong><br>
+            These figures are estimates only. Always verify every amount against your official <strong>IRP5 certificate provided by your employer</strong> before submitting to SARS.
           </div>
           <div style="text-align:center;margin-top:14px">
             <button class="dp-btn" onclick="genIRP5PDF()">📄 Download IRP5 Tax Summary PDF</button>
@@ -1642,10 +1649,13 @@ function addRow(ctx, label, value, highlight) {
 
 function addDisclaimer(ctx) {
   const {doc,W,M} = ctx; ctx.y += 10;
-  doc.setFillColor(239,246,255); doc.rect(M, ctx.y, W-M*2, 14, 'F');
-  doc.setFontSize(7.5); doc.setFont('helvetica','italic'); doc.setTextColor(100,116,139);
-  doc.text('⚠ For preparation purposes only. Verify all figures on SARS eFiling before submitting.', M+4, ctx.y+5);
-  doc.text('Powered by official SARS 2025/26 tax tables · Verify with SARS eFiling before submitting.', M+4, ctx.y+11);
+  doc.setFillColor(254,243,199); doc.rect(M, ctx.y, W-M*2, 20, 'F');
+  doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(146,64,14);
+  doc.text('IMPORTANT DISCLAIMER', M+4, ctx.y+6);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(120,53,15);
+  doc.text('This tool prepares your tax information. Submission is done via SARS eFiling at efiling.sars.gov.za', M+4, ctx.y+12);
+  doc.text('Figures are estimates only. Always verify against your official IRP5 from your employer before submitting.', M+4, ctx.y+18);
+  ctx.y += 10;
 }
 
 function fmtR(v) { return 'R '+(parseFloat(v)||0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2}); }
