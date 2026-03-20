@@ -2362,8 +2362,8 @@ function getInvStatus(inv) {
   if (inv.doc_type === 'quote') return 'quote';
   // Overpaid — payment received exceeds invoice total
   if (inv.type === 'income' && inv.amount_paid > 0 && inv.amount_paid > (inv.total || inv.amount || 0)) return 'overpaid';
-  // Overdue
-  if (inv.type === 'income' && inv.due_date && (inv.status === 'unpaid' || !inv.status)) {
+  // Overdue — 'outstanding' is the canonical unpaid status (schema default)
+  if (inv.type === 'income' && inv.due_date && (inv.status === 'outstanding' || inv.status === 'unpaid' || !inv.status)) {
     if (new Date(inv.due_date) < new Date() && inv.status !== 'paid') return 'overdue';
   }
   // Deposit
@@ -2450,7 +2450,7 @@ function updateInvStats() {
   const income = invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0);
   const exp = invoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0);
   const vatOut = invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.vat||0),0);
-  const outstanding = invoices.filter(i=>i.type==='income'&&(i.status||'unpaid')==='unpaid').reduce((s,i)=>s+Number(i.amount||0),0);
+  const outstanding = invoices.filter(i=>i.type==='income'&&(i.status==='outstanding'||i.status==='unpaid'||!i.status)).reduce((s,i)=>s+Number(i.amount||0),0);
   document.getElementById('inv-total-income').textContent = fmtR(income);
   document.getElementById('inv-total-exp').textContent = fmtR(exp);
   document.getElementById('inv-vat-out').textContent = fmtR(vatOut);
@@ -2515,7 +2515,7 @@ async function convertQuoteToInvoice(id) {
   const {error} = await sb.from('invoices').update({
     doc_type: 'invoice',
     invoice_number: newNum,
-    status: 'unpaid'
+    status: 'outstanding'
   }).eq('id', id);
   if (error) { showToast('Error: '+error.message,'var(--red)'); return; }
   showToast(`✅ Quote converted to Invoice ${newNum}`, 'var(--green)');
@@ -2700,7 +2700,7 @@ async function editInvoice(id) {
   document.getElementById('inv-whatsapp').value = inv.client_whatsapp||'';
   document.getElementById('inv-address').value = inv.client_address||'';
   document.getElementById('inv-notes').value = inv.notes||'';
-  document.getElementById('inv-status').value = inv.status||'unpaid';
+  document.getElementById('inv-status').value = inv.status||'outstanding';
   document.getElementById('inv-deposit').value = inv.deposit_paid||'';
   document.getElementById('inv-deposit-note').value = inv.deposit_note||'';
   document.getElementById('inv-cat').value = inv.category||'Sales';
@@ -7064,7 +7064,7 @@ function autoMapAndPreview() {
       client: String(row[clientCol]||'').trim(),
       amount: Math.abs(rawAmt),
       date:   cleanDate,
-      status: isPaid ? 'paid' : 'unpaid',
+      status: isPaid ? 'paid' : 'outstanding',
       type:   rawAmt < 0 ? 'expense' : 'income',
     };
   }).filter(r => r.amount > 0 && r.date && r.client);
