@@ -1010,7 +1010,10 @@ h1,h2,h3,.logo-text,.stat-value{font-family:'Syne',sans-serif}
         <div class="card">
           <div class="card-head"><div class="card-title">🔢 Opening Balances</div><span class="badge b-amber" id="openingBadge">Not set</span></div>
           <div style="padding:18px 20px">
-            <div style="background:var(--blue-dim);border:1px solid rgba(184,196,216,.2);border-radius:10px;padding:13px 15px;margin-bottom:16px;font-size:13px;color:var(--text-2);line-height:1.6"><strong style="color:var(--text)">Joining mid-year?</strong> Enter your verified figures below — as confirmed by your accountant up to the date you started using OneTouch.</div>
+            <div style="background:var(--blue-dim);border:1px solid rgba(184,196,216,.2);border-radius:10px;padding:13px 15px;margin-bottom:16px;font-size:13px;color:var(--text-2);line-height:1.6">
+            <strong style="color:var(--text)">Joining mid-year?</strong> Enter your verified figures below — as confirmed by your accountant up to the date you started using OneTouch.<br>
+            <span style="color:var(--text-3)">Brand new business with no prior history?</span> <button onclick="markNewBusiness()" style="background:none;border:none;color:var(--blue);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;text-decoration:underline;padding:0">Click here — no figures needed →</button>
+          </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
               <div class="dp-field"><label>Financial Year Start</label><input type="month" id="ob-yearstart" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%"/></div>
               <div class="dp-field"><label>Date Verified By Accountant</label><input type="date" id="ob-verifydate" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%"/></div>
@@ -5479,6 +5482,17 @@ async function loadOpeningBalances() {
   if(f('ob-revenue')) f('ob-revenue').value=data.ytd_revenue||'';
   if(f('ob-expenses')) f('ob-expenses').value=data.ytd_expenses||'';
   if(f('ob-vat')) f('ob-vat').value=data.vat_owing||'';
+}
+
+async function markNewBusiness() {
+  const today = new Date();
+  const yearStart = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+  const data = { user_id: currentUser.id, year_start: yearStart, verify_date: null, accountant_name: 'New Business', ytd_revenue: 0, ytd_expenses: 0, vat_owing: 0 };
+  const { error } = await sb.from('opening_balances').upsert(data, { onConflict: 'user_id' });
+  if (error) { showToast('Error: ' + error.message, 'var(--red)'); return; }
+  showToast('✅ Marked as new business — starting from zero', 'var(--green)');
+  const badge = document.getElementById('openingBadge');
+  if (badge) { badge.textContent = 'New Business ✅'; badge.className = 'badge b-green'; }
 }
 
 async function saveOpeningBalances() {
