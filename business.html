@@ -4455,7 +4455,7 @@ function detectConflicts() {
   invoices.filter(i => i.type === 'income' && i.status === 'paid').forEach(inv => {
     const hasMatch = reconTransactions.some(t => String(t.matched_invoice_id) === String(inv.id) && !t.ignored);
     if (!hasMatch && reconTransactions.length > 0) {
-      warnings.push(`⚠️ <strong>${inv.invoice_number||'Invoice'}</strong> is marked Paid but no matching bank transaction found`);
+      warnings.push(`⚠️ <strong>${escHtml(inv.invoice_number||'Invoice')}</strong> is marked Paid but no matching bank transaction found`);
     }
   });
 
