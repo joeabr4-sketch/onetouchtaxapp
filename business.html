@@ -3851,6 +3851,7 @@ async function processReconFile(file) {
     const stmtPeriod = dates.length ? dates[0] + ' – ' + dates[dates.length-1] : getCurrentPeriod();
     const { error: stmtErr } = await sb.from('statements').insert({
       user_id: currentUser.id, filename: file.name, period: stmtPeriod,
+      month: getCurrentPeriod(),
       total_income: totalCredits, total_expenses: totalDebits,
       vat_liability: 0, flag_count: 0, created_at: new Date().toISOString()
     });
@@ -4845,6 +4846,7 @@ async function loadStatementHistory() {
           <div style="font-size:11.5px;color:var(--text-3)">${s.period||''} · ${new Date(s.created_at).toLocaleDateString('en-ZA')}</div>
         </div>
         <div style="text-align:right;margin-right:10px"><div style="font-size:12px;color:var(--green)">${fmtR(s.total_income||0)}</div><div style="font-size:10.5px;color:var(--text-3)">income</div></div>
+        <button onclick="event.stopPropagation();deleteStatement('${s.id}')" style="background:none;border:none;color:var(--text-3);font-size:14px;cursor:pointer;padding:4px 6px;border-radius:5px;flex-shrink:0" title="Delete">🗑</button>
         <div style="font-size:11px;color:var(--text-3)">▼</div>
       </div>
       <div id="stmtd-${i}" style="display:none;padding:0 20px 14px 54px">
@@ -4872,8 +4874,7 @@ const _storedDocs = {};
 function viewStoredDoc(idx) {
   const data = _storedDocs[idx];
   if (!data) return;
-  const win = window.open('', '_blank');
-  win.document.write(`<!DOCTYPE html><html><head><title>Document</title><style>*{margin:0;padding:0}body{background:#1a1a1a}</style></head><body><iframe src="${data}" style="width:100vw;height:100vh;border:none"></iframe></body></html>`);
+  window.open(data, '_blank');
 }
 
 function downloadStoredDoc(idx, filename) {
@@ -4881,6 +4882,20 @@ function downloadStoredDoc(idx, filename) {
   if (!data) return;
   const a = document.createElement('a');
   a.href = data; a.download = filename; a.click();
+}
+
+async function deleteStatement(id) {
+  if (!confirm('Delete this statement from history?')) return;
+  const { error } = await sb.from('statements').delete().eq('id', id).eq('user_id', currentUser.id);
+  if (error) { showToast('Delete failed: ' + error.message, 'var(--red)'); return; }
+  loadStatementHistory();
+}
+
+async function deleteDocHistory(id) {
+  if (!confirm('Delete this document from history?')) return;
+  const { error } = await sb.from('doc_history').delete().eq('id', id).eq('user_id', currentUser.id);
+  if (error) { showToast('Delete failed: ' + error.message, 'var(--red)'); return; }
+  loadDocHistory();
 }
 
 async function loadDocHistory() {
@@ -4923,6 +4938,7 @@ async function loadDocHistory() {
       <div style="display:flex;gap:6px;flex-shrink:0">
         ${hasPdf ? `<button onclick="viewStoredDoc(${i})" style="background:var(--blue-dim);border:1px solid rgba(184,196,216,.2);color:var(--blue);padding:6px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">👁 View</button>` : ''}
         ${hasPdf ? `<button onclick="downloadStoredDoc(${i},'${fname}')" style="background:var(--surface2);border:1px solid var(--border);color:var(--text-2);padding:6px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">↓ Download</button>` : (regenAction ? `<button onclick="${regenAction}" style="background:var(--surface2);border:1px solid var(--border);color:var(--text-2);padding:6px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">↺ Regenerate</button>` : '')}
+        <button onclick="deleteDocHistory('${d.id}')" style="background:none;border:none;color:var(--text-3);font-size:14px;cursor:pointer;padding:4px 6px;border-radius:5px" title="Delete">🗑</button>
       </div>
     </div>`;
   }).join('');
