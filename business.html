@@ -2254,8 +2254,11 @@ function isPlan(p) {
 }
 
 function canUse(feature) {
-  const proFeatures = ['invoices','financials','reconcile','vat201','exportpdf','handoff','bankanalysis','irp6','itr14'];
+  // Pro: reconciliation, bank analysis, VAT/IRP6/ITR14 docs, handoff, AI calls, unlimited invoices
+  const proFeatures = ['invoices','reconcile','vat201','handoff','bankanalysis','irp6','itr14'];
+  // Full: payroll, EMP201, WhatsApp, accountant link, AI tips
   const fullFeatures = ['accountant','payroll','emp201','tips','whatsapp'];
+  // exportpdf is FREE — all users can export PDFs for their invoices
   if (fullFeatures.includes(feature)) return isPlan('full');
   if (proFeatures.includes(feature)) return isPlan('pro');
   return true;
