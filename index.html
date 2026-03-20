@@ -985,5 +985,22 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   });
 });
 </script>
+<!-- Admin OAuth redirect handler -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(async () => {
+  const ADMIN_EMAILS = ['joeabr4@gmail.com'];
+  if (!window.location.hash.includes('access_token')) return;
+  const { createClient } = supabase;
+  const sb = createClient(
+    'https://stcxldjcagyxjfwfforx.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0Y3hsZGpjYWd5eGpmd2Zmb3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MjI3ODUsImV4cCI6MjA4ODE5ODc4NX0.kGmiqXZ9TYsO58pCSLuZg7kUiwknxFpF14N2i0Q-Wis'
+  );
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user && ADMIN_EMAILS.includes(session.user.email)) {
+    window.location.replace('/admin.html');
+  }
+})();
+</script>
 </body>
 </html>
