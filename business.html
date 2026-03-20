@@ -2420,7 +2420,7 @@ function renderInvoices() {
       const amtColor = isQuote ? 'var(--gold)' : inv.type==='income' ? 'var(--green)' : 'var(--red)';
       const depositInfo = inv.deposit_paid > 0
         ? `<div style="font-size:10px;color:var(--amber);margin-top:2px">💰 Deposit: ${fmtR(inv.deposit_paid)}</div>` : '';
-      const statusLog = inv.status_log ? `<div class="status-log" title="${inv.status_log}">ℹ️ ${inv.status_log.length > 40 ? inv.status_log.slice(0,40)+'...' : inv.status_log}</div>` : '';
+      const statusLog = inv.status_log ? `<div class="status-log" title="${escHtml(inv.status_log)}">ℹ️ ${escHtml(inv.status_log.length > 40 ? inv.status_log.slice(0,40)+'...' : inv.status_log)}</div>` : '';
       const overpaidActions = computedStatus === 'overpaid' ? `
         <div style="display:flex;gap:6px;margin-top:4px">
           <button onclick="resolveOverpaid('${inv.id}','credited')" style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:var(--green);padding:3px 8px;border-radius:5px;font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif">✓ Credited</button>
@@ -2428,10 +2428,10 @@ function renderInvoices() {
         </div>` : '';
       return `<tr>
         <td><input type="checkbox" class="inv-cb inv-select-cb" data-id="${inv.id}" onchange="updateBulkBar()"></td>
-        <td><div style="font-family:'Syne',sans-serif;font-size:12px;font-weight:600;color:${numColor}">${num}</div>${isQuote?'<div style="font-size:9px;color:var(--gold);letter-spacing:.5px">QUOTE</div>':''}</td>
-        <td style="color:var(--text-3)">${inv.date||''}</td>
-        <td><div style="font-weight:500">${inv.client_name||inv.party||'—'}</div>${inv.due_date&&computedStatus==='overdue'?`<div style="font-size:10px;color:var(--red)">Due: ${inv.due_date}</div>`:''}</td>
-        <td><span style="background:var(--surface2);border:1px solid var(--border);padding:2px 8px;border-radius:4px;font-size:11px">${inv.category||inv.type}</span></td>
+        <td><div style="font-family:'Syne',sans-serif;font-size:12px;font-weight:600;color:${numColor}">${escHtml(num)}</div>${isQuote?'<div style="font-size:9px;color:var(--gold);letter-spacing:.5px">QUOTE</div>':''}</td>
+        <td style="color:var(--text-3)">${escHtml(inv.date||'')}</td>
+        <td><div style="font-weight:500">${escHtml(inv.client_name||inv.party||'—')}</div>${inv.due_date&&computedStatus==='overdue'?`<div style="font-size:10px;color:var(--red)">Due: ${escHtml(inv.due_date)}</div>`:''}</td>
+        <td><span style="background:var(--surface2);border:1px solid var(--border);padding:2px 8px;border-radius:4px;font-size:11px">${escHtml(inv.category||inv.type)}</span></td>
         <td><div style="font-family:'Syne',sans-serif;font-weight:700;color:${amtColor}">${fmtR(inv.total||inv.amount)}</div>${depositInfo}</td>
         <td>${statusBadge}${statusLog}${overpaidActions}</td>
         <td style="display:flex;gap:4px;flex-wrap:wrap">
@@ -2557,7 +2557,7 @@ function renderLineItems() {
   const body = document.getElementById('lineItemsBody');
   body.innerHTML = lineItems.map((li, i) => `
     <div class="line-item-row">
-      <input placeholder="Description" value="${li.desc||''}" oninput="updateLineItem(${i},'desc',this.value)" />
+      <input placeholder="Description" value="${escHtml(li.desc||'')}" oninput="updateLineItem(${i},'desc',this.value)" />
       <input type="number" min="1" value="${li.qty||1}" oninput="updateLineItem(${i},'qty',this.value)" />
       <input type="number" min="0" step="0.01" placeholder="0.00" value="${li.price||''}" oninput="updateLineItem(${i},'price',this.value)" />
       <div class="li-total" id="li-total-${i}">${fmtR((li.qty||1)*(li.price||0))}</div>
@@ -3014,7 +3014,7 @@ function getDeadlines(today, profile) {
   }
   if (profile?.is_provisional) {
     dl.push({name:'IRP6 — 1st Provisional Tax',type:'Provisional Tax',date:new Date(y,7,31),panel:'irp6'});
-    dl.push({name:'IRP6 — 2nd Provisional Tax',type:'Provisional Tax',date:new Date(y+1,1,28),panel:'irp6'});
+    dl.push({name:'IRP6 — 2nd Provisional Tax',type:'Provisional Tax',date:new Date(y+1,2,0),panel:'irp6'}); // day 0 of March = last day of Feb (handles leap years)
   }
   dl.push({name:'ITR14 — Annual Return',type:'Corporate Tax',date:new Date(y,5,30),panel:'itr14'});
   return dl.sort((a,b) => a.date - b.date);
@@ -5205,12 +5205,12 @@ async function loadPeriodTransactions(period, container) {
           const statusLabel = t.ignored ? '⊘ Ignored' : t.match_status==='matched' ? '✅ Matched' : t.match_status==='suggested' ? '🔶 Suggested' : '⏳ Unmatched';
           const rowBg = t.match_status==='matched'?'rgba(34,197,94,.04)':t.match_status==='suggested'?'rgba(245,158,11,.04)':'';
           return `<tr style="border-bottom:1px solid rgba(255,255,255,.03);background:${rowBg};opacity:${t.ignored?'.5':'1'}">
-            <td style="padding:8px 20px;color:var(--text-3);white-space:nowrap">${t.date||'—'}</td>
-            <td style="padding:8px 12px;color:var(--text);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(t.description||'').replace(/"/g,'&quot;')}">${t.description||'—'}</td>
+            <td style="padding:8px 20px;color:var(--text-3);white-space:nowrap">${escHtml(t.date||'—')}</td>
+            <td style="padding:8px 12px;color:var(--text);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(t.description||'')}">${escHtml(t.description||'—')}</td>
             <td style="padding:8px 12px;color:${t.type==='credit'?'var(--green)':'var(--red)'};font-weight:600;text-align:right;white-space:nowrap">${t.type==='credit'?'+':'-'}${fmtR(Math.abs(t.amount||0))}</td>
-            <td style="padding:8px 12px;color:var(--text-3);text-transform:capitalize">${t.type||'—'}</td>
+            <td style="padding:8px 12px;color:var(--text-3);text-transform:capitalize">${escHtml(t.type||'—')}</td>
             <td style="padding:8px 12px;color:${statusColor};font-size:11px;white-space:nowrap">${statusLabel}</td>
-            <td style="padding:8px 12px;color:var(--text-3);font-size:11px">${t.classification||'—'}</td>
+            <td style="padding:8px 12px;color:var(--text-3);font-size:11px">${escHtml(t.classification||'—')}</td>
             <td style="padding:8px 20px;color:var(--text-3);font-size:11px">${t.matched_invoice_id?'🔗 Linked':'—'}</td>
           </tr>`;
         }).join('')}</tbody>
