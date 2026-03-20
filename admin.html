@@ -627,8 +627,10 @@ async function loadUsers() {
 
   allUsers = (profiles || []).map(p => ({ ...p, invoiceCount: invMap[p.id] || 0 }));
 
-  // Check if RLS is blocking (only see our own profile)
-  if (allUsers.length <= 1) {
+  // Check if RLS is blocking: only show warning if the sole returned user is the admin themselves
+  const { data: { session } } = await sb.auth.getSession();
+  const onlyOwnProfile = allUsers.length === 1 && session?.user && allUsers[0].id === session.user.id;
+  if (onlyOwnProfile) {
     document.getElementById('setupNotice').style.display = 'block';
   }
 
