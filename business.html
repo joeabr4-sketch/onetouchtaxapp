@@ -639,10 +639,18 @@ h1,h2,h3,.logo-text,.stat-value{font-family:'Syne',sans-serif}
 .ot-tip{display:inline-flex;align-items:center}
 .ot-tip-btn{background:rgba(184,196,216,.12);border:1px solid rgba(184,196,216,.2);border-radius:50%;width:18px;height:18px;display:none;align-items:center;justify-content:center;font-size:10px;color:var(--text-3);cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;line-height:1}
 body.help-mode .ot-tip-btn{display:inline-flex}
-.ot-tip-popup{position:absolute;z-index:200;background:var(--surface);border:1px solid var(--blue);border-radius:10px;padding:12px 14px;max-width:260px;font-size:12px;color:var(--text-2);line-height:1.6;box-shadow:0 8px 24px rgba(0,0,0,.3);top:calc(100% + 8px);left:0}
-.ot-tip-popup strong{color:var(--text);display:block;margin-bottom:4px}
-.ot-tip-popup .ot-close{float:right;background:none;border:none;color:var(--text-3);cursor:pointer;font-size:13px;margin:-2px -4px 0 8px;line-height:1}
+.ot-tip-popup{position:absolute;z-index:200;background:#111c2e;border:1px solid rgba(79,142,247,.4);border-radius:10px;padding:12px 14px;max-width:260px;font-size:12px;color:#c0c8d8;line-height:1.6;box-shadow:0 8px 24px rgba(0,0,0,.6);top:calc(100% + 8px);left:0}
+.ot-tip-popup strong{color:#fff;display:block;margin-bottom:4px}
+.ot-tip-popup .ot-close{float:right;background:none;border:none;color:#8a9ab8;cursor:pointer;font-size:13px;margin:-2px -4px 0 8px;line-height:1}
 .ot-tip-wrap{position:relative;display:inline-flex;align-items:center;gap:6px}
+
+/* ── HELP MODE BANNERS ── */
+.help-banner{display:none;background:rgba(79,142,247,.07);border:1px solid rgba(79,142,247,.22);border-radius:12px;padding:14px 18px;margin-bottom:18px}
+.help-banner-title{font-size:13px;font-weight:700;color:#4f8ef7;margin-bottom:5px}
+.help-banner-body{font-size:12.5px;color:#c0c8d8;line-height:1.65}
+.help-banner-actions{margin-top:8px;font-size:11.5px;color:#8a9ab8;display:flex;flex-wrap:wrap;gap:5px}
+.help-banner-actions span{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:2px 9px}
+body.help-mode .help-banner{display:block}
 
 /* ── HELP MODE TOGGLE ── */
 #helpModeToggle{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:7px;color:var(--text-3);font-size:11.5px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;margin-top:6px}
@@ -811,6 +819,7 @@ body.help-mode .ot-tip-btn{display:inline-flex}
 
     <!-- ═══ DASHBOARD ═══ -->
     <div class="section active" id="section-dashboard">
+      <div class="help-banner"><div class="help-banner-title">💡 Dashboard</div><div class="help-banner-body">Your financial control centre. The numbers here update automatically as you log invoices and reconcile your bank statement. Use it to spot what's overdue, what's coming up on the SARS calendar, and how healthy your cash flow is.</div><div class="help-banner-actions"><span>Use the nav on the left to jump to any section</span><span>Guidance mode shows ? buttons on section headings</span></div></div>
       <div id="newUserBanner" style="display:none;background:linear-gradient(135deg,rgba(184,196,216,.1),rgba(34,197,94,.06));border:1px solid rgba(184,196,216,.2);border-radius:14px;padding:22px 26px;margin-bottom:20px">
         <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px">Welcome to OneTouch TaxApp 👋</div>
         <div style="font-size:13px;color:var(--text-2);margin-bottom:16px;max-width:500px">Your dashboard is ready. Start by adding your first invoice or uploading a bank statement.</div>
@@ -982,6 +991,7 @@ body.help-mode .ot-tip-btn{display:inline-flex}
 
     <!-- ═══ COMPLIANCE CALENDAR ═══ -->
     <div class="section" id="section-calendar">
+      <div class="help-banner"><div class="help-banner-title">💡 Compliance Calendar</div><div class="help-banner-body">All your SARS deadlines for the year in one place — VAT201, EMP201, provisional tax (IRP6), and annual returns. Dates are calculated from your business profile (VAT registered, provisional taxpayer, PAYE). Check this each month so nothing sneaks up on you.</div><div class="help-banner-actions"><span>Deadlines turn red when they're within 14 days</span><span>Set up your profile in Settings to get accurate dates</span></div></div>
       <div style="margin-bottom:20px">
         <h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:4px">📅 Compliance Calendar <span id="calYear" style="color:var(--blue)"></span></h2>
         <p style="font-size:13px;color:var(--text-2)">All SARS deadlines for the year. Plan ahead to stay compliant.</p>
@@ -1004,6 +1014,7 @@ body.help-mode .ot-tip-btn{display:inline-flex}
 
     <!-- ═══ CHECKLISTS ═══ -->
     <div class="section" id="section-checklist">
+      <div class="help-banner"><div class="help-banner-title">💡 Compliance Checklists</div><div class="help-banner-body">Tick-off checklists for VAT, payroll, and year-end compliance. They don't auto-complete — you tick them manually as you do each task. Think of them as a monthly and annual checklist to make sure you haven't missed anything before submitting to SARS.</div><div class="help-banner-actions"><span>Tick items as you complete them</span><span>Progress saves to your account</span></div></div>
       <div style="margin-bottom:20px"><h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:4px">✅ Compliance Checklists</h2><p style="font-size:13px;color:var(--text-2)">Tick off as you go. Progress saves to your account.</p></div>
       <div class="g2">
         <div class="card">
@@ -1059,6 +1070,7 @@ body.help-mode .ot-tip-btn{display:inline-flex}
 
     <!-- ═══ FINANCIAL HISTORY ═══ -->
     <div class="section" id="section-history">
+      <div class="help-banner"><div class="help-banner-title">💡 Financial History</div><div class="help-banner-body">A month-by-month record of your revenue, expenses, and profit. Snapshots are saved automatically when you close a reconciliation period. Use this to spot trends, compare months, and have a full picture ready when your accountant asks for history.</div><div class="help-banner-actions"><span>Snapshots save automatically when you close a month</span><span>Opening balances set your year-start position</span></div></div>
       <div style="margin-bottom:18px"><h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:3px">📁 Financial History</h2><p style="font-size:13px;color:var(--text-2)">Monthly snapshots, document history, bank statements and opening balances.</p></div>
       <div style="display:flex;gap:6px;margin-bottom:16px;border-bottom:1.5px solid var(--border);padding-bottom:0">
         <button class="hist-tab active" id="htab-monthly" onclick="switchHistTab('monthly')">📊 Monthly Financials</button>
@@ -1126,6 +1138,7 @@ body.help-mode .ot-tip-btn{display:inline-flex}
 
     <!-- ═══ INVOICES ═══ -->
     <div class="section" id="section-invoices">
+      <div class="help-banner"><div class="help-banner-title">💡 Invoices &amp; Documents</div><div class="help-banner-body">Log every rand you earn here as an income invoice, and every business cost as an expense. This feeds directly into your VAT201, your P&amp;L, and your reconciliation — so the more accurately you log here, the cleaner your tax picture. You can add entries one at a time or import in bulk from a CSV.</div><div class="help-banner-actions"><span>+ New Invoice — add income or expense</span><span>Import CSV — bulk upload from a spreadsheet</span><span>PDF — download any invoice as a PDF</span><span>WhatsApp — send invoice to client (Full plan)</span></div></div>
       <div class="inv-toolbar">
         <div>
           <div class="ot-tip-wrap"><h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:3px">🧾 Invoices &amp; Documents</h2><button class="ot-tip-btn" onclick="showTip(this,'invoices')">?</button></div>
@@ -1183,6 +1196,7 @@ body.help-mode .ot-tip-btn{display:inline-flex}
 
     <!-- ═══ FINANCIALS ═══ -->
     <div class="section" id="section-financials">
+      <div class="help-banner"><div class="help-banner-title">💡 Business Financials &amp; P&amp;L</div><div class="help-banner-body">Your live profit &amp; loss report, built from the invoices you've logged. This is where you generate your VAT201 (quarterly VAT return), IRP6 (provisional tax), and ITR14 (annual return) pre-fill data. The numbers here are only as accurate as what you've logged in Invoices.</div><div class="help-banner-actions"><span>VAT201 — quarterly VAT submission (Pro+)</span><span>IRP6 — provisional tax every 6 months (Pro+)</span><span>ITR14 — annual company tax return (Pro+)</span><span>AI Tips — personalised tax-saving advice (Full)</span></div></div>
       <div id="finEmptyState" style="display:none;text-align:center;padding:60px 20px;min-height:calc(100vh - 200px);flex-direction:column;align-items:center;justify-content:center"><div style="font-size:48px;margin-bottom:14px">📈</div><div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px">No financial data yet</div><div style="font-size:13px;color:var(--text-2);margin-bottom:22px">Add invoices to see your P&L, charts and tax estimates.</div><button onclick="showSection('invoices',document.querySelector('.s-btn[onclick*=invoices]'))" style="background:var(--blue);color:#0f1520;border:none;padding:11px 22px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">+ Add First Invoice</button></div>
       <div id="finContent">
         <div style="margin-bottom:18px"><h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:3px">📈 Business Financials</h2><p style="font-size:13px;color:var(--text-2)">Monthly income vs expenses, profit/loss, and AI saving tips.</p></div>
@@ -1218,6 +1232,7 @@ body.help-mode .ot-tip-btn{display:inline-flex}
 
     <!-- ═══ RECONCILIATION ═══ -->
     <div class="section" id="section-reconcile" style="position:relative">
+      <div class="help-banner"><div class="help-banner-title">💡 Bank Reconciliation</div><div class="help-banner-body">At the end of each month: download your bank statement as a CSV from your internet banking app, then upload it in the Bank Statement card below. The app will match each bank transaction to your logged invoices — auto-matching where it can, letting you match manually for the rest. When you hit 80%+ confidence, close the month to lock it. This creates an immutable audit trail that proves your books are clean.</div><div class="help-banner-actions"><span>Upload CSV — drop your bank statement in the card below</span><span>Auto-Match — let AI do the first pass</span><span>Manual match — drag transactions to invoices</span><span>Close Month — locks the period when 80%+ matched</span><span>Audit tab — full tamper-evident history</span></div></div>
       <div id="lock-section-reconcile" style="display:none;position:absolute;pointer-events:none;inset:0;background:rgba(7,8,9,.85);backdrop-filter:blur(4px);z-index:10;align-items:center;justify-content:center;padding:20px"><div style="background:rgba(184,196,216,.08);border:1px solid rgba(184,196,216,.2);border-radius:16px;padding:32px;text-align:center;max-width:380px"><div style="font-size:36px;margin-bottom:12px">🔒</div><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Pro Plan Feature</div><div style="font-size:13px;color:var(--text-2);margin-bottom:20px;line-height:1.6">Bank reconciliation is available on the Pro plan.</div><button onclick="window.open('https://onetouch.net.za/#pricing','_blank')" style="background:var(--blue);color:#0f1520;border:none;padding:11px 24px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer">⬆ Upgrade to Pro</button></div></div>
 
       <!-- HEADER -->
@@ -1351,6 +1366,7 @@ body.help-mode .ot-tip-btn{display:inline-flex}
 
     <!-- ═══ BOOKKEEPER PACK ═══ -->
     <div class="section" id="section-handoff">
+      <div class="help-banner"><div class="help-banner-title">💡 Bookkeeper Handoff Pack</div><div class="help-banner-body">One-click PDF that packages everything your accountant needs — your P&amp;L, invoice list, reconciliation summary, VAT201 figures, and opening balances. Generate this at the end of each quarter or year-end. You can also create a 30-day share link so your accountant can view it online without needing app access.</div><div class="help-banner-actions"><span>Download Pack — generates a single PDF</span><span>Share Link — 30-day read-only access for your accountant (Full plan)</span></div></div>
       <div id="lock-section-handoff" style="display:none;position:absolute;pointer-events:none;inset:0;background:rgba(7,8,9,.85);backdrop-filter:blur(4px);border-radius:inherit;z-index:10;align-items:center;justify-content:center;padding:20px"><div style="background:rgba(184,196,216,.08);border:1px solid rgba(184,196,216,.2);border-radius:16px;padding:32px;text-align:center;max-width:380px"><div style="font-size:36px;margin-bottom:12px">🔒</div><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Pro Plan Feature</div><div style="font-size:13px;color:var(--text-2);margin-bottom:20px;line-height:1.6">The Bookkeeper Handoff Pack is available on Pro. Download your full P&L, VAT summary, invoice register and tax liability report in one click.</div><button onclick="window.open('https://onetouch.net.za/#pricing','_blank')" style="background:var(--blue);color:#0f1520;border:none;padding:11px 24px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer">⬆ Upgrade to Pro — R299/mo</button></div></div>
       <div style="margin-bottom:18px"><h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:3px">📦 Bookkeeper Handoff Pack</h2><p style="font-size:13px;color:var(--text-2)">One-click download of everything your accountant needs. Clean, verified, ready to sign off.</p></div>
       <!-- RECONCILIATION STATUS BANNER -->
@@ -1418,6 +1434,7 @@ body.help-mode .ot-tip-btn{display:inline-flex}
 
     <!-- ═══ PAYROLL ═══ -->
     <div class="section" id="section-payroll">
+      <div class="help-banner"><div class="help-banner-title">💡 Payroll</div><div class="help-banner-body">Add each employee once with their gross salary and allowances. The app calculates PAYE (using the 2025/26 SARS tax tables), UIF (1% employee + 1% employer, capped at R177.12/month), and SDL (1% if total annual payroll exceeds R500k). Run payroll each month to generate payslips and auto-post the salary expense to your books. EMP201 data is generated for you to submit on eFiling.</div><div class="help-banner-actions"><span>Add Employee — set up once, runs every month</span><span>Run Payroll — calculates and posts to books</span><span>Payslips — professional PDF per employee</span><span>EMP201 — SARS payroll return prep (Full plan)</span></div></div>
       <div id="lock-section-payroll" style="display:none;position:absolute;pointer-events:none;inset:0;background:rgba(7,8,9,.85);backdrop-filter:blur(4px);border-radius:inherit;z-index:10;align-items:center;justify-content:center;padding:20px"><div style="background:var(--gold-dim);border:1px solid rgba(212,168,67,.25);border-radius:16px;padding:32px;text-align:center;max-width:380px"><div style="font-size:36px;margin-bottom:12px">🔒</div><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Full Plan Feature</div><div style="font-size:13px;color:var(--text-2);margin-bottom:20px;line-height:1.6">Payroll, payslips, PAYE/UIF/SDL calculator and EMP201 prep are available on the Full plan.</div><button onclick="window.open('https://onetouch.net.za/#pricing','_blank')" style="background:var(--gold);color:#fff;border:none;padding:11px 24px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer">⬆ Upgrade to Full — R499/mo</button></div></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px">
         <div>
@@ -1610,6 +1627,7 @@ body.help-mode .ot-tip-btn{display:inline-flex}
 
     <!-- ═══ SETTINGS ═══ -->
     <div class="section" id="section-settings">
+      <div class="help-banner"><div class="help-banner-title">💡 Settings</div><div class="help-banner-body">Set up your business profile here — name, owner, VAT number, bank details for invoices, and your logo. The more complete your profile, the more accurate your SARS deadlines, VAT calculations, and invoice PDFs. You can also change your display language and restart the setup guide from here.</div><div class="help-banner-actions"><span>Business Profile — used on all invoice PDFs</span><span>Language — English, Afrikaans, isiZulu, isiXhosa, Setswana</span><span>Restart Setup Guide — relaunches the orientation tour</span></div></div>
       <div style="max-width:700px">
         <div style="margin-bottom:20px"><h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:3px">⚙ Settings</h2><p style="font-size:13px;color:var(--text-2)">Manage your business profile, invoice branding and account.</p></div>
         <!-- HELP & ONBOARDING -->
@@ -7817,64 +7835,58 @@ function setLanguage(lang) {
 const OB_STEPS = [
   {
     icon: '🧾',
-    title: 'Step 1 — Log your invoices & expenses',
-    desc: 'Start by adding your income and expenses. This is what your business has earned and spent.',
+    title: 'Where your money gets logged',
+    desc: 'The Invoices section is home base. Every rand you earn goes in as income. Every business cost goes in as an expense. No need to add anything yet — just see where it lives.',
     actions: [
       {
-        icon: '📥',
-        label: 'Import from CSV',
-        desc: 'Already have records? Import them all at once.',
-        fn: () => { _goObSection('invoices', 'Log your invoices & expenses', 'When done, tap Done →'); setTimeout(openImportModal, 300); }
-      },
-      {
-        icon: '✏️',
-        label: 'Capture manually',
-        desc: 'Add an income invoice or expense one at a time.',
-        fn: () => { _goObSection('invoices', 'Log your invoices & expenses', 'When done, tap Done →'); setTimeout(openInvForm, 300); }
+        icon: '👀',
+        label: 'Show me the Invoices section',
+        desc: 'Take a look around — nothing to fill in right now.',
+        fn: () => _goObSection('invoices', '📍 Invoices section', 'Explore freely — tap Got it when ready →')
       }
     ],
-    nextLabel: "Done →"
+    nextLabel: "Got it, next →"
   },
   {
     icon: '🏦',
-    title: 'Step 2 — Upload your bank statement',
-    desc: 'Your bank statement is the source of truth. It helps catch mistakes and ensures your numbers are correct before tax submission.',
+    title: 'Where your bank statement lives',
+    desc: 'At the end of each month you\'ll download your bank statement as a CSV and upload it here. It\'s your source of truth — it catches anything you missed and proves your numbers are correct.',
     actions: [
       {
-        icon: '📂',
-        label: 'Go to Reconciliation → Upload',
-        desc: 'Download a CSV from your internet banking, then drop it in the Bank Statement card.',
-        fn: () => { _goObSection('reconcile', 'Upload your bank statement', 'Drop your CSV in the Bank Statement card, then Done →'); setTimeout(() => { const dz = document.getElementById('reconDropZone'); if (dz) dz.scrollIntoView({behavior:'smooth',block:'center'}); }, 400); }
+        icon: '👀',
+        label: 'Show me the upload spot',
+        desc: 'This is the Bank Statement card in the Reconciliation section.',
+        fn: () => { _goObSection('reconcile', '📍 Bank Statement upload card', 'Scroll down to see it — tap Got it when ready →'); setTimeout(() => { const dz = document.getElementById('reconDropZone'); if (dz) dz.scrollIntoView({behavior:'smooth',block:'center'}); }, 400); }
       }
     ],
-    nextLabel: "Done →"
+    nextLabel: "Got it, next →"
   },
   {
     icon: '🔗',
-    title: 'Step 3 — Reconcile your transactions',
-    desc: 'Match your bank transactions to invoices and expenses. This creates an audit trail and verifies your books.',
+    title: 'How you close each month',
+    desc: 'Once your bank statement is uploaded, you match transactions to invoices here. Aim for 80%+ and close the month. That\'s your immutable audit trail — proof that your books are clean.',
     actions: [
       {
-        icon: '🔗',
-        label: 'Open Reconciliation',
-        desc: 'Match transactions to invoices. Aim for 80%+ completion.',
-        fn: () => _goObSection('reconcile', 'Match transactions', 'Aim for high completion → Done →')
+        icon: '👀',
+        label: 'Show me the matching screen',
+        desc: 'See how transactions line up against your invoices.',
+        fn: () => _goObSection('reconcile', '📍 Reconciliation — matching screen', 'Scroll down past the upload card — tap Got it when ready →')
       }
     ],
-    nextLabel: "Done →"
+    nextLabel: "Got it, next →"
   },
   {
     icon: '📅',
-    title: 'Your Monthly Routine',
-    desc: 'Every month, follow these 4 steps and your books will always be clean:',
+    title: 'Your monthly routine',
+    desc: 'Do these 4 things every month and your books will always be clean:',
     routine: [
-      'Log invoices & expenses',
-      'Upload your bank statement',
-      'Reconcile your transactions',
-      'Close the month'
+      'Log invoices & expenses as they happen',
+      'Download & upload your bank statement',
+      'Match transactions to invoices',
+      'Close the month when you hit 80%+'
     ],
     actions: [],
-    nextLabel: 'Go to my dashboard →',
+    nextLabel: "Let's go →",
     last: true
   }
 ];
@@ -7914,7 +7926,7 @@ function showObWizard(step) {
   document.getElementById('obWizTitle').textContent = s.title;
   document.getElementById('obWizNextBtn').textContent = s.nextLabel || 'Done →';
   document.getElementById('obWizStepLabel').textContent =
-    s.last ? '🎉 Almost there' : 'Step ' + (step + 1) + ' of 3';
+    s.last ? '🎉 Almost there' : 'App Tour — ' + (step + 1) + ' of 3';
 
   // Description + optional numbered routine list
   const descEl = document.getElementById('obWizDesc');
