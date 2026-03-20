@@ -1675,8 +1675,8 @@ body.help-mode .main{padding-top:34px}
           <div style="padding:16px 20px">
             <div id="planFreeMsg" style="font-size:13px;color:var(--text-2);margin-bottom:14px">You're on the <strong style="color:var(--text)">Free plan</strong>. Upgrade to Pro to unlock VAT201, bank analysis, reconciliation, IRP6/ITR14 and bookkeeper pack.</div>
             <div id="upgradeButtons" style="display:flex;gap:8px;flex-wrap:wrap">
-              <button onclick="window.open('https://onetouch.net.za/#pricing','_blank')" style="background:var(--blue);color:#0f1520;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬆ Upgrade to Pro — R299/mo</button>
-              <button onclick="window.open('https://onetouch.net.za/#pricing','_blank')" style="background:var(--gold);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬆ Upgrade to Full — R499/mo</button>
+              <button onclick="payWithPayFast('pro')" style="background:var(--blue);color:#0f1520;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬆ Upgrade to Pro — R299/mo</button>
+              <button onclick="payWithPayFast('full')" style="background:var(--gold);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬆ Upgrade to Full — R499/mo</button>
             </div>
             <div id="proUpgradeBtn" style="display:none">
               <div style="font-size:13px;color:var(--text-2);margin-bottom:14px">You're on the <strong style="color:var(--text)">⭐ Pro plan</strong>. Upgrade to Full to unlock WhatsApp delivery, payroll, EMP201, AI saving tips and accountant access link.</div>
@@ -2266,6 +2266,60 @@ function canUse(feature) {
 
 function showUpgradePrompt(tier) { /* removed — no upgrade popups */ }
 function closeUpgrade() { /* removed */ }
+
+// ── PAYFAST CHECKOUT ──
+async function payWithPayFast(plan) {
+  if (!currentUser) { showToast('Please sign in first', 'var(--red)'); return; }
+  showToast('⏳ Preparing secure checkout...', 'var(--blue)');
+  try {
+    const resp = await fetch('/api/payfast', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        plan,
+        userId:    currentUser.id,
+        email:     currentUser.email,
+        firstName: userProfile?.owner_name?.split(' ')[0] || ''
+      })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Checkout failed');
+
+    // Build and submit form to PayFast
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = data.action;
+    Object.entries(data.fields).forEach(([key, val]) => {
+      const input = document.createElement('input');
+      input.type = 'hidden'; input.name = key; input.value = val;
+      form.appendChild(input);
+    });
+    document.body.appendChild(form);
+    form.submit();
+  } catch (e) {
+    showToast('❌ ' + e.message, 'var(--red)');
+  }
+}
+
+// Handle return from PayFast
+(function checkPaymentReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const status = params.get('payment');
+  const plan   = params.get('plan');
+  if (status === 'success' && plan) {
+    // Clean URL
+    window.history.replaceState({}, '', window.location.pathname);
+    // Show success toast after app loads
+    setTimeout(() => {
+      showToast(`🎉 Payment received! Your ${plan.charAt(0).toUpperCase()+plan.slice(1)} plan is now active.`, 'var(--green)', 6000);
+      // Reload profile so plan badge updates
+      if (currentUser) loadUserProfile();
+    }, 1500);
+  } else if (status === 'cancelled') {
+    window.history.replaceState({}, '', window.location.pathname);
+    setTimeout(() => showToast('Payment cancelled — no charge was made.', 'var(--amber)'), 1000);
+  }
+})()
 
 // ── ONBOARDING ──
 let obData = { vat: 'yes', paye: 'yes', prov: 'yes' };
