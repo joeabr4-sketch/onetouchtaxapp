@@ -577,28 +577,44 @@ h1,h2,h3,.logo-text,.stat-value{font-family:'Syne',sans-serif}
 }
 
 /* ── ONBOARDING WIZARD ── */
-#obWizard{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:900;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+#obWizard{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);transition:background .3s}
 #obWizard.ob-hidden{display:none}
-#obWizard.ob-min{inset:auto;bottom:24px;right:24px;background:none;backdrop-filter:none;display:flex;align-items:flex-end;justify-content:flex-end}
-.ob-wiz-full{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px 28px;max-width:480px;width:90%;position:relative}
-.ob-wiz-pill{background:var(--surface);border:1px solid rgba(79,142,247,.4);border-radius:40px;padding:10px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 28px rgba(0,0,0,.5);max-width:340px}
-.ob-pill-text{font-size:12px;color:var(--text-2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ob-pill-text strong{color:var(--text)}
-.ob-pill-expand{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--text-3);cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0}
-.ob-pill-next{background:var(--blue);color:#0f1520;border:none;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0}
-.ob-dots{display:flex;justify-content:center;gap:7px;margin-bottom:20px}
-.ob-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .25s}
-.ob-dot.on{background:var(--blue);width:22px;border-radius:4px}
+#obWizard.ob-min{inset:auto;bottom:24px;right:24px;background:none;backdrop-filter:none;display:flex;align-items:flex-end;justify-content:flex-end;z-index:9000}
+.ob-wiz-full{background:var(--surface);border:1px solid rgba(79,142,247,.25);border-radius:22px;padding:36px 32px;max-width:460px;width:92%;position:relative;box-shadow:0 32px 80px rgba(0,0,0,.6),0 0 0 1px rgba(79,142,247,.08),inset 0 1px 0 rgba(255,255,255,.04)}
+.ob-wiz-pill{background:var(--surface);border:1px solid rgba(79,142,247,.5);border-radius:50px;padding:12px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 12px 40px rgba(0,0,0,.6),0 0 0 1px rgba(79,142,247,.1);min-width:280px;max-width:360px}
+.ob-pill-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 6px var(--blue);flex-shrink:0;animation:pulse 2s infinite}
+.ob-pill-text{font-size:12px;color:var(--text-2);flex:1;line-height:1.4}
+.ob-pill-text strong{color:var(--text);display:block;font-size:12.5px}
+.ob-pill-expand{background:none;border:none;color:var(--text-3);cursor:pointer;font-size:18px;flex-shrink:0;line-height:1;padding:2px}
+.ob-pill-next{background:var(--blue);color:#0f1520;border:none;border-radius:20px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0;white-space:nowrap;transition:all .15s}
+.ob-pill-next:hover{background:#3a7ae0;transform:translateY(-1px)}
+.ob-dots{display:flex;justify-content:center;gap:8px;margin-bottom:22px}
+.ob-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .3s}
+.ob-dot.on{background:var(--blue);width:24px;border-radius:4px}
 .ob-dot.done{background:var(--green)}
-.ob-primary{background:var(--blue);color:#0f1520;border:none;padding:11px 24px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .15s}
-.ob-primary:hover{background:#3a7ae0}
-.ob-step-label{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;text-align:center}
-.ob-why{background:rgba(79,142,247,.06);border:1px solid rgba(79,142,247,.12);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12.5px;color:var(--text-2);line-height:1.65}
-.ob-why strong{color:var(--blue);display:block;margin-bottom:3px;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
-.ob-act-btn{display:flex;flex-direction:column;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;cursor:pointer;text-align:left;transition:all .15s;width:100%}
-.ob-act-btn:hover{border-color:var(--blue);background:rgba(79,142,247,.06)}
-.ob-act-label{font-size:13px;font-weight:600;color:var(--text)}
-.ob-act-desc{font-size:11px;color:var(--text-3)}
+.ob-primary{background:var(--blue);color:#0f1520;border:none;padding:12px 28px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;width:100%}
+.ob-primary:hover{background:#3a7ae0;transform:translateY(-1px)}
+.ob-step-label{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px;text-align:center}
+.ob-desc{font-size:14px;color:var(--text-2);line-height:1.7;margin-bottom:20px;text-align:center}
+.ob-act-btn{display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:13px 16px;cursor:pointer;text-align:left;transition:all .2s;width:100%}
+.ob-act-btn:hover{border-color:var(--blue);background:rgba(79,142,247,.06);transform:translateY(-1px)}
+.ob-act-icon{font-size:22px;flex-shrink:0}
+.ob-act-body{flex:1}
+.ob-act-label{font-size:13.5px;font-weight:600;color:var(--text)}
+.ob-act-desc{font-size:11.5px;color:var(--text-3);margin-top:2px}
+/* Step 4 routine list */
+.ob-routine{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:20px;text-align:left}
+.ob-routine li{display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:13.5px;color:var(--text-2)}
+.ob-routine li .ob-rn{width:22px;height:22px;border-radius:50%;background:var(--blue);color:#0f1520;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+/* Completion modal */
+#obComplete{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9100;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+#obComplete.open{display:flex}
+.ob-complete-card{background:var(--surface);border:1px solid rgba(34,197,94,.3);border-radius:22px;padding:44px 36px;max-width:420px;width:90%;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.6),0 0 40px rgba(34,197,94,.08)}
+.ob-complete-icon{font-size:56px;margin-bottom:18px;display:block}
+.ob-complete-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:10px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif}
+.ob-complete-msg{font-size:15px;color:var(--text-2);line-height:1.75;margin-bottom:28px}
+.ob-complete-btn{background:var(--green);color:#fff;border:none;padding:13px 32px;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;width:100%}
+.ob-complete-btn:hover{background:#16a34a;transform:translateY(-1px)}
 
 /* ── ONBOARDING CHECKLIST (dashboard) ── */
 #obChecklist{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:16px}
@@ -7761,51 +7777,61 @@ const OB_STEPS = [
   {
     icon: '🧾',
     title: 'Step 1 — Log your invoices & expenses',
-    why: 'Every rand you earn or spend needs to be recorded here. Your invoices feed your VAT return, P&L and bank reconciliation automatically. No records = no accurate tax picture and no audit defence.',
+    desc: 'Start by adding your income and expenses. This is what your business has earned and spent.',
     actions: [
       {
-        label: '📥 Import from CSV',
-        desc: 'Already have records in a spreadsheet or another app? Import them all at once.',
-        fn: () => { _goObSection('invoices'); setTimeout(openImportModal, 300); }
+        icon: '📥',
+        label: 'Import from CSV',
+        desc: 'Already have records? Import them all at once.',
+        fn: () => { _goObSection('invoices', 'Log your invoices & expenses', 'When done, tap Done →'); setTimeout(openImportModal, 300); }
       },
       {
-        label: '✏️ Capture invoice manually',
-        desc: 'Add an income invoice or business expense one at a time.',
-        fn: () => { _goObSection('invoices'); setTimeout(openInvForm, 300); }
+        icon: '✏️',
+        label: 'Capture manually',
+        desc: 'Add an income invoice or expense one at a time.',
+        fn: () => { _goObSection('invoices', 'Log your invoices & expenses', 'When done, tap Done →'); setTimeout(openInvForm, 300); }
       }
     ],
-    nextLabel: "I've added my invoices →"
+    nextLabel: "Done →"
   },
   {
     icon: '🏦',
     title: 'Step 2 — Upload your bank statement',
-    why: "Your bank statement is the source of truth. Uploading it lets OneTouch automatically match payments to invoices and flag anything that doesn't add up — catching errors before SARS does.",
+    desc: 'Your bank statement is the source of truth. It helps catch mistakes and ensures your numbers are correct before tax submission.',
     actions: [
       {
-        label: '🏦 Go to Bank Analysis',
-        desc: 'Download a CSV from your internet banking, then drag it into the upload zone.',
-        fn: () => _goObSection('bankanalysis')
+        icon: '🏦',
+        label: 'Go to Bank Analysis',
+        desc: 'Download a CSV from your internet banking, then upload it here.',
+        fn: () => _goObSection('bankanalysis', 'Upload your bank statement', 'Tap Done when complete →')
       }
     ],
-    nextLabel: "I've uploaded my statement →"
+    nextLabel: "Done →"
   },
   {
     icon: '🔗',
     title: 'Step 3 — Reconcile your transactions',
-    why: 'Reconciliation matches what is in your bank to what is in your books. Each matched transaction builds your audit trail. Aim for 80%+ then close the month — this locks your records and generates your bookkeeper pack.',
+    desc: 'Match your bank transactions to invoices and expenses. This creates an audit trail and verifies your books.',
     actions: [
       {
-        label: '🔗 Open Reconciliation',
-        desc: 'Match transactions to invoices. Unmatched items can be classified or ignored with a reason.',
-        fn: () => _goObSection('reconcile')
+        icon: '🔗',
+        label: 'Open Reconciliation',
+        desc: 'Match transactions to invoices. Aim for 80%+ completion.',
+        fn: () => _goObSection('reconcile', 'Match transactions', 'Aim for high completion → Done →')
       }
     ],
-    nextLabel: "I've started reconciling →"
+    nextLabel: "Done →"
   },
   {
-    icon: '✅',
-    title: "You're set up — here's the monthly routine",
-    why: 'Every month repeat this cycle: log invoices → upload bank statement → reconcile → close the month. Your compliance score, VAT liability, payroll and bookkeeper pack all update automatically. You never need to start from scratch.',
+    icon: '📅',
+    title: 'Your Monthly Routine',
+    desc: 'Every month, follow these 4 steps and your books will always be clean:',
+    routine: [
+      'Log invoices & expenses',
+      'Upload your bank statement',
+      'Reconcile your transactions',
+      'Close the month'
+    ],
     actions: [],
     nextLabel: 'Go to my dashboard →',
     last: true
@@ -7845,22 +7871,36 @@ function showObWizard(step) {
   const s = OB_STEPS[step];
   document.getElementById('obWizIcon').textContent = s.icon;
   document.getElementById('obWizTitle').textContent = s.title;
-  document.getElementById('obWizWhy').textContent = s.why;
-  document.getElementById('obWizNextBtn').textContent = s.nextLabel || 'Next →';
-  document.getElementById('obWizStepLabel').textContent = s.last ? 'Setup Complete 🎉' : 'Step ' + (step + 1) + ' of ' + (OB_STEPS.length - 1);
+  document.getElementById('obWizNextBtn').textContent = s.nextLabel || 'Done →';
+  document.getElementById('obWizStepLabel').textContent =
+    s.last ? '🎉 Almost there' : 'Step ' + (step + 1) + ' of 3';
 
-  // Render action buttons
+  // Description + optional numbered routine list
+  const descEl = document.getElementById('obWizDesc');
+  descEl.textContent = s.desc;
+
+  // Action buttons
   const actionsEl = document.getElementById('obWizActions');
-  if (actionsEl) {
+  if (s.routine) {
+    // Step 4: numbered routine list
+    actionsEl.innerHTML = `<ul class="ob-routine">${
+      s.routine.map((item, i) =>
+        `<li><span class="ob-rn">${i+1}</span>${item}</li>`
+      ).join('')
+    }</ul>`;
+  } else {
     actionsEl.innerHTML = s.actions.map((a, i) =>
       `<button class="ob-act-btn" onclick="_obAct(${i})">
-        <div class="ob-act-label">${a.label}</div>
-        ${a.desc ? `<div class="ob-act-desc">${a.desc}</div>` : ''}
+        <span class="ob-act-icon">${a.icon}</span>
+        <span class="ob-act-body">
+          <span class="ob-act-label">${a.label}</span>
+          ${a.desc ? `<span class="ob-act-desc">${a.desc}</span>` : ''}
+        </span>
       </button>`
     ).join('');
   }
 
-  // Update dots (only count non-last steps)
+  // Dots — 4 dots but only Steps 1-3 are "numbered"
   for (let i = 0; i < OB_STEPS.length; i++) {
     const d = document.getElementById('owd' + i);
     if (d) d.className = 'ob-dot' + (i === step ? ' on' : i < step ? ' done' : '');
@@ -7872,8 +7912,8 @@ function _obAct(i) {
   if (s.actions[i]) s.actions[i].fn();
 }
 
-// Navigate to section and minimise wizard to floating pill
-function _goObSection(name) {
+// Navigate to section and shrink wizard to floating pill
+function _goObSection(name, pillTitle, pillSub) {
   showSection(name, document.querySelector('.s-btn[onclick*=' + name + ']'));
   const el = document.getElementById('obWizard');
   if (!el) return;
@@ -7881,10 +7921,9 @@ function _goObSection(name) {
   document.getElementById('obWizFull').style.display = 'none';
   const pill = document.getElementById('obWizPill');
   pill.style.display = 'flex';
+  document.getElementById('obPillTitle').textContent = pillTitle;
+  document.getElementById('obPillSub').textContent = pillSub;
   const s = OB_STEPS[_obStep];
-  document.getElementById('obPillIcon').textContent = s.icon;
-  document.getElementById('obPillTitle').textContent = s.title.replace(/^Step \d+ — /, '');
-  document.getElementById('obPillSub').textContent = 'When done, tap the button →';
   document.getElementById('obPillNext').textContent = s.nextLabel || 'Done →';
 }
 
@@ -7894,21 +7933,36 @@ function expandObWizard() {
 
 function advanceObWizard() {
   if (_obStep >= OB_STEPS.length - 1) {
-    skipObWizard(true);
-    showSection('dashboard', document.querySelector('.s-btn[onclick*=dashboard]'));
+    // Last step — show completion modal
+    const el = document.getElementById('obWizard');
+    if (el) el.classList.add('ob-hidden');
+    setObState({ wizardDone: true });
+    const modal = document.getElementById('obComplete');
+    if (modal) modal.classList.add('open');
+    renderObChecklist();
   } else {
     showObWizard(_obStep + 1);
   }
 }
 
 function skipObStep() {
-  advanceObWizard();
+  if (_obStep >= OB_STEPS.length - 1) {
+    advanceObWizard();
+  } else {
+    showObWizard(_obStep + 1);
+  }
 }
 
 function skipObWizard(completed) {
   const el = document.getElementById('obWizard');
   if (el) el.classList.add('ob-hidden');
   setObState(completed ? { wizardDone: true } : { wizardSkipped: true });
+}
+
+function closeObComplete() {
+  const modal = document.getElementById('obComplete');
+  if (modal) modal.classList.remove('open');
+  showSection('dashboard', document.querySelector('.s-btn[onclick*=dashboard]'));
 }
 
 // ── ONBOARDING CHECKLIST ──────────────────────────────────────────
@@ -8008,31 +8062,44 @@ document.addEventListener('click', function(e) {
 
   <!-- FULL VIEW -->
   <div class="ob-wiz-full" id="obWizFull">
-    <div class="ob-step-label" id="obWizStepLabel">Step 1 of 4</div>
+    <div class="ob-step-label" id="obWizStepLabel">Step 1 of 3</div>
     <div class="ob-dots">
       <div class="ob-dot on" id="owd0"></div>
       <div class="ob-dot" id="owd1"></div>
       <div class="ob-dot" id="owd2"></div>
       <div class="ob-dot" id="owd3"></div>
     </div>
-    <div id="obWizIcon" style="font-size:42px;text-align:center;margin-bottom:12px"></div>
-    <div id="obWizTitle" style="font-size:19px;font-weight:700;text-align:center;margin-bottom:14px;color:var(--text);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif"></div>
-    <div class="ob-why"><strong>Why this matters</strong><span id="obWizWhy"></span></div>
-    <div id="obWizActions" style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-      <button onclick="skipObStep()" style="background:none;border:none;color:var(--text-3);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;padding:4px">Skip this step</button>
-      <button id="obWizNextBtn" class="ob-primary" onclick="advanceObWizard()">Done, next step →</button>
+    <div id="obWizIcon" style="font-size:46px;text-align:center;margin-bottom:14px"></div>
+    <div id="obWizTitle" style="font-size:20px;font-weight:800;text-align:center;margin-bottom:10px;color:var(--text);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;line-height:1.3"></div>
+    <div id="obWizDesc" class="ob-desc"></div>
+    <div id="obWizActions" style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px"></div>
+    <button id="obWizNextBtn" class="ob-primary" onclick="advanceObWizard()">Done, next step →</button>
+    <div style="text-align:center;margin-top:12px">
+      <button onclick="skipObStep()" style="background:none;border:none;color:var(--text-3);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Skip this step</button>
     </div>
   </div>
 
   <!-- PILL VIEW (minimized while user does the action) -->
   <div class="ob-wiz-pill" id="obWizPill" style="display:none">
-    <div style="font-size:18px" id="obPillIcon"></div>
-    <div class="ob-pill-text"><strong id="obPillTitle"></strong><br><span id="obPillSub"></span></div>
-    <button class="ob-pill-expand" onclick="expandObWizard()">↑ Guide</button>
+    <div class="ob-pill-dot"></div>
+    <div class="ob-pill-text">
+      <strong id="obPillTitle"></strong>
+      <span id="obPillSub"></span>
+    </div>
+    <button class="ob-pill-expand" onclick="expandObWizard()" title="Reopen guide">↑</button>
     <button class="ob-pill-next" onclick="advanceObWizard()" id="obPillNext">Done →</button>
   </div>
 
+</div>
+
+<!-- ONBOARDING COMPLETION MODAL -->
+<div id="obComplete" role="dialog" aria-modal="true">
+  <div class="ob-complete-card">
+    <span class="ob-complete-icon">🎉</span>
+    <div class="ob-complete-title">You're all set up!</div>
+    <div class="ob-complete-msg">Now just follow this each month and your books will always be clean.</div>
+    <button class="ob-complete-btn" onclick="closeObComplete()">Go to my dashboard →</button>
+  </div>
 </div>
 </body>
 </html>
