@@ -6,7 +6,7 @@
 <title>OneTouch · Admin</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 
 <!--
   SUPABASE ADMIN POLICIES REQUIRED
@@ -47,19 +47,26 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 
 /* ── LOGIN ── */
-.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);background-image:radial-gradient(ellipse at 50% 0%, rgba(59,130,246,.08) 0%, transparent 60%)}
-.login-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:44px 40px;width:100%;max-width:400px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.5)}
-.login-mark{width:56px;height:56px;background:linear-gradient(135deg,var(--gold),#e8c97a);border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:#070c14;margin:0 auto 22px;box-shadow:0 8px 24px rgba(201,168,76,.25)}
-.login-title{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;margin-bottom:6px}
-.login-sub{font-size:13.5px;color:var(--text-2);margin-bottom:30px;line-height:1.6}
-.login-divider{display:flex;align-items:center;gap:12px;margin-bottom:20px}
-.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:var(--border)}
-.login-divider span{font-size:11.5px;color:var(--text-3);white-space:nowrap}
-.google-btn{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:13px;border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px}
-.google-btn:hover{border-color:var(--blue);background:rgba(59,130,246,.05);transform:translateY(-1px)}
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(184,196,216,.07),transparent),#070809}
+.auth-card{width:100%;max-width:380px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:40px 36px;box-shadow:0 24px 64px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.04) inset;text-align:center}
+.auth-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px}
+.auth-mark{width:40px;height:40px;background:linear-gradient(135deg,#c0c8d8,#8a9ab8);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#0f1520}
+.auth-wordmark{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#fff}
+.auth-wordmark span{background:linear-gradient(135deg,#c0c8d8,#e8edf5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.auth-pill{display:inline-block;background:rgba(184,196,216,.1);border:1px solid rgba(184,196,216,.2);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--blue);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:24px}
+.auth-h{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:6px;color:#fff}
+.auth-sub{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:26px;line-height:1.65}
+.g-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:13px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;margin-bottom:14px}
+.g-btn:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.2);transform:translateY(-1px)}
+.auth-or{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.2);font-size:12px;margin:4px 0 14px}
+.auth-or::before,.auth-or::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.08)}
+.auth-input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:11px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13.5px;outline:none;transition:border-color .15s;margin-bottom:10px}
+.auth-input:focus{border-color:rgba(184,196,216,.6);background:rgba(255,255,255,.07)}
+.auth-input::placeholder{color:rgba(255,255,255,.25)}
+.magic-btn{width:100%;background:linear-gradient(135deg,#c0c8d8,#8a9ab8);border:none;border-radius:8px;padding:13px;color:#0f1520;font-family:'Syne',sans-serif;font-size:13.5px;font-weight:700;cursor:pointer;transition:all .2s}
+.magic-btn:hover{background:linear-gradient(135deg,#d0d8e8,#9aaac8);transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.auth-note{font-size:11px;color:rgba(255,255,255,.25);text-align:center;margin-top:16px;line-height:1.6}
 .login-error{color:var(--red);font-size:12.5px;margin-top:12px;padding:10px 14px;background:var(--red-pale);border:1px solid rgba(239,68,68,.2);border-radius:8px;display:none;text-align:left}
-.login-loading{color:var(--text-3);font-size:13px;margin-top:12px}
-.login-note{font-size:11.5px;color:var(--text-3);margin-top:18px;line-height:1.6;padding-top:18px;border-top:1px solid var(--border)}
 
 /* ── LAYOUT ── */
 .admin-wrap{display:none;min-height:100vh;flex-direction:row}
@@ -265,25 +272,27 @@ tbody tr:hover .row-actions{opacity:1}
 <body>
 
 <!-- ── LOGIN ── -->
-<div class="login-wrap" id="loginWrap">
-  <div class="login-card">
-    <div class="login-mark">OT</div>
-    <div class="login-title">Admin Panel</div>
-    <div class="login-sub">OneTouch internal control panel.<br>Restricted to authorised admins only.</div>
-    <button class="google-btn" onclick="adminLogin()" id="googleBtn">
+<div class="auth-wrap" id="loginWrap">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-mark">OT</div>
+      <div class="auth-wordmark">One<span>Touch</span></div>
+    </div>
+    <div style="margin-bottom:22px"><div class="auth-pill">Admin Panel</div></div>
+    <div class="auth-h">Welcome back 👋</div>
+    <div class="auth-sub">Restricted to authorised admins only.</div>
+    <button class="g-btn" onclick="adminLogin()" id="googleBtn">
       <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-      Sign in with Google
+      Continue with Google
     </button>
-    <div class="login-divider"><span>or sign in with email</span></div>
-    <input type="email" class="login-input" id="magicEmail" style="display:none;margin-bottom:10px" />
-    <button class="google-btn" onclick="magicBtnClick()" id="magicBtn" style="background:var(--blue);border-color:var(--blue);color:#fff;justify-content:center">
-      Send Magic Link
-    </button>
-    <div id="magicSent" style="display:none;background:var(--green-pale);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--green);margin-top:8px">
+    <div class="auth-or">or</div>
+    <input class="auth-input" id="magicEmail" type="email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')magicLogin()" />
+    <button class="magic-btn" onclick="magicLogin()" id="magicBtn">Send Magic Link →</button>
+    <div id="magicSent" style="display:none;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:10px 14px;font-size:12.5px;color:#10b981;margin-top:10px">
       ✅ Magic link sent — check your email
     </div>
     <div class="login-error" id="loginError"></div>
-    <div class="login-note">Access is restricted to authorised admins only.</div>
+    <div class="auth-note">We'll email you a secure link — no password needed. ✉️</div>
   </div>
 </div>
 
@@ -550,17 +559,6 @@ async function adminLogin() {
     errEl.style.display = 'block';
     btn.disabled = false;
     btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>Sign in with Google';
-  }
-}
-
-function magicBtnClick() {
-  const input = document.getElementById('magicEmail');
-  if (input.style.display === 'none') {
-    input.style.display = 'block';
-    input.focus();
-    document.getElementById('magicBtn').textContent = 'Send →';
-  } else {
-    magicLogin();
   }
 }
 
