@@ -4733,12 +4733,20 @@ async function loadReconStatusBar() {
     const conf = session?.confidence || 0;
     const isLocked = session?.locked || false;
     let unresolved = 0;
+    let txCount = 0;
     if (session?.id) {
-      const { count } = await sb.from('bank_transactions')
+      const { count: unmatchedCount } = await sb.from('bank_transactions')
         .select('*', { count: 'exact', head: true })
         .eq('session_id', session.id).eq('match_status', 'unmatched').eq('ignored', false);
-      unresolved = count || 0;
+      const { count: totalCount } = await sb.from('bank_transactions')
+        .select('*', { count: 'exact', head: true })
+        .eq('session_id', session.id);
+      unresolved = unmatchedCount || 0;
+      txCount = totalCount || 0;
     }
+    // Hide the bar entirely if there's nothing to reconcile
+    if (!session && invoices.length === 0) { bar.style.display = 'none'; return; }
+    if (session && txCount === 0 && invoices.length === 0) { bar.style.display = 'none'; return; }
     const labelEl = document.getElementById('rsb-label');
     const subEl = document.getElementById('rsb-sub');
     const pctEl = document.getElementById('rsb-pct');
@@ -5253,7 +5261,7 @@ async function loadPeriodHistory() {
         mid_month_done: recon.mid_month_done || false,
         month_end_done: recon.month_end_done || false
       };
-    });
+    }).filter(p => p.revenue > 0 || p.expenses > 0 || p.confidence > 0 || p.invoice_count > 0);
     renderPeriodHistory(_periodData);
     const totRev = snaps.reduce((s, m) => s + (m.revenue || 0), 0);
     const totExp = snaps.reduce((s, m) => s + (m.expenses || 0), 0);
