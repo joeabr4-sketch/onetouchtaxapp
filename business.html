@@ -3852,6 +3852,7 @@ async function processReconFile(file) {
     const { error: stmtErr } = await sb.from('statements').insert({
       user_id: currentUser.id, filename: file.name, period: stmtPeriod,
       month: getCurrentPeriod(),
+      year: new Date().getFullYear(),
       total_income: totalCredits, total_expenses: totalDebits,
       vat_liability: 0, flag_count: 0, created_at: new Date().toISOString()
     });
