@@ -1611,6 +1611,14 @@ body.help-mode .ot-tip-btn{display:inline-flex}
     <div class="section" id="section-settings">
       <div style="max-width:700px">
         <div style="margin-bottom:20px"><h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:3px">⚙ Settings</h2><p style="font-size:13px;color:var(--text-2)">Manage your business profile, invoice branding and account.</p></div>
+        <!-- HELP & ONBOARDING -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-head"><div class="card-title">🚀 Help &amp; Onboarding</div></div>
+          <div style="padding:16px 20px">
+            <p style="font-size:13px;color:var(--text-2);margin-bottom:14px">Want to walk through the setup guide again? Restart it any time — it won't delete any of your data.</p>
+            <button onclick="restartObWizard();showSection('dashboard',document.querySelector('.s-btn[onclick*=dashboard]'))" style="background:var(--blue);color:#0f1520;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">↺ Restart Setup Guide</button>
+          </div>
+        </div>
         <!-- LANGUAGE SELECTOR -->
         <div class="card" style="margin-bottom:16px">
           <div class="card-head"><div class="card-title">🌍 <span data-i18n="settings_language">Language</span></div></div>
@@ -5652,6 +5660,13 @@ async function sendSupportMsg() {
   input.value = '';
   document.getElementById('supportQuickReplies').style.display = 'none';
   addSupportMsg('user', msg);
+  // Client-side command: restart setup wizard
+  const lower = msg.toLowerCase();
+  if (/restart.*setup|restart.*wizard|restart.*guide|redo.*setup|redo.*wizard|start.*over.*setup|setup.*again|show.*wizard|reopen.*wizard/.test(lower)) {
+    restartObWizard();
+    addSupportMsg('ai', "Done! I've restarted your setup guide — it'll appear in a moment. Follow the 4 steps and you'll be fully set up. Let me know if you need anything else.");
+    return;
+  }
   processSupportMsg(msg);
 }
 
@@ -5671,60 +5686,84 @@ async function processSupportMsg(msg) {
   const systemPrompt = `You are the OneTouch TaxApp support assistant — warm, clear and solution-focused. You know the app inside out.
 
 APP OVERVIEW:
-OneTouch TaxApp — South African business tax & invoicing SaaS by justadopeboy (Pty) Ltd t/a OneTouch.
+OneTouch TaxApp — South African business tax & bookkeeping SaaS by justadopeboy (Pty) Ltd t/a OneTouch.
 Website: onetouch.net.za | Support: support@onetouch.net.za | Billing: billing@onetouch.net.za
 
 TECH STACK:
 - Frontend: business.html hosted on Vercel via GitHub
-- Database: Supabase (PostgreSQL) — tables: profiles, invoices
+- Database: Supabase (PostgreSQL) — tables: profiles, invoices, statements, reconciliation_sessions, bank_transactions, monthly_snapshots, doc_history, opening_balances, employees, payroll_runs, recon_audit
 - Auth: Supabase Auth — Google OAuth + Magic Link
 - Email: Resend via /api/send-email
 - WhatsApp: Twilio via /api/whatsapp
 - AI: Claude API via /api/claude
-- PDF: jsPDF (client-side) | Excel import: SheetJS
+- PDF: jsPDF (client-side) | Excel/CSV import: SheetJS
 
 PLANS:
-FREE (R0): 5 invoices/month, PDF export, dashboard, financials & P&L, SARS calendar, checklists
-PRO (R299/mo): + unlimited invoices, VAT201, bank analysis (AI), reconciliation, IRP6 & ITR14 prep, bookkeeper pack, 10 AI calls
-FULL (R499/mo): + WhatsApp delivery, payroll & payslips (PAYE/UIF/SDL), EMP201, AI saving tips, accountant access link, unlimited AI
+FREE (R0): 5 invoices/quotes, PDF export, Financial Control Center dashboard, Financials & P&L, SARS compliance calendar, Opening balances & new business setup, Guided onboarding wizard, 5 South African languages
+PRO (R299/mo): Everything in Free + unlimited invoices/quotes, VAT201 prep, Bank reconciliation & immutable audit trail, AI bank statement analysis & categorisation, Transaction import (CSV), Monthly financial history & snapshots, IRP6 & ITR14 prep, Bookkeeper handoff pack (PDF), 10 AI assistant calls/month
+FULL (R499/mo): Everything in Pro + WhatsApp invoice delivery, Payroll (unlimited employees), PAYE/UIF/SDL calculator (SARS 2025/26 tables), Professional payslips (PDF), EMP201 prep (payroll auto-posts to books), Accountant access link (30-day revokable), AI business saving tips, Unlimited AI assistant calls, Priority support
+
+APP SECTIONS:
+- Dashboard: Financial health overview, reconciliation status, monthly summaries, SARS deadlines, getting-started checklist
+- Invoices & Documents: Create/edit income invoices and expenses, PDF download, WhatsApp send (Full plan), CSV import, status tracking
+- Bank Analysis: Upload bank statement (PDF/CSV/XLS), AI parses transactions, shows totals and flagged items (Pro+)
+- Reconciliation: Match bank transactions to invoices, auto/fuzzy/manual matching, confidence score, immutable audit log, close month (Pro+)
+- Financial History: Monthly snapshots with revenue/expenses/profit per period (Pro+)
+- Financials & P&L: Live income vs expense breakdown, VAT201, IRP6, ITR14 prep
+- Payroll: Add employees, calculate PAYE/UIF/SDL, generate payslips, EMP201, auto-post to books (Full plan)
+- Bookkeeper Pack: PDF summary for accountant handoff (Pro+)
+- SARS Calendar: Upcoming submission deadlines based on your profile
+- Opening Balances: Set year-start balances, YTD figures — for both new and existing businesses
+- Settings: Business profile, invoice branding, bank details, language, plan status, Help & Onboarding
 
 CURRENT USER:
 Email: ${userEmail} | Plan: ${userPlan} | Business: ${bizName}
 
 COMMON ISSUES & FIXES:
 
+SETUP WIZARD / ONBOARDING:
+- How to restart the setup guide: Go to Settings → "Help & Onboarding" → click "↺ Restart Setup Guide". Or type "restart setup" here and I'll do it instantly.
+- Wizard not showing on login: It only shows once per account. Use Settings → Help & Onboarding to relaunch it.
+- Skipped a step: Click "↺ Restart Setup Guide" in Settings to go through it again.
+- Setup checklist disappeared: Dismissed checklists can be restored by restarting the wizard from Settings.
+
 AUTH:
-- Magic link not arriving: Check spam. Expires in 1 hour. Try Google sign-in.
-- Stuck loading: Hard refresh (Cmd/Ctrl+Shift+R). Clear site data if persists.
+- Magic link not arriving: Check spam. Expires in 1 hour. Try Google sign-in instead.
+- Stuck loading: Hard refresh (Cmd/Ctrl+Shift+R). Clear site data if it persists.
 - Wrong redirect after Google: Clear cache, try incognito.
 - Plan not reflecting: Sign out and back in to refresh session.
 
 INVOICES:
-- Not saving: Check internet. Free plan limited to 5 invoices/month.
-- PDF not downloading: Allow popups for onetouch.net.za.
+- Not saving: Check internet connection. Free plan is limited to 5 invoices/month.
+- PDF not downloading: Allow popups for onetouch.net.za in your browser.
 - WhatsApp not sending: Number must be +27 format. Requires Full plan.
-- Wrong VAT: Check "Include VAT" toggle on invoice form. VAT is 15%.
+- Wrong VAT: Check "Include VAT" toggle on invoice form. SA VAT is 15%.
+- CSV import failing: Headers must be in row 1. Download the template for the correct format.
+
+BANK ANALYSIS & RECONCILIATION:
+- File not uploading: Supported formats: PDF, CSV, TXT, XLS, XLSX. Max 5MB.
+- Wrong transactions extracted: Use CSV export directly from your bank app (more reliable than PDF).
+- Reconciliation confidence low: Match more transactions manually using the reconcile section. Aim for 80%+.
+- Can't close the month: You need at least one matched transaction. Match a few manually first.
 
 FINANCIALS:
-- Showing R0: Add income invoices first. Toggle income/expense correctly.
-- VAT201 wrong: Ensure all income invoices have VAT enabled if VAT registered.
+- Showing R0: Add income invoices first. Make sure type is set to "income" not "expense".
+- VAT201 wrong: Ensure income invoices have VAT enabled if you are VAT registered.
 - EMP201 missing: Add employees in Payroll section first. Requires Full plan.
 
-BANK ANALYSIS:
-- File not uploading: Supported: PDF, CSV, TXT, XLS, XLSX. Max 5MB.
-- Wrong transactions: Try CSV export directly from your bank app.
-
-IMPORT:
-- CSV not working: Headers must be in row 1. Use template download.
-- Excel error: Save as CSV first, then import.
-
 PAYROLL:
-- PAYE wrong: Using 2025/26 SARS tables, primary rebate R17,235.
-- Employee data gone: Stored in localStorage — clearing browser data removes it.
+- PAYE calculation wrong: App uses 2025/26 SARS tables, primary rebate R17,235. Double-check employee gross salary.
+- Employee data gone: Employee records are stored in Supabase — if lost, check your internet and reload.
+- Payslip not generating: Employee must have a name and gross salary set.
+
+OPENING BALANCES:
+- New business with no history: Set all balances to R0 and enter today as the start date.
+- Existing business: Enter your YTD revenue, expenses, and any VAT owing as at your financial year start.
 
 SETTINGS:
-- Logo not showing: Must be under 2MB. JPG or PNG only.
-- Language not changing: Settings → Language section. Refresh after changing.
+- Logo not showing on invoices: Must be under 2MB. JPG or PNG only.
+- Language not changing: Settings → Language section. Supported: English, Afrikaans, isiZulu, isiXhosa, Setswana.
+- Plan upgrade not reflecting: Sign out and back in after upgrading.
 
 ESCALATION RULES:
 If after 2 attempts you cannot resolve the issue, end your message with exactly: [ESCALATE]
@@ -5732,9 +5771,10 @@ Escalate immediately for: database errors, data loss, billing issues, security c
 
 RULES:
 - Under 120 words per response
-- Never give tax advice — direct to Tax Assistant
+- Never give tax advice — direct to the Tax Assistant tab
 - Never promise refunds — direct to billing@onetouch.net.za
-- Always end with a follow-up question if issue may not be resolved`;
+- Always end with a follow-up question if the issue may not be fully resolved
+- Be definitive — give ONE clear answer, not a list of possibilities`;
 
   try {
     const resp = await fetch(AI_ENDPOINT, {
@@ -8007,6 +8047,22 @@ function dismissObChecklist() {
   setObState({ checklistDismissed: true });
   const el = document.getElementById('obChecklist');
   if (el) el.classList.add('ob-hidden');
+}
+
+function restartObWizard() {
+  // Clear all onboarding state for this user
+  try { localStorage.removeItem('ot_ob_' + (currentUser?.id || 'x')); } catch {}
+  _obStep = 0;
+  // Close pill/complete modal if open
+  const wiz = document.getElementById('obWizard');
+  const complete = document.getElementById('obComplete');
+  if (complete) complete.classList.remove('open');
+  if (wiz) wiz.classList.add('ob-hidden');
+  // Re-show the checklist
+  const checklist = document.getElementById('obChecklist');
+  if (checklist) checklist.classList.remove('ob-hidden');
+  // Launch wizard after short delay
+  setTimeout(() => showObWizard(0), 400);
 }
 
 // Mark calendar reviewed when user opens deadlines section
