@@ -1107,8 +1107,9 @@ body.help-mode .main{padding-top:34px}
             </select>
             <input type="month" id="ph-from" onchange="filterPeriodHistory()" style="background:var(--bg-input,var(--bg-card));border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12.5px;font-family:'DM Sans',sans-serif">
             <input type="month" id="ph-to" onchange="filterPeriodHistory()" style="background:var(--bg-input,var(--bg-card));border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12.5px;font-family:'DM Sans',sans-serif">
-            <button onclick="clearPeriodFilters()" style="background:transparent;border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text-3);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Clear</button>
+            <button onclick="clearPeriodFilters()" style="background:transparent;border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text-3);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Clear filters</button>
             <button onclick="saveMonthlySnapshot()" style="background:var(--blue);color:#0f1520;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">💾 Save Month</button>
+            <button onclick="clearAllFinancialHistory()" style="background:rgba(244,63,94,.08);border:1.5px solid rgba(244,63,94,.25);border-radius:8px;padding:7px 12px;color:var(--red);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">🗑 Clear All</button>
           </div>
         </div>
         <!-- YTD summary -->
@@ -5279,6 +5280,35 @@ async function loadPeriodHistory() {
 
 // Keep old name as alias so any stale callers don't break
 function loadMonthlyHistory() { return loadPeriodHistory(); }
+
+async function clearAllFinancialHistory() {
+  if (!confirm('This will permanently delete all monthly snapshots and reconciliation sessions. Your invoices and expenses are NOT deleted.\n\nThis cannot be undone. Continue?')) return;
+  try {
+    const uid = currentUser.id;
+    // Delete snapshots and sessions (bank_transactions cascade from sessions)
+    const [s1, s2] = await Promise.all([
+      sb.from('monthly_snapshots').delete().eq('user_id', uid),
+      sb.from('reconciliation_sessions').delete().eq('user_id', uid)
+    ]);
+    if (s1.error) throw s1.error;
+    if (s2.error) throw s2.error;
+    // Clear localStorage caches
+    try {
+      localStorage.removeItem('ot_recon_audit_' + uid);
+      localStorage.removeItem('ot_recon_done_' + uid);
+    } catch {}
+    // Reset in-memory recon state
+    reconSession = null;
+    bankTransactions = [];
+    // Refresh UI
+    await loadPeriodHistory();
+    loadReconStatusBar();
+    updateReconUI();
+    showToast('✅ Financial history cleared', 'var(--green)');
+  } catch(e) {
+    showToast('Error clearing history: ' + e.message, 'var(--red)');
+  }
+}
 
 function renderPeriodHistory(data) {
   const badge = document.getElementById('monthlyHistBadge');
