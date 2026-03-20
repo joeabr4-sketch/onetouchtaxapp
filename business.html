@@ -2378,7 +2378,8 @@ function updateUserUI() {
   const planLabel = plan === 'free' ? 'Free Plan' : plan === 'pro' ? '⭐ Pro Plan' : '🏢 Full Plan';
   document.getElementById('planBadge').textContent = planLabel;
   const aiLeft = plan === 'free' ? 0 : plan === 'pro' ? Math.max(0, 10 - (userProfile.ai_calls||0)) : '∞';
-  document.getElementById('aiCallsBadge').textContent = plan === 'full' ? '∞ AI calls' : `${aiLeft} AI calls left`;
+  const aiLabel = plan === 'full' ? '∞ AI calls' : plan === 'pro' ? `${aiLeft}/10 AI calls` : '0 AI calls';
+  document.getElementById('aiCallsBadge').textContent = aiLabel;
   // Settings plan badge
   const settBadge = document.getElementById('settingsPlanBadge');
   if (settBadge) { settBadge.textContent = planLabel; settBadge.className = 'badge ' + (plan==='free'?'b-blue':plan==='pro'?'b-amber':'b-gold'); }
@@ -3648,10 +3649,24 @@ async function checkAICalls() {
   const plan = userProfile?.plan||'free';
   if (plan==='free') { showUpgradePrompt('pro'); return false; }
   if (plan==='full') return true;
-  const calls = userProfile?.ai_calls||0;
-  if (calls>=10) { showToast('You have used all 10 AI calls this month. Upgrade to Full for unlimited.','var(--amber)'); return false; }
-  await sb.from('profiles').update({ai_calls:calls+1}).eq('id',currentUser.id);
-  userProfile.ai_calls = calls+1; updateUserUI(); return true;
+  // Monthly reset — compare stored month to current month
+  const monthKey = new Date().toISOString().slice(0,7); // 'YYYY-MM'
+  if ((userProfile.ai_calls_month||'') !== monthKey) {
+    await sb.from('profiles').update({ai_calls:0, ai_calls_month:monthKey}).eq('id',currentUser.id);
+    userProfile.ai_calls = 0;
+    userProfile.ai_calls_month = monthKey;
+    updateUserUI();
+  }
+  const calls = userProfile.ai_calls||0;
+  if (calls>=10) {
+    showToast('You\'ve used all 10 AI calls this month. Resets on the 1st. Upgrade to Full for unlimited.','var(--amber)');
+    return false;
+  }
+  await sb.from('profiles').update({ai_calls:calls+1, ai_calls_month:monthKey}).eq('id',currentUser.id);
+  userProfile.ai_calls = calls+1;
+  userProfile.ai_calls_month = monthKey;
+  updateUserUI();
+  return true;
 }
 
 async function sendChat() {

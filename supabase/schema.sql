@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   year_end            text DEFAULT 'February',
   plan                text DEFAULT 'free',         -- 'free' | 'pro' | 'full'
   ai_calls            integer DEFAULT 0,
+  ai_calls_month      text,                        -- 'YYYY-MM' — resets counter when month changes
   share_token         text,
   share_token_email   text,
   share_token_expiry  timestamptz,
@@ -197,6 +198,9 @@ CREATE TABLE IF NOT EXISTS opening_balances (
   notes                 text,
   created_at            timestamptz DEFAULT now()
 );
+
+-- Add ai_calls_month to profiles if table already exists (safe to re-run)
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS ai_calls_month text;
 
 -- Add columns if table already exists (safe to re-run)
 ALTER TABLE opening_balances ADD COLUMN IF NOT EXISTS year_start        text;
