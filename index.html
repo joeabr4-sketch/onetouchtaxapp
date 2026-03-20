@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OneTouch TaxApp — South African Tax & Business Finance</title>
-<meta name="description" content="The smart way for South African businesses and individuals to manage tax, invoices, VAT, and SARS compliance. Start free today.">
+<meta name="description" content="The smart way for South African businesses to manage tax, invoices, VAT, payroll, bank reconciliation and SARS compliance. Start free today.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
@@ -36,11 +36,10 @@ html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6}
 h1,h2,h3,h4,.syne{font-family:'Syne',sans-serif}
 
-/* ── NOISE OVERLAY ── */
 body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");opacity:.4;pointer-events:none;z-index:0}
 
 /* ── NAV ── */
-nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 40px;height:64px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:rgba(7,9,15,.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(26,38,64,.6)}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 40px;height:64px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:rgba(7,9,15,.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(26,38,64,.6);transition:border-color .3s}
 .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
 .nav-mark{width:36px;height:36px;background:var(--blue);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#fff;flex-shrink:0}
 .nav-wordmark{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--text)}
@@ -51,51 +50,116 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 40px;height:64px;d
 .nav-cta{background:var(--blue);color:#fff;border:none;padding:9px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .2s;justify-self:end}
 .nav-cta:hover{background:#3a7ae0;transform:translateY(-1px)}
 
-/* ── QUICK NAV BAR ── */
-
-
-
-
-
-
-
-
 /* ── HERO ── */
-.hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:120px 24px 80px;overflow:hidden}
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:100px 24px 60px;overflow:hidden}
 .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 20%,rgba(79,142,247,.12),transparent),radial-gradient(ellipse 40% 30% at 80% 60%,rgba(45,212,191,.06),transparent),radial-gradient(ellipse 50% 40% at 20% 80%,rgba(212,168,67,.05),transparent)}
 .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(79,142,247,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(79,142,247,.04) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 60% at 50% 30%,black,transparent)}
-.hero-inner{position:relative;z-index:1;text-align:center;max-width:860px}
+.hero-inner{position:relative;z-index:1;text-align:center;max-width:980px;width:100%}
 .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(212,168,67,.1);border:1px solid rgba(212,168,67,.25);border-radius:20px;padding:6px 16px;font-size:12px;color:var(--gold);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:28px;animation:fadeUp .6s ease both}
 .hero-badge-dot{width:6px;height:6px;background:var(--gold);border-radius:50%;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.hero-h{font-size:clamp(38px,4.5vw,62px);font-weight:800;line-height:1.18;letter-spacing:-1px;margin-bottom:32px;animation:fadeUp .6s .1s ease both}
+.hero-h{font-size:clamp(36px,4.5vw,60px);font-weight:800;line-height:1.18;letter-spacing:-1px;margin-bottom:24px;animation:fadeUp .6s .1s ease both}
 .hero-h .accent{color:var(--blue)}
 .hero-h .accent2{color:var(--gold)}
-.hero-sub{font-size:clamp(15px,1.8vw,18px);color:var(--text-2);max-width:640px;margin:0 auto 44px;line-height:1.9;animation:fadeUp .6s .2s ease both}
+.hero-sub{font-size:clamp(14px,1.8vw,17px);color:var(--text-2);max-width:600px;margin:0 auto 36px;line-height:1.9;animation:fadeUp .6s .2s ease both}
 .hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;animation:fadeUp .6s .3s ease both}
 .btn-primary{background:var(--blue);color:#fff;border:none;padding:14px 28px;border-radius:10px;font-family:'Syne',sans-serif;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .25s;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 24px rgba(79,142,247,.3)}
 .btn-primary:hover{background:#3a7ae0;transform:translateY(-2px);box-shadow:0 8px 32px rgba(79,142,247,.4)}
 .btn-secondary{background:transparent;color:var(--text);border:1px solid var(--border2);padding:14px 28px;border-radius:10px;font-family:'Syne',sans-serif;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .25s;display:inline-flex;align-items:center;gap:8px}
 .btn-secondary:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-2px)}
-.hero-trust{display:flex;align-items:center;justify-content:center;gap:24px;margin-top:48px;flex-wrap:wrap;animation:fadeUp .6s .4s ease both}
-.trust-item{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text-3)}
-.trust-item span{color:var(--green);font-size:14px}
-.hero-cards{position:relative;margin-top:64px;animation:fadeUp .6s .5s ease both}
-.app-preview{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px 24px;max-width:700px;margin:0 auto;box-shadow:0 32px 80px rgba(0,0,0,.5),0 0 0 1px rgba(79,142,247,.06)}
-.preview-bar{display:flex;align-items:center;gap:8px;margin-bottom:16px}
-.preview-dot{width:10px;height:10px;border-radius:50%}
-.preview-title{font-size:11px;color:var(--text-3);margin-left:6px;font-family:'Syne',sans-serif;letter-spacing:.5px}
-.preview-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
-.prev-stat{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
-.prev-stat-label{font-size:10px;color:var(--text-3);margin-bottom:4px}
-.prev-stat-val{font-family:'Syne',sans-serif;font-size:16px;font-weight:700}
-.preview-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface2);border-radius:7px;margin-bottom:6px}
-.preview-row:last-child{margin-bottom:0}
-.pr-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.pr-text{font-size:12px;color:var(--text-2);flex:1}
-.pr-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
-
+.hero-trust{display:flex;align-items:center;justify-content:center;gap:20px;margin-top:32px;flex-wrap:wrap;animation:fadeUp .6s .4s ease both}
+.trust-item{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-3)}
+.trust-item span{color:var(--green)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── CONTROL CENTER MOCKUP ── */
+.cc-wrap{margin-top:52px;animation:fadeUp .6s .5s ease both;position:relative}
+.cc-wrap::before{content:'';position:absolute;inset:-40px -20px;background:radial-gradient(ellipse 60% 40% at 50% 50%,rgba(79,142,247,.08),transparent);pointer-events:none}
+.cc-shell{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,.6),0 0 0 1px rgba(79,142,247,.06);max-width:900px;margin:0 auto;text-align:left}
+.cc-titlebar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:rgba(0,0,0,.3);border-bottom:1px solid var(--border)}
+.cc-dot{width:10px;height:10px;border-radius:50%}
+.cc-title{font-size:10px;color:var(--text-3);margin-left:4px;font-family:'Syne',sans-serif;letter-spacing:.6px;text-transform:uppercase}
+.cc-body{padding:16px;display:flex;flex-direction:column;gap:12px}
+
+/* Financial Health Row */
+.cc-health{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cc-h-card{border-radius:10px;padding:12px 14px;border:1px solid}
+.cc-h-label{font-size:9px;text-transform:uppercase;letter-spacing:.7px;font-weight:600;margin-bottom:5px;opacity:.7}
+.cc-h-val{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;line-height:1}
+.cc-h-sub{font-size:9px;margin-top:4px;opacity:.6}
+.cc-h-green{background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.15);color:var(--green)}
+.cc-h-blue{background:rgba(79,142,247,.06);border-color:rgba(79,142,247,.15);color:var(--blue)}
+.cc-h-amber{background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.15);color:var(--amber)}
+
+/* Recon Status Bar */
+.cc-recon{background:rgba(79,142,247,.06);border:1px solid rgba(79,142,247,.15);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.cc-recon-left{flex:1;min-width:140px}
+.cc-recon-title{font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px}
+.cc-recon-sub{font-size:10px;color:var(--text-3)}
+.cc-recon-bar-wrap{flex:1;min-width:100px}
+.cc-recon-bar{height:5px;border-radius:3px;background:var(--border);overflow:hidden;margin-bottom:3px}
+.cc-recon-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--blue),var(--cyan));width:78%}
+.cc-recon-pct{font-size:9px;color:var(--text-3)}
+.cc-recon-stats{display:flex;gap:14px;flex-shrink:0}
+.cc-rs{text-align:center}
+.cc-rs-val{font-family:'Syne',sans-serif;font-size:16px;font-weight:800}
+.cc-rs-label{font-size:8px;color:var(--text-3);text-transform:uppercase;letter-spacing:.4px}
+.cc-recon-btn{background:var(--blue);color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:10px;font-weight:700;font-family:'Syne',sans-serif;cursor:default;white-space:nowrap;flex-shrink:0}
+
+/* Two-column middle row */
+.cc-mid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cc-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.cc-card-title{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+
+/* Monthly Status */
+.cc-month-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)}
+.cc-month-row:last-child{border-bottom:none}
+.cc-month-label{font-size:10.5px;color:var(--text-2)}
+.cc-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px}
+.cb-green{background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.cb-amber{background:rgba(245,158,11,.1);color:var(--amber);border:1px solid rgba(245,158,11,.2)}
+.cb-red{background:rgba(244,63,94,.1);color:var(--red);border:1px solid rgba(244,63,94,.2)}
+.cc-warn{display:flex;align-items:flex-start;gap:6px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:6px;padding:6px 8px;margin-top:8px}
+.cc-warn-text{font-size:9.5px;color:var(--amber);line-height:1.5}
+
+/* Payroll */
+.cc-payroll-status{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cc-payroll-pill{font-size:9px;font-weight:700;padding:3px 10px;border-radius:20px}
+.cc-payroll-cost{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);margin-bottom:2px}
+.cc-payroll-sub{font-size:9px;color:var(--text-3);margin-bottom:8px}
+.cc-sm-btn{background:var(--surface);border:1px solid var(--border);color:var(--text-2);border-radius:6px;padding:5px 10px;font-size:9.5px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:default;display:inline-flex;align-items:center;gap:4px}
+
+/* Bottom row: pack + history + alerts */
+.cc-bot{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+/* Pack */
+.cc-pack-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.15);border-radius:6px;padding:4px 8px;font-size:9px;color:var(--green);font-weight:600;margin-bottom:8px}
+.cc-pack-month{font-size:11px;font-weight:600;color:var(--text);margin-bottom:8px}
+.cc-pack-btns{display:flex;flex-direction:column;gap:5px}
+.cc-pack-btn{background:var(--surface);border:1px solid var(--border);color:var(--text-2);border-radius:6px;padding:5px 8px;font-size:9px;font-weight:600;cursor:default;text-align:center}
+.cc-pack-btn.primary{background:rgba(79,142,247,.1);border-color:rgba(79,142,247,.2);color:var(--blue)}
+
+/* History */
+.cc-hist-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)}
+.cc-hist-row:last-child{border-bottom:none}
+.cc-hist-month{font-size:10px;color:var(--text-2)}
+.cc-hist-right{display:flex;align-items:center;gap:6px}
+.cc-hist-val{font-size:10px;font-weight:600;font-family:'Syne',sans-serif}
+.cc-hist-status{font-size:8px;padding:1px 6px;border-radius:10px;font-weight:600}
+.chs-closed{background:rgba(34,197,94,.1);color:var(--green)}
+.chs-partial{background:rgba(245,158,11,.1);color:var(--amber)}
+
+/* Alerts */
+.cc-alert{display:flex;align-items:flex-start;gap:6px;padding:5px 0;border-bottom:1px solid var(--border)}
+.cc-alert:last-child{border-bottom:none}
+.cc-alert-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.cc-alert-text{font-size:9.5px;color:var(--text-2);line-height:1.4}
+
+/* Quick Actions row */
+.cc-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.cc-action{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;text-align:center;cursor:default;transition:all .2s}
+.cc-action-icon{font-size:16px;margin-bottom:3px}
+.cc-action-label{font-size:9px;color:var(--text-2);font-weight:600;line-height:1.3}
 
 /* ── SECTION SHARED ── */
 section{position:relative;z-index:1}
@@ -107,9 +171,8 @@ section{position:relative;z-index:1}
 /* ── HOW IT WORKS ── */
 .how{padding:100px 0}
 .how-inner{text-align:center;margin-bottom:60px}
-.how-steps{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;position:relative}
-.how-steps::before{display:none}
-.step{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px 28px;text-align:center;position:relative;z-index:1;transition:all .3s}
+.how-steps{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.step{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px 28px;text-align:center;transition:all .3s}
 .step:hover{border-color:var(--border2);transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.3)}
 .step-num{width:48px;height:48px;background:linear-gradient(135deg,var(--blue),var(--cyan));border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#fff;margin:0 auto 18px}
 .step-title{font-size:17px;font-weight:700;margin-bottom:8px}
@@ -243,15 +306,19 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
   .footer-grid{grid-template-columns:1fr 1fr}
   .testi-grid{grid-template-columns:1fr}
   .how-steps{grid-template-columns:1fr}
-  .how-steps::before{display:none}
-  .how-steps::before{display:none}
+  .cc-health{grid-template-columns:1fr 1fr}
+  .cc-mid{grid-template-columns:1fr}
+  .cc-bot{grid-template-columns:1fr 1fr}
+  .cc-actions{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:600px){
-  nav{grid-template-columns:1fr auto;gap:0}
-  .hero{padding:90px 16px 60px}
+  nav{grid-template-columns:1fr auto}
+  .hero{padding:80px 16px 40px}
   .feat-grid{grid-template-columns:1fr}
-  .preview-stats{grid-template-columns:1fr 1fr}
   .footer-grid{grid-template-columns:1fr}
+  .cc-health{grid-template-columns:1fr}
+  .cc-bot{grid-template-columns:1fr}
+  .cc-recon{flex-direction:column;align-items:flex-start}
 }
 </style>
 </head>
@@ -273,9 +340,6 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
   <a class="nav-cta" href="/business.html">Start Free →</a>
 </nav>
 
-<!-- ── QUICK NAV BAR ── -->
-
-
 <!-- ── HERO ── -->
 <section class="hero">
   <div class="hero-bg"></div>
@@ -286,19 +350,19 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
       🇿🇦 Proudly South African — Built for SA businesses
     </div>
     <h1 class="hero-h">
-      The app every<br>
-      <span class="accent">South African</span><br>
-      <span class="accent2">business needs.</span>
+      Your business finances.<br>
+      <span class="accent">Automated.</span>
+      <span class="accent2">Understood.</span>
     </h1>
-    <p class="hero-sub">Invoices. Payroll. VAT. PAYE. Bank analysis. SARS deadlines. Your full financials — all in your home language. And when you still have questions, your AI tax assistant has answers.</p>
+    <p class="hero-sub">Invoices. Payroll. VAT. Bank reconciliation. SARS deadlines. Everything in one financial command center — no accountant jargon, no spreadsheets.</p>
     <div class="hero-btns">
       <a class="btn-primary" href="/business.html">Start for Free →</a>
       <a class="btn-secondary" href="#pricing">See Pricing</a>
     </div>
-    <div style="margin-top:12px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap">
-      <span style="font-size:11.5px;color:var(--text-3);display:flex;align-items:center;gap:5px">🖥️ Business Edition — best on desktop</span>
-      <span style="font-size:11.5px;color:var(--text-3)">·</span>
-      <span style="font-size:11.5px;color:var(--text-3);display:flex;align-items:center;gap:5px">📱 Personal Edition — <a href="/personal.html" style="color:var(--blue);text-decoration:none;font-weight:600">mobile friendly</a></span>
+    <div style="margin-top:10px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap">
+      <span style="font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:5px">🖥️ Business Edition — best on desktop</span>
+      <span style="font-size:11px;color:var(--text-3)">·</span>
+      <span style="font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:5px">📱 Personal Edition — <a href="/personal.html" style="color:var(--blue);text-decoration:none;font-weight:600">mobile friendly</a></span>
     </div>
     <div class="hero-trust">
       <div class="trust-item"><span>✓</span> No credit card required</div>
@@ -307,38 +371,194 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
       <div class="trust-item"><span>✓</span> Cancel anytime</div>
     </div>
 
-    <!-- App preview mockup -->
-    <div class="hero-cards">
-      <div class="app-preview">
-        <div class="preview-bar">
-          <div class="preview-dot" style="background:#f43f5e"></div>
-          <div class="preview-dot" style="background:#f59e0b"></div>
-          <div class="preview-dot" style="background:#22c55e"></div>
-          <div class="preview-title">ONETOUCH TAXAPP — BUSINESS DASHBOARD</div>
+    <!-- ── CONTROL CENTER MOCKUP ── -->
+    <div class="cc-wrap">
+      <div class="cc-shell">
+        <!-- Title bar -->
+        <div class="cc-titlebar">
+          <div class="cc-dot" style="background:#f43f5e"></div>
+          <div class="cc-dot" style="background:#f59e0b"></div>
+          <div class="cc-dot" style="background:#22c55e"></div>
+          <div class="cc-title">OneTouch TaxApp — Financial Control Center</div>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+            <div style="font-size:9px;color:var(--text-3);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:2px 7px">March 2026</div>
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green)"></div>
+          </div>
         </div>
-        <div class="preview-stats">
-          <div class="prev-stat"><div class="prev-stat-label">Revenue (YTD)</div><div class="prev-stat-val" style="color:#22c55e">R 284k</div></div>
-          <div class="prev-stat"><div class="prev-stat-label">VAT Owing</div><div class="prev-stat-val" style="color:#4f8ef7">R 12,450</div></div>
-          <div class="prev-stat"><div class="prev-stat-label">Outstanding</div><div class="prev-stat-val" style="color:#f59e0b">R 38,200</div></div>
-          <div class="prev-stat"><div class="prev-stat-label">Compliance</div><div class="prev-stat-val" style="color:#22c55e">94%</div></div>
-        </div>
-        <div class="preview-row">
-          <div class="pr-dot" style="background:#f43f5e;box-shadow:0 0 6px #f43f5e"></div>
-          <div class="pr-text">VAT201 — Due in 3 days</div>
-          <div class="pr-badge" style="background:rgba(244,63,94,.12);color:#f43f5e">Urgent</div>
-        </div>
-        <div class="preview-row">
-          <div class="pr-dot" style="background:#22c55e;box-shadow:0 0 6px #22c55e"></div>
-          <div class="pr-text">INV-047 — Acme Design — R 18,500</div>
-          <div class="pr-badge" style="background:rgba(34,197,94,.1);color:#22c55e">Paid ✓</div>
-        </div>
-        <div class="preview-row">
-          <div class="pr-dot" style="background:#f59e0b;box-shadow:0 0 6px #f59e0b"></div>
-          <div class="pr-text">INV-048 — Studio Nine — R 24,000</div>
-          <div class="pr-badge" style="background:rgba(245,158,11,.1);color:#f59e0b">Deposit Received</div>
+
+        <div class="cc-body">
+
+          <!-- 1. Financial Health Summary -->
+          <div class="cc-health">
+            <div class="cc-h-card cc-h-green">
+              <div class="cc-h-label">Total Captured Income</div>
+              <div class="cc-h-val">R 284,500</div>
+              <div class="cc-h-sub">↑ 18% vs Feb · 47 invoices</div>
+            </div>
+            <div class="cc-h-card cc-h-blue">
+              <div class="cc-h-label">Bank Verified Income</div>
+              <div class="cc-h-val">R 221,200</div>
+              <div class="cc-h-sub">78% matched · reconciliation open</div>
+            </div>
+            <div class="cc-h-card cc-h-amber">
+              <div class="cc-h-label">Outstanding Income</div>
+              <div class="cc-h-val">R 63,300</div>
+              <div class="cc-h-sub">12 invoices awaiting payment</div>
+            </div>
+          </div>
+
+          <!-- 2. Reconciliation Status Bar -->
+          <div class="cc-recon">
+            <div style="font-size:16px">🔗</div>
+            <div class="cc-recon-left">
+              <div class="cc-recon-title">March 2026 — Bank Reconciliation</div>
+              <div class="cc-recon-sub">14 transactions need attention · mid-month checkpoint</div>
+            </div>
+            <div class="cc-recon-bar-wrap">
+              <div class="cc-recon-bar"><div class="cc-recon-fill"></div></div>
+              <div class="cc-recon-pct">78% reconciled</div>
+            </div>
+            <div class="cc-recon-stats">
+              <div class="cc-rs">
+                <div class="cc-rs-val" style="color:var(--blue)">78%</div>
+                <div class="cc-rs-label">Matched</div>
+              </div>
+              <div class="cc-rs">
+                <div class="cc-rs-val" style="color:var(--red)">14</div>
+                <div class="cc-rs-label">Unresolved</div>
+              </div>
+            </div>
+            <div class="cc-recon-btn">Continue Reconciliation →</div>
+          </div>
+
+          <!-- 3 & 4. Monthly Status + Payroll -->
+          <div class="cc-mid">
+
+            <!-- Monthly Status -->
+            <div class="cc-card">
+              <div class="cc-card-title">📅 Monthly Status</div>
+              <div class="cc-month-row">
+                <div class="cc-month-label">March 2026 (current)</div>
+                <span class="cc-badge cb-amber">Partially Reconciled</span>
+              </div>
+              <div class="cc-month-row">
+                <div class="cc-month-label">February 2026</div>
+                <span class="cc-badge cb-red">Not Closed</span>
+              </div>
+              <div class="cc-month-row">
+                <div class="cc-month-label">January 2026</div>
+                <span class="cc-badge cb-green">Closed ✓</span>
+              </div>
+              <div class="cc-warn">
+                <div>⚠️</div>
+                <div class="cc-warn-text">February is not closed yet. Complete reconciliation before continuing to March.</div>
+              </div>
+            </div>
+
+            <!-- Payroll Status -->
+            <div class="cc-card">
+              <div class="cc-card-title">👥 Payroll — March 2026</div>
+              <div class="cc-payroll-status">
+                <div style="font-size:10px;color:var(--text-3)">Status</div>
+                <span class="cc-payroll-pill" style="background:rgba(245,158,11,.1);color:var(--amber);border:1px solid rgba(245,158,11,.2)">Calculated</span>
+              </div>
+              <div class="cc-payroll-cost">R 84,500</div>
+              <div class="cc-payroll-sub">4 employees · PAYE R 14,320 · UIF R 708</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <span class="cc-sm-btn">▶ Run Payroll</span>
+                <span class="cc-sm-btn">🔗 Match Payments</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5, 6, 7. Pack + History + Alerts -->
+          <div class="cc-bot">
+
+            <!-- Bookkeeper Pack -->
+            <div class="cc-card">
+              <div class="cc-card-title">📦 Bookkeeper Pack</div>
+              <div class="cc-pack-badge">⚡ Ready</div>
+              <div class="cc-pack-month">February 2026 Pack</div>
+              <div class="cc-pack-btns">
+                <div class="cc-pack-btn primary">⬇ Download Accountant Pack</div>
+                <div class="cc-pack-btn">🔗 Share with Accountant</div>
+              </div>
+            </div>
+
+            <!-- Financial History -->
+            <div class="cc-card">
+              <div class="cc-card-title">📈 Recent Periods</div>
+              <div class="cc-hist-row">
+                <div class="cc-hist-month">Feb 2026</div>
+                <div class="cc-hist-right">
+                  <div class="cc-hist-val" style="color:var(--green)">+R 241k</div>
+                  <span class="cc-hist-status chs-closed">Closed</span>
+                </div>
+              </div>
+              <div class="cc-hist-row">
+                <div class="cc-hist-month">Jan 2026</div>
+                <div class="cc-hist-right">
+                  <div class="cc-hist-val" style="color:var(--green)">+R 198k</div>
+                  <span class="cc-hist-status chs-closed">Closed</span>
+                </div>
+              </div>
+              <div class="cc-hist-row">
+                <div class="cc-hist-month">Dec 2025</div>
+                <div class="cc-hist-right">
+                  <div class="cc-hist-val" style="color:var(--amber)">+R 167k</div>
+                  <span class="cc-hist-status chs-partial">Partial</span>
+                </div>
+              </div>
+              <div style="margin-top:8px;font-size:9px;color:var(--blue);cursor:default">View Full History →</div>
+            </div>
+
+            <!-- Smart Alerts -->
+            <div class="cc-card">
+              <div class="cc-card-title">💡 Smart Alerts</div>
+              <div class="cc-alert">
+                <div class="cc-alert-dot" style="background:var(--red)"></div>
+                <div class="cc-alert-text">VAT201 due in <strong>3 days</strong> — prep document ready</div>
+              </div>
+              <div class="cc-alert">
+                <div class="cc-alert-dot" style="background:var(--amber)"></div>
+                <div class="cc-alert-text">14 unreconciled transactions in March</div>
+              </div>
+              <div class="cc-alert">
+                <div class="cc-alert-dot" style="background:var(--green)"></div>
+                <div class="cc-alert-text">Income up <strong>18%</strong> vs last month 📈</div>
+              </div>
+              <div class="cc-alert">
+                <div class="cc-alert-dot" style="background:var(--amber)"></div>
+                <div class="cc-alert-text">Payroll not yet verified for March</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="cc-actions">
+            <div class="cc-action">
+              <div class="cc-action-icon">🧾</div>
+              <div class="cc-action-label">Create Invoice</div>
+            </div>
+            <div class="cc-action">
+              <div class="cc-action-icon">💸</div>
+              <div class="cc-action-label">Add Expense</div>
+            </div>
+            <div class="cc-action">
+              <div class="cc-action-icon">🏦</div>
+              <div class="cc-action-label">Upload Bank Statement</div>
+            </div>
+            <div class="cc-action">
+              <div class="cc-action-icon">🔗</div>
+              <div class="cc-action-label">Start Reconciliation</div>
+            </div>
+          </div>
+
         </div>
       </div>
+      <div style="margin-top:12px;font-size:11px;color:var(--text-3);text-align:center">Live preview · All data updates in real time · No spreadsheets needed</div>
     </div>
+
   </div>
 </section>
 
@@ -353,14 +573,14 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
     <div class="feat-grid">
       <div class="feat-card reveal">
         <div class="feat-icon">🧾</div>
-        <div class="feat-title">Professional Invoices & Quotes</div>
+        <div class="feat-title">Professional Invoices &amp; Quotes</div>
         <p class="feat-desc">Create branded invoices and quotes with line items, VAT, deposit tracking and balance outstanding. Export as PDF or send via WhatsApp in seconds.</p>
         <span class="feat-tag tag-free">Free</span>
       </div>
       <div class="feat-card reveal reveal-delay-1">
         <div class="feat-icon">📊</div>
-        <div class="feat-title">Financials & P&L</div>
-        <p class="feat-desc">Your full Profit & Loss updates automatically as you capture transactions. Know exactly where your business stands at any moment.</p>
+        <div class="feat-title">Financials &amp; P&amp;L</div>
+        <p class="feat-desc">Your full Profit &amp; Loss updates automatically as you capture transactions. Know exactly where your business stands at any moment.</p>
         <span class="feat-tag tag-free">Free</span>
       </div>
       <div class="feat-card reveal reveal-delay-2">
@@ -376,33 +596,33 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
         <span class="feat-tag tag-pro">Pro</span>
       </div>
       <div class="feat-card reveal reveal-delay-1">
-        <div class="feat-icon">📄</div>
-        <div class="feat-title">VAT201, IRP6 & ITR14 Prep</div>
-        <p class="feat-desc">Auto-generate your VAT return, provisional tax and annual return prep documents directly from your data. Download and submit via SARS eFiling.</p>
+        <div class="feat-icon">🔗</div>
+        <div class="feat-title">Bank Reconciliation</div>
+        <p class="feat-desc">Auto-match bank transactions to invoices, flag missing records and export a clean reconciliation report with a full audit trail — ready for SARS or your accountant.</p>
         <span class="feat-tag tag-pro">Pro</span>
       </div>
       <div class="feat-card reveal reveal-delay-2">
-        <div class="feat-icon">📁</div>
-        <div class="feat-title">Bookkeeper Handoff Pack</div>
-        <p class="feat-desc">One-click download of your full P&L, VAT summary, invoice register and tax liability report. Everything your accountant needs, clean and ready to sign off.</p>
+        <div class="feat-icon">📄</div>
+        <div class="feat-title">VAT201, IRP6 &amp; ITR14 Prep</div>
+        <p class="feat-desc">Auto-generate your VAT return, provisional tax and annual return prep documents directly from your data. Download and submit via SARS eFiling.</p>
         <span class="feat-tag tag-pro">Pro</span>
       </div>
       <div class="feat-card reveal">
-        <div class="feat-icon">📥</div>
-        <div class="feat-title">Transaction Import</div>
-        <p class="feat-desc">Already using another system? Import your transactions via CSV, Excel or OFX bank export. Franchise owners, Pastel users — your bookkeeping layer, your way.</p>
+        <div class="feat-icon">📁</div>
+        <div class="feat-title">Bookkeeper Handoff Pack</div>
+        <p class="feat-desc">One-click download of your full P&amp;L, VAT summary, invoice register and tax liability report. Everything your accountant needs, clean and ready to sign off.</p>
         <span class="feat-tag tag-pro">Pro</span>
       </div>
       <div class="feat-card reveal reveal-delay-1">
-        <div class="feat-icon">🔗</div>
-        <div class="feat-title">Bank Reconciliation</div>
-        <p class="feat-desc">Auto-match bank transactions to invoices, flag missing records and export a clean reconciliation report — ready for your accountant or SARS.</p>
+        <div class="feat-icon">📥</div>
+        <div class="feat-title">Transaction Import</div>
+        <p class="feat-desc">Already using another system? Import your transactions via CSV. Franchise owners, Pastel users — your bookkeeping layer, your way.</p>
         <span class="feat-tag tag-pro">Pro</span>
       </div>
       <div class="feat-card reveal reveal-delay-2">
         <div class="feat-icon">👥</div>
-        <div class="feat-title">Payroll & Payslips</div>
-        <p class="feat-desc">Add employees, generate professional payslips and calculate PAYE, UIF and SDL using the latest SARS tax tables. EMP201 prep in one click.</p>
+        <div class="feat-title">Payroll &amp; Payslips</div>
+        <p class="feat-desc">Add employees, generate professional payslips and calculate PAYE, UIF and SDL using the latest SARS tax tables. EMP201 prep in one click. SDL threshold-aware for your payroll size.</p>
         <span class="feat-tag tag-full">Full</span>
       </div>
       <div class="feat-card reveal">
@@ -420,7 +640,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
       <div class="feat-card reveal reveal-delay-2">
         <div class="feat-icon">💬</div>
         <div class="feat-title">AI Tax Assistant</div>
-        <p class="feat-desc">Ask anything about SA tax — VAT, PAYE, eFiling, SARS notices, provisional tax. Get clear, specific answers in your home language. Available in 5 SA languages.</p>
+        <p class="feat-desc">Ask anything about SA tax — VAT, PAYE, eFiling, SARS notices, provisional tax. Clear answers in your home language. Available in 5 SA languages.</p>
         <span class="feat-tag tag-full">Full</span>
       </div>
     </div>
@@ -439,22 +659,22 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
       <div class="step reveal">
         <div class="step-num">1</div>
         <div class="step-title">Set up your business profile</div>
-        <p class="step-desc">Enter your business details, VAT registration status, PAYE obligations and financial year end. Takes under 2 minutes — then OneTouch knows exactly what applies to you.</p>
+        <p class="step-desc">Enter your business details, VAT registration status, PAYE obligations and financial year end. A guided setup walks you through each step — takes under 2 minutes.</p>
       </div>
       <div class="step reveal reveal-delay-1">
         <div class="step-num">2</div>
         <div class="step-title">Capture, import or upload</div>
-        <p class="step-desc">Create invoices, import transactions from your existing system, or upload your bank statement for instant AI analysis. Your financials update automatically.</p>
+        <p class="step-desc">Create invoices, import transactions from your existing system, or upload your bank statement for instant AI analysis. Your financials and reconciliation update automatically.</p>
       </div>
       <div class="step reveal reveal-delay-2">
         <div class="step-num">3</div>
-        <div class="step-title">Stay ahead of SARS — always</div>
-        <p class="step-desc">Your compliance calendar keeps you on track. VAT201, EMP201, IRP6 and ITR14 prep documents are generated in one click — ready to submit via eFiling.</p>
+        <div class="step-title">Reconcile and close each month</div>
+        <p class="step-desc">Match bank transactions to invoices in one screen. When you hit 80%+ match rate, close the month — locking your records and updating your bookkeeper pack.</p>
       </div>
       <div class="step reveal reveal-delay-3">
         <div class="step-num">4</div>
-        <div class="step-title">Ask your AI assistant anything</div>
-        <p class="step-desc">Still unsure? Chat to your AI tax assistant in your home language — English, Afrikaans, isiZulu, isiXhosa or Setswana. Clear answers, no jargon, no extra charge.</p>
+        <div class="step-title">Stay ahead of SARS — always</div>
+        <p class="step-desc">Your compliance calendar keeps you on track. VAT201, EMP201, IRP6 and ITR14 prep documents generated in one click — ready to submit via eFiling.</p>
       </div>
     </div>
   </div>
@@ -478,7 +698,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
         <ul class="compare-list">
           <li>Step-by-step eFiling guide</li>
           <li>IRP5 income capture</li>
-          <li>Medical aid & retirement deductions</li>
+          <li>Medical aid &amp; retirement deductions</li>
           <li>Travel allowance calculator</li>
           <li>Home office deduction guide</li>
           <li>SARS efiling checklist</li>
@@ -491,11 +711,11 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
         <div class="compare-price paid">From R0</div>
         <div class="compare-price-note">Free plan available · Pro from R299/month</div>
         <ul class="compare-list">
-          <li>Invoices, quotes & PDF export</li>
-          <li>VAT201, EMP201 & IRP6 prep</li>
-          <li>AI bank statement analysis</li>
-          <li>P&L financials & reconciliation</li>
-          <li>AI tax assistant (Pro)</li>
+          <li>Financial Control Center dashboard</li>
+          <li>Invoices, quotes &amp; PDF export</li>
+          <li>VAT201, EMP201 &amp; IRP6 prep</li>
+          <li>AI bank statement analysis &amp; reconciliation</li>
+          <li>Guided onboarding — no accountant needed</li>
           <li>Bookkeeper handoff pack (Full)</li>
         </ul>
         <a href="/business.html" class="compare-btn blue">Start Business App →</a>
@@ -524,16 +744,14 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
         <ul class="price-features">
           <li><span class="check">✓</span> 5 invoices &amp; quotes per month</li>
           <li><span class="check">✓</span> PDF export</li>
-          <li><span class="check">✓</span> Business dashboard</li>
+          <li><span class="check">✓</span> Financial Control Center</li>
           <li><span class="check">✓</span> Financials &amp; P&amp;L</li>
           <li><span class="check">✓</span> SARS compliance calendar</li>
-          <li><span class="check">✓</span> Tax deadline notifications</li>
+          <li><span class="check">✓</span> Guided onboarding</li>
           <li><span class="check">✓</span> Compliance checklists</li>
           <li class="muted"><span class="x">—</span> VAT201 prep <span style="font-size:10px;opacity:.6">(Pro)</span></li>
           <li class="muted"><span class="x">—</span> Bank analysis &amp; reconciliation <span style="font-size:10px;opacity:.6">(Pro)</span></li>
-          <li class="muted"><span class="x">—</span> IRP6 / ITR14 prep <span style="font-size:10px;opacity:.6">(Pro)</span></li>
           <li class="muted"><span class="x">—</span> Payroll &amp; EMP201 <span style="font-size:10px;opacity:.6">(Full)</span></li>
-          <li class="muted"><span class="x">—</span> WhatsApp delivery <span style="font-size:10px;opacity:.6">(Full)</span></li>
         </ul>
         <a href="/business.html" class="price-cta outline">Get Started Free</a>
         <div style="text-align:center;margin-top:8px;font-size:10.5px;color:var(--text-3)">🖥️ Best on desktop</div>
@@ -551,7 +769,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
           <li><span class="check">✓</span> Everything in Free</li>
           <li><span class="check">✓</span> Unlimited invoices &amp; quotes</li>
           <li><span class="check">✓</span> VAT201 prep documents</li>
-          <li><span class="check">✓</span> Financial history &amp; reconciliation</li>
+          <li><span class="check">✓</span> Bank reconciliation &amp; audit trail</li>
           <li><span class="check">✓</span> AI bank statement analysis</li>
           <li><span class="check">✓</span> IRP6 &amp; ITR14 prep</li>
           <li><span class="check">✓</span> Bookkeeper handoff pack</li>
@@ -559,7 +777,6 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
           <li class="muted"><span class="x">—</span> WhatsApp invoice delivery</li>
           <li class="muted"><span class="x">—</span> Payroll &amp; EMP201</li>
           <li class="muted"><span class="x">—</span> AI business saving tips</li>
-          <li class="muted"><span class="x">—</span> Accountant access link</li>
         </ul>
         <a href="/business.html" class="price-cta solid-blue">Start Pro →</a>
         <div style="text-align:center;margin-top:8px;font-size:10.5px;color:var(--text-3)">🖥️ Best on desktop</div>
@@ -574,7 +791,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
         <div class="price-desc">For businesses that are growing, hiring and want everything running like a well-oiled machine — with or without an accountant.</div>
         <ul class="price-features">
           <li><span class="check">✓</span> Everything in Pro</li>
-          <li style="color:#fff;font-weight:600"><span class="check">✓</span> WhatsApp invoice delivery <span style="background:rgba(37,211,102,.15);color:#25d366;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:4px;letter-spacing:.3px">NEW</span></li>
+          <li style="color:#fff;font-weight:600"><span class="check">✓</span> WhatsApp invoice delivery <span style="background:rgba(37,211,102,.15);color:#25d366;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:4px">NEW</span></li>
           <li><span class="check">✓</span> Payroll — unlimited employees</li>
           <li><span class="check">✓</span> PAYE / UIF / SDL calculator</li>
           <li><span class="check">✓</span> EMP201 prep documents</li>
@@ -621,7 +838,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
       </div>
       <div class="testi-card reveal reveal-delay-2">
         <div class="testi-stars">★★★★★</div>
-        <p class="testi-quote">"Finally an invoicing tool that understands South African business. The VAT handling alone is worth every cent of the Pro plan."</p>
+        <p class="testi-quote">"Finally an invoicing tool that understands South African business. The reconciliation dashboard alone saves me 4 hours a month."</p>
         <div class="testi-author">
           <div class="testi-avatar" style="background:linear-gradient(135deg,#d4a843,#f59e0b)">NP</div>
           <div><div class="testi-name">Nadia P.</div><div class="testi-role">Consulting, Cape Town</div></div>
@@ -647,11 +864,15 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
       </div>
       <div class="faq-item" onclick="toggleFAQ(this)">
         <div class="faq-q">Does the free plan have any time limits? <span class="faq-arrow">▼</span></div>
-        <div class="faq-a">No. The Free plan is genuinely free with no time limit. You get 5 invoices per month, the compliance calendar, and your business dashboard — forever. When you need more, upgrading is easy.</div>
+        <div class="faq-a">No. The Free plan is genuinely free with no time limit. You get 5 invoices per month, the compliance calendar, guided onboarding and your full business dashboard — forever. When you need more, upgrading is easy.</div>
+      </div>
+      <div class="faq-item" onclick="toggleFAQ(this)">
+        <div class="faq-q">How does bank reconciliation work? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Download your bank statement as a CSV from your internet banking and upload it. OneTouch automatically matches transactions to your invoices, calculates your match rate, and flags anything unresolved. When you hit a high enough match rate, you can lock the month — creating an immutable audit trail for SARS.</div>
       </div>
       <div class="faq-item" onclick="toggleFAQ(this)">
         <div class="faq-q">How does the AI bank statement analysis work? <span class="faq-arrow">▼</span></div>
-        <div class="faq-a">You upload your bank statement (PDF or text). Our AI reads only what is actually in the document — it never guesses or estimates. It categorises transactions, calculates VAT on claimable items, and flags anything that could trigger a SARS audit. If it can't read a value clearly, it leaves it blank and tells you to fill it in manually.</div>
+        <div class="faq-a">You upload your bank statement (PDF or text). Our AI reads only what is in the document — it never guesses. It categorises transactions, calculates VAT on claimable items, and flags anything that could trigger a SARS audit. If it can't read a value clearly, it leaves it blank and tells you to fill it in manually.</div>
       </div>
       <div class="faq-item" onclick="toggleFAQ(this)">
         <div class="faq-q">Is my financial data safe? <span class="faq-arrow">▼</span></div>
@@ -743,25 +964,19 @@ function toggleFAQ(item) {
   if (!isOpen) item.classList.add('open');
 }
 
-
-
+// ── NAV SCROLL ──
 window.addEventListener('scroll', () => {
-  const nav = document.querySelector('nav');
-  const scrolled = window.scrollY;
-
-  // Nav border
-  nav.style.borderBottomColor = scrolled > 40 ? 'rgba(26,38,64,.9)' : 'rgba(26,38,64,.6)';
+  document.querySelector('nav').style.borderBottomColor =
+    window.scrollY > 40 ? 'rgba(26,38,64,.9)' : 'rgba(26,38,64,.6)';
 });
 
-// ── SMOOTH SCROLL offset for fixed bars ──
+// ── SMOOTH SCROLL ──
 document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
     const target = document.querySelector(a.getAttribute('href'));
     if (!target) return;
     e.preventDefault();
-    const offset = 110; // nav (64) + quick nav (40) + breathing room
-    const top = target.getBoundingClientRect().top + window.scrollY - offset;
-    window.scrollTo({ top, behavior: 'smooth' });
+    window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
   });
 });
 </script>
