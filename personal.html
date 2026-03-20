@@ -589,12 +589,13 @@ h1,h2,h3,.serif{font-family:'DM Serif Display',serif}
     <nav class="s-nav">
       <div class="s-section">My Tax</div>
       <button class="s-btn active" onclick="showSection('dashboard',this)"><span class="s-icon">🏠</span>Dashboard</button>
-      <button class="s-btn" onclick="showSection('refund',this)"><span class="s-icon">💰</span>Refund Estimator</button>
-      <button class="s-btn" onclick="showSection('checklist',this)"><span class="s-icon">✅</span>Document Checklist</button>
+      <button class="s-btn" onclick="showSection('checklist',this)"><span class="s-icon">✅</span>eFiling Checklist</button>
       <div class="s-section">Tools</div>
-      <button class="s-btn" onclick="showSection('bankanalysis',this)"><span class="s-icon">🏦</span>Bank Analysis</button>
-      <button class="s-btn" onclick="showSection('efiling',this)"><span class="s-icon">📋</span>eFiling Walkthrough</button>
-      <button class="s-btn" onclick="showSection('assessment',this)"><span class="s-icon">🔍</span>Auto-Assessment Checker</button>
+      <button class="s-btn" onclick="showSection('guide',this)"><span class="s-icon">📋</span>eFiling Guide</button>
+      <button class="s-btn" onclick="showSection('irp5',this)"><span class="s-icon">🧾</span>IRP5 Capture</button>
+      <button class="s-btn" onclick="showSection('deductions',this)"><span class="s-icon">💊</span>Deductions</button>
+      <button class="s-btn" onclick="showSection('travel',this)"><span class="s-icon">🚗</span>Travel Allowance</button>
+      <button class="s-btn" onclick="showSection('homeoffice',this)"><span class="s-icon">🏡</span>Home Office</button>
     </nav>
     <!-- Cross-sell to Business -->
     <div style="margin:0 10px 10px;background:linear-gradient(135deg,rgba(37,99,235,.08),rgba(14,165,233,.06));border:1px solid rgba(37,99,235,.15);border-radius:10px;padding:12px 14px">
@@ -628,7 +629,7 @@ h1,h2,h3,.serif{font-family:'DM Serif Display',serif}
             <div class="notif-dh">Reminders</div>
             <div class="notif-item" id="n1">
               <div class="notif-icon">📅</div>
-              <div class="notif-text"><strong>ITR12 Filing Opens</strong>1 July 2025 — start gathering your documents now<div class="notif-time">Tax Year 2024/25</div><div class="notif-dismiss" onclick="dismissNotif('n1',event)">Dismiss</div></div>
+              <div class="notif-text"><strong>ITR12 Filing Opens</strong>1 July 2026 — start gathering your documents now<div class="notif-time">Tax Year 2025/26</div><div class="notif-dismiss" onclick="dismissNotif('n1',event)">Dismiss</div></div>
             </div>
             <div class="notif-item" id="n2">
               <div class="notif-icon">⚠️</div>
@@ -647,419 +648,363 @@ h1,h2,h3,.serif{font-family:'DM Serif Display',serif}
 
       <!-- DASHBOARD -->
       <div class="section active" id="section-dashboard">
-        <div class="welcome" style="display:flex;align-items:center;justify-content:space-between">
+        <div class="welcome" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
           <div>
             <h2>Hello, <span id="welcomeName">there</span> 👋</h2>
-            <p>Tax season opens July 2025. Get ahead — know what you're owed before filing day.</p>
+            <p>Your free eFiling toolkit for the 2025/26 tax year. Everything you need to file with confidence.</p>
           </div>
           <div class="welcome-right">
-            <div class="tax-pill"><div class="tp-label">Tax Year</div><div class="tp-val">2024/25</div></div>
+            <div class="tax-pill"><div class="tp-label">Tax Year</div><div class="tp-val">2025/26</div></div>
+          </div>
+        </div>
+
+        <div style="background:var(--blue-pale);border:1px solid rgba(37,99,235,.2);border-radius:12px;padding:14px 18px;margin-bottom:22px;display:flex;align-items:center;gap:12px">
+          <div style="font-size:22px">📅</div>
+          <div>
+            <div style="font-size:13.5px;font-weight:600;color:var(--ink)">Filing season opens 1 July 2026 for the 2025/26 tax year</div>
+            <div style="font-size:12px;color:var(--ink-3);margin-top:2px">Non-provisional taxpayers: deadline 24 October 2026 · Provisional: 31 January 2027</div>
           </div>
         </div>
 
         <div class="stats">
-          <div class="stat"><div class="stat-label">Filing Deadline</div><div class="stat-value" style="color:var(--amber)">24 Oct</div><div class="stat-sub">Non-provisional taxpayers</div></div>
-          <div class="stat"><div class="stat-label">Estimated Refund</div><div class="stat-value" style="color:var(--green)" id="dashRefund">R —</div><div class="stat-sub">Run the estimator to calculate</div></div>
-          <div class="stat"><div class="stat-label">Checklist Progress</div><div class="stat-value" style="color:var(--blue)" id="checkProgress">0 / 8</div><div class="stat-sub">Documents gathered</div></div>
+          <div class="stat"><div class="stat-label">Filing Opens</div><div class="stat-value" style="color:var(--blue)">1 Jul</div><div class="stat-sub">efiling.sars.gov.za</div></div>
+          <div class="stat"><div class="stat-label">Filing Deadline</div><div class="stat-value" style="color:var(--amber)">24 Oct</div><div class="stat-sub">Non-provisional</div></div>
+          <div class="stat"><div class="stat-label">Checklist Progress</div><div class="stat-value" style="color:var(--green)" id="checkProgress">0 / 10</div><div class="stat-sub">Documents ready</div></div>
         </div>
 
-        <!-- ACTION ITEMS WITH INLINE DOC GENERATION -->
         <div class="card" style="margin-bottom:20px">
-          <div class="card-head">
-            <div class="card-title">📅 Your Tax Action Items</div>
-            <span class="badge b-blue">Click any item to prepare your document</span>
+          <div class="card-head"><div class="card-title">🛠 Your eFiling Toolkit</div><span class="badge b-blue">All tools free</span></div>
+          <div onclick="showSection('guide',document.querySelector('[onclick*=guide]'))" style="display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
+            <div style="font-size:24px;width:40px;text-align:center">📋</div>
+            <div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--ink)">eFiling Guide</div><div style="font-size:12px;color:var(--ink-3);margin-top:2px">Step-by-step walkthrough of the SARS eFiling process</div></div>
+            <div style="font-size:12px;color:var(--blue);font-weight:600">Open →</div>
           </div>
-
-          <!-- ITR12 -->
-          <div class="ai-row" onclick="togglePanel('pp-itr12')">
-            <div class="ai-dot" style="background:var(--amber);box-shadow:0 0 7px var(--amber)"></div>
-            <div class="ai-info"><div class="ai-name">ITR12 — Personal Income Tax Return</div><div class="ai-type">Annual return · Filing opens 1 July 2025</div></div>
-            <div class="ai-date-box"><div class="ai-days" style="color:var(--amber)">Due 24 Oct</div><div class="ai-due">~236 days</div></div>
-            <div class="ai-prepare" style="background:var(--amber-pale);color:var(--amber);border:1px solid rgba(217,119,6,.2)">Prepare ↓</div>
+          <div onclick="showSection('irp5',document.querySelector('[onclick*=irp5]'))" style="display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
+            <div style="font-size:24px;width:40px;text-align:center">🧾</div>
+            <div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--ink)">IRP5 Capture</div><div style="font-size:12px;color:var(--ink-3);margin-top:2px">Enter your IRP5 source codes — calculate your tax and estimated refund</div></div>
+            <div style="font-size:12px;color:var(--blue);font-weight:600">Open →</div>
           </div>
-          <div class="doc-panel" id="pp-itr12">
-            <div class="dp-wrap">
-              <div class="dp-title">Personal Tax Summary</div>
-              <div class="dp-desc">We'll calculate your tax using the official 2024/25 SARS tables and generate a summary to use while filing your ITR12 on eFiling. Tax reference number is optional.</div>
-              <div class="dp-grid">
-                <div class="dp-field"><label>Full Name</label><input id="it-name" placeholder="e.g. Sipho Nkosi" /></div>
-                <div class="dp-field"><label>ID Number (optional)</label><input id="it-id" placeholder="e.g. 8001015009087" /></div>
-                <div class="dp-field"><label>Tax Reference (optional)</label><input id="it-ref" placeholder="e.g. 1234567890" /></div>
-                <div class="dp-field"><label>Age Group</label>
-                  <select id="it-age"><option value="under65">Under 65</option><option value="65to75">65 – 75</option><option value="over75">Over 75</option></select>
-                </div>
-                <div class="dp-field"><label>Annual Gross Salary (R)</label><input id="it-salary" type="number" placeholder="e.g. 320000" /></div>
-                <div class="dp-field"><label>PAYE Already Deducted (R)</label><input id="it-paye" type="number" placeholder="e.g. 65000" /></div>
-                <div class="dp-field"><label>Annual RA Contributions (R)</label><input id="it-ra" type="number" placeholder="e.g. 24000" /></div>
-                <div class="dp-field"><label>Monthly Medical Aid (R)</label><input id="it-med" type="number" placeholder="e.g. 2800" /></div>
-                <div class="dp-field"><label>Medical Aid Dependants</label>
-                  <select id="it-deps"><option value="0">Just me</option><option value="1">Me + 1</option><option value="2">Me + 2</option><option value="3">Me + 3+</option></select>
-                </div>
-                <div class="dp-field"><label>Other Income (R)</label><input id="it-other" type="number" placeholder="e.g. 0" /></div>
-              </div>
-              <button class="dp-btn" onclick="showSarsDisclaimer('genPersonalTax')">📄 Download Personal Tax Summary PDF</button>
-            </div>
+          <div onclick="showSection('deductions',document.querySelector('[onclick*=deductions]'))" style="display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
+            <div style="font-size:24px;width:40px;text-align:center">💊</div>
+            <div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--ink)">Deductions Calculator</div><div style="font-size:12px;color:var(--ink-3);margin-top:2px">Medical aid tax credits and retirement annuity deductions</div></div>
+            <div style="font-size:12px;color:var(--blue);font-weight:600">Open →</div>
           </div>
-
-          <!-- AUTO ASSESSMENT -->
-          <div class="ai-row" onclick="togglePanel('pp-dispute')" style="border-top:1.5px solid var(--border)">
-            <div class="ai-dot" style="background:var(--red);box-shadow:0 0 7px var(--red)"></div>
-            <div class="ai-info"><div class="ai-name">Auto-Assessment — Dispute if Needed</div><div class="ai-type">SARS issues auto-assessments in July · You have 40 working days to dispute</div></div>
-            <div class="ai-date-box"><div class="ai-days" style="color:var(--red)">Act in July</div><div class="ai-due">40 working days</div></div>
-            <div class="ai-prepare" style="background:var(--red-pale);color:var(--red);border:1px solid rgba(220,38,38,.2)">Prepare ↓</div>
+          <div onclick="showSection('travel',document.querySelector('[onclick*=travel]'))" style="display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
+            <div style="font-size:24px;width:40px;text-align:center">🚗</div>
+            <div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--ink)">Travel Allowance Calculator</div><div style="font-size:12px;color:var(--ink-3);margin-top:2px">Calculate your business km deduction using SARS fixed rate or actual costs</div></div>
+            <div style="font-size:12px;color:var(--blue);font-weight:600">Open →</div>
           </div>
-          <div class="doc-panel" id="pp-dispute">
-            <div class="dp-wrap">
-              <div class="dp-title">Auto-Assessment Dispute Letter</div>
-              <div class="dp-desc">If SARS's auto-assessment is wrong, generate a formal dispute letter. You have 40 working days from the assessment date. ID and tax reference are optional but helpful.</div>
-              <div class="dp-grid">
-                <div class="dp-field"><label>Full Name</label><input id="dis-name" placeholder="e.g. Sipho Nkosi" /></div>
-                <div class="dp-field"><label>ID Number (optional)</label><input id="dis-id" placeholder="e.g. 8001015009087" /></div>
-                <div class="dp-field"><label>Tax Reference (optional)</label><input id="dis-ref" placeholder="e.g. 1234567890" /></div>
-                <div class="dp-field"><label>Date of Auto-Assessment</label><input id="dis-date" placeholder="e.g. 15 July 2025" /></div>
-                <div class="dp-field"><label>SARS Assessment Amount (R)</label><input id="dis-sars" type="number" placeholder="e.g. 4200" /></div>
-                <div class="dp-field"><label>Correct Amount You Believe (R)</label><input id="dis-correct" type="number" placeholder="e.g. -2800" /></div>
-                <div class="dp-field dp-full"><label>Reason for Dispute</label><textarea id="dis-reason" rows="3" placeholder="e.g. SARS did not include my medical aid tax credit of R4,368 and RA contribution deduction of R24,000..."></textarea></div>
-              </div>
-              <button class="dp-btn" onclick="showSarsDisclaimer('genDisputeLetter')">📄 Download Dispute Letter PDF</button>
-            </div>
-          </div>
-
-          <!-- MEDICAL -->
-          <div class="ai-row" onclick="togglePanel('pp-medical')" style="border-top:1.5px solid var(--border)">
-            <div class="ai-dot" style="background:var(--green);box-shadow:0 0 7px var(--green)"></div>
-            <div class="ai-info"><div class="ai-name">Medical Aid Tax Credit</div><div class="ai-type">Calculate exactly what SARS owes you — most people miss this</div></div>
-            <div class="ai-date-box"><div class="ai-days" style="color:var(--green)">Before filing</div><div class="ai-due">Include in ITR12</div></div>
-            <div class="ai-prepare" style="background:var(--green-pale);color:var(--green);border:1px solid rgba(5,150,105,.2)">Prepare ↓</div>
-          </div>
-          <div class="doc-panel" id="pp-medical">
-            <div class="dp-wrap">
-              <div class="dp-title">Medical Aid Tax Credit Summary</div>
-              <div class="dp-desc">We'll calculate your exact medical credit using 2024/25 SARS rates and the correct source codes to enter on your ITR12.</div>
-              <div class="dp-grid">
-                <div class="dp-field"><label>Full Name</label><input id="med-name" placeholder="e.g. Sipho Nkosi" /></div>
-                <div class="dp-field"><label>Medical Aid Scheme</label><input id="med-scheme" placeholder="e.g. Discovery Health" /></div>
-                <div class="dp-field"><label>Monthly Contribution (R)</label><input id="med-monthly" type="number" placeholder="e.g. 2800" /></div>
-                <div class="dp-field"><label>Number of Dependants</label>
-                  <select id="med-deps"><option value="0">Just me</option><option value="1">Me + spouse/1 child</option><option value="2">Me + 2 dependants</option><option value="3">Me + 3 dependants</option><option value="4">Me + 4+</option></select>
-                </div>
-                <div class="dp-field"><label>Out-of-Pocket Expenses (R)</label><input id="med-oop" type="number" placeholder="e.g. 4500" /></div>
-                <div class="dp-field"><label>Annual Gross Income (R)</label><input id="med-income" type="number" placeholder="e.g. 320000" /></div>
-              </div>
-              <button class="dp-btn" onclick="showSarsDisclaimer('genMedicalPDF')">📄 Download Medical Credit Summary PDF</button>
-            </div>
-          </div>
-
-          <!-- REFUND FOLLOW UP -->
-          <div class="ai-row" onclick="togglePanel('pp-refund')" style="border-top:1.5px solid var(--border)">
-            <div class="ai-dot" style="background:var(--blue);box-shadow:0 0 7px var(--blue)}"></div>
-            <div class="ai-info"><div class="ai-name">Refund Follow-Up Letter</div><div class="ai-type">If SARS hasn't paid your refund after 21 business days</div></div>
-            <div class="ai-date-box"><div class="ai-days" style="color:var(--blue)">After filing</div><div class="ai-due">21 business days</div></div>
-            <div class="ai-prepare" style="background:var(--blue-pale);color:var(--blue);border:1px solid rgba(37,99,235,.2)">Prepare ↓</div>
-          </div>
-          <div class="doc-panel" id="pp-refund">
-            <div class="dp-wrap">
-              <div class="dp-title">Refund Follow-Up Letter</div>
-              <div class="dp-desc">If your refund hasn't arrived after 21 business days, generate a formal follow-up letter to send to SARS. Professional, ready to submit.</div>
-              <div class="dp-grid">
-                <div class="dp-field"><label>Full Name</label><input id="ref-name" placeholder="e.g. Sipho Nkosi" /></div>
-                <div class="dp-field"><label>ID Number (optional)</label><input id="ref-id" placeholder="e.g. 8001015009087" /></div>
-                <div class="dp-field"><label>Tax Reference (optional)</label><input id="ref-ref" placeholder="e.g. 1234567890" /></div>
-                <div class="dp-field"><label>Return Submitted Date</label><input id="ref-date" placeholder="e.g. 10 August 2025" /></div>
-                <div class="dp-field"><label>Expected Refund Amount (R)</label><input id="ref-amount" type="number" placeholder="e.g. 8400" /></div>
-                <div class="dp-field"><label>Bank Account (last 4 digits)</label><input id="ref-bank" placeholder="e.g. 7823" /></div>
-              </div>
-              <button class="dp-btn" onclick="showSarsDisclaimer('genRefundLetter')">📄 Download Refund Follow-Up Letter PDF</button>
-            </div>
+          <div onclick="showSection('homeoffice',document.querySelector('[onclick*=homeoffice]'))" style="display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
+            <div style="font-size:24px;width:40px;text-align:center">🏡</div>
+            <div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--ink)">Home Office Deduction</div><div style="font-size:12px;color:var(--ink-3);margin-top:2px">Calculate your home office deduction based on floor space ratio</div></div>
+            <div style="font-size:12px;color:var(--blue);font-weight:600">Open →</div>
           </div>
         </div>
       </div>
 
-      <!-- REFUND ESTIMATOR -->
-      <div class="section" id="section-refund">
-        <div style="margin-bottom:22px"><h2 class="serif" style="font-size:22px;margin-bottom:5px">💰 Refund Estimator</h2><p style="font-size:13px;color:var(--ink-3)">Answer a few questions — we'll calculate what SARS owes you using official 2024/25 tax tables.</p></div>
-
-        <!-- PAYSLIP HINT -->
-        <div style="background:var(--blue-pale);border:1px solid rgba(37,99,235,.15);border-radius:10px;padding:13px 16px;margin-bottom:18px;display:flex;align-items:flex-start;gap:12px">
-          <div style="font-size:20px;flex-shrink:0">📋</div>
-          <div style="font-size:13px;color:var(--ink-2);line-height:1.6">
-            <strong style="color:var(--ink)">Have your payslip ready.</strong> Your bank statement shows income after tax — to calculate your refund we need your <strong>gross salary</strong> and <strong>PAYE deducted</strong>, which are on your payslip or IRP5 from your employer.
-          </div>
+      <!-- EFILING GUIDE -->
+      <div class="section" id="section-guide">
+        <div style="margin-bottom:22px"><h2 class="serif" style="font-size:22px;margin-bottom:5px">📋 Step-by-Step eFiling Guide</h2><p style="font-size:13px;color:var(--ink-3)">Follow these steps to file your ITR12 on SARS eFiling for the 2025/26 tax year.</p></div>
+        <div style="display:none"><!-- old refund estimator placeholder removed -->
         </div>
-        <div class="card">
-          <div class="card-head"><div class="card-title">Your Tax Details</div><span class="badge b-blue">2024/25 Tax Tables</span></div>
-          <div style="padding:24px 28px">
-            <div class="step-bar">
-              <div class="step active" id="step1"><div class="step-circle">1</div><div class="step-label">Income</div></div>
-              <div class="step-line" id="line1"></div>
-              <div class="step" id="step2"><div class="step-circle">2</div><div class="step-label">Deductions</div></div>
-              <div class="step-line" id="line2"></div>
-              <div class="step" id="step3"><div class="step-circle">3</div><div class="step-label">Result</div></div>
-            </div>
 
-            <div class="step-page active" id="sp1">
-              <div class="field-row">
-                <div class="field"><label>Annual Gross Salary (R)</label><input id="r-salary" type="number" placeholder="e.g. 320000" /><div class="field-note">Before any deductions — from your IRP5</div></div>
-                <div class="field"><label>PAYE Deducted by Employer (R)</label><input id="r-paye" type="number" placeholder="e.g. 65000" /><div class="field-note">Also on your IRP5 certificate</div></div>
-                <div class="field"><label>Months Employed This Tax Year</label>
-                  <select id="r-months">
-                    <option value="12">12 months (full year)</option>
-                    <option value="11">11 months</option>
-                    <option value="10">10 months</option>
-                    <option value="9">9 months</option>
-                    <option value="8">8 months</option>
-                    <option value="7">7 months</option>
-                    <option value="6">6 months</option>
-                    <option value="5">5 months</option>
-                    <option value="4">4 months</option>
-                    <option value="3">3 months</option>
-                    <option value="2">2 months</option>
-                    <option value="1">1 month</option>
-                  </select>
-                  <div class="field-note">If you changed jobs or started mid-year — affects your PAYE calculation</div>
-                </div>
-                <div class="field"><label>Other Income — rental, freelance (R)</label><input id="r-other" type="number" placeholder="e.g. 0" /></div>
-              <div class="f-field"><label>Rental Income (R)</label><input type="number" id="r-rental" placeholder="0" min="0" oninput="calculateRefund()"></div>
-                <div class="field"><label>Age Group</label>
-                  <select id="r-age"><option value="under65">Under 65</option><option value="65to75">65 – 75</option><option value="over75">Over 75</option></select>
-                </div>
-              </div>
-              <div class="step-nav"><div></div><button class="btn-next" onclick="advanceStep(2)">Next: Deductions →</button></div>
-            </div>
+        <div style="display:flex;flex-direction:column;gap:16px">
 
-            <div class="step-page" id="sp2">
-              <div class="field-row">
-                <div class="field"><label>Annual RA / Pension Contributions (R)</label><input id="r-ra" type="number" placeholder="e.g. 24000" /><div class="field-note">Max deduction: 27.5% of income or R350,000</div></div>
-                <div class="field"><label>Monthly Medical Aid Contributions (R)</label><input id="r-med" type="number" placeholder="e.g. 2800" /></div>
-                <div class="field"><label>Medical Aid Dependants</label>
-                  <select id="r-deps"><option value="0">Just me</option><option value="1">Me + 1</option><option value="2">Me + 2</option><option value="3">Me + 3+</option></select>
-                </div>
-                <div class="field"><label>Home Office Deduction (R)</label><input id="r-homeoffice" type="number" placeholder="e.g. 0" /><div class="field-note">Annual deductible amount</div></div>
-                <div class="field field-full"><label>Travel Deduction (R)</label><input id="r-travel" type="number" placeholder="e.g. 0" /><div class="field-note">Deductible portion of car allowance only</div></div>
-              </div>
-              <div class="step-nav">
-                <button class="btn-back" onclick="advanceStep(1)">← Back</button>
-                <button class="btn-next" onclick="calculateRefund()">Calculate My Refund →</button>
-              </div>
-            </div>
-
-            <div class="step-page" id="sp3">
-              <div class="result-box" id="refundResult">
-                <div class="result-banner" id="resultBanner">
-                  <div><div class="rb-label" id="rbLabel"></div><div class="rb-amount" id="rbAmount"></div></div>
-                  <button class="rb-cta" id="rbCta" onclick="advanceStep(1)"></button>
-                </div>
-                <div class="breakdown" id="breakdown"></div>
-                <div style="margin-top:14px;font-size:12px;color:var(--ink-4);text-align:center">⚠ Estimate only. Verify on SARS eFiling before submitting.</div>
-              </div>
+          <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:22px;display:flex;gap:18px">
+            <div style="width:36px;height:36px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;flex-shrink:0">1</div>
+            <div style="flex:1">
+              <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:5px">Log in to SARS eFiling</div>
+              <div style="font-size:13px;color:var(--ink-2);line-height:1.7;margin-bottom:10px">Go to <strong>efiling.sars.gov.za</strong>. If you don't have an account, click Register and use your SA ID number. Keep your login credentials safe — never share them.</div>
+              <div style="background:var(--blue-pale);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--blue)">💡 Tip: Use a private browser window to avoid session conflicts if you manage multiple accounts</div>
             </div>
           </div>
+
+          <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:22px;display:flex;gap:18px">
+            <div style="width:36px;height:36px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;flex-shrink:0">2</div>
+            <div style="flex:1">
+              <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:5px">Confirm your personal details &amp; banking</div>
+              <div style="font-size:13px;color:var(--ink-2);line-height:1.7;margin-bottom:10px">Under <strong>My Profile → Personal Details</strong>, confirm your name, ID number, address, and most importantly your <strong>bank account details</strong>. SARS pays refunds directly to the account on file.</div>
+              <div style="background:rgba(217,119,6,.08);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--amber)">⚠ Wrong bank details = delayed or lost refund. Double-check before filing.</div>
+            </div>
+          </div>
+
+          <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:22px;display:flex;gap:18px">
+            <div style="width:36px;height:36px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;flex-shrink:0">3</div>
+            <div style="flex:1">
+              <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:5px">Request or review your ITR12</div>
+              <div style="font-size:13px;color:var(--ink-2);line-height:1.7;margin-bottom:10px">Go to <strong>Returns → Income Tax → ITR12</strong>. If SARS issued an auto-assessment, review it carefully — <strong>don't just accept it</strong>, they sometimes miss deductions. If none, click Request Return to open your form.</div>
+              <div style="background:var(--blue-pale);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--blue)">💡 Tip: You have <strong>40 working days</strong> from the auto-assessment date to dispute it if it's incorrect</div>
+            </div>
+          </div>
+
+          <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:22px;display:flex;gap:18px">
+            <div style="width:36px;height:36px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;flex-shrink:0">4</div>
+            <div style="flex:1">
+              <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:5px">Enter your IRP5 income</div>
+              <div style="font-size:13px;color:var(--ink-2);line-height:1.7;margin-bottom:10px">Your employer submits your IRP5 directly to SARS — it should auto-populate. Check every figure matches your IRP5 certificate. Use our <strong>IRP5 Capture</strong> tool to understand the source codes before entering them.</div>
+              <div style="background:var(--green-pale);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--green)">✅ Key source codes: 3601 = basic salary · 4116 = PAYE deducted · 4001 = pension contribution</div>
+            </div>
+          </div>
+
+          <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:22px;display:flex;gap:18px">
+            <div style="width:36px;height:36px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;flex-shrink:0">5</div>
+            <div style="flex:1">
+              <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:5px">Claim your deductions</div>
+              <div style="font-size:13px;color:var(--ink-2);line-height:1.7;margin-bottom:10px">This is where most people leave money on the table. Add your <strong>medical aid contributions</strong> (source 4116), <strong>retirement annuity</strong> (source 4001/4006), <strong>travel allowance</strong> (with logbook), and <strong>home office</strong> (with employer letter). Use our Deductions, Travel Allowance, and Home Office tools to calculate these before entering.</div>
+              <div style="background:var(--blue-pale);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--blue)">💡 Tip: Medical tax credits reduce your actual tax bill — not just your taxable income. Don't skip this.</div>
+            </div>
+          </div>
+
+          <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:22px;display:flex;gap:18px">
+            <div style="width:36px;height:36px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;flex-shrink:0">6</div>
+            <div style="flex:1">
+              <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:5px">Review your return</div>
+              <div style="font-size:13px;color:var(--ink-2);line-height:1.7;margin-bottom:10px">eFiling will show a summary — your total tax, what you've already paid through PAYE, and whether you get a refund or owe SARS. Check the figures look right and confirm your banking details one more time.</div>
+              <div style="background:var(--blue-pale);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--blue)">💡 Tip: Save a PDF copy of your completed return from eFiling before submitting</div>
+            </div>
+          </div>
+
+          <div style="background:var(--white);border:1.5px solid var(--green);border-radius:14px;padding:22px;display:flex;gap:18px">
+            <div style="width:36px;height:36px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;flex-shrink:0">7</div>
+            <div style="flex:1">
+              <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:5px">Submit &amp; track your refund</div>
+              <div style="font-size:13px;color:var(--ink-2);line-height:1.7;margin-bottom:10px">Click Submit. SARS issues a <strong>Notice of Assessment (ITA34)</strong> within minutes to hours. Refunds typically arrive within <strong>7–21 business days</strong>. If no refund arrives after 21 business days, contact SARS.</div>
+              <div style="background:var(--green-pale);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--green)">✅ SARS Contact: 0800 00 7277 · efiling.sars.gov.za · Visit a SARS branch</div>
+            </div>
+          </div>
+
         </div>
       </div>
 
       <!-- CHECKLIST -->
       <div class="section" id="section-checklist">
-        <div style="margin-bottom:22px"><h2 class="serif" style="font-size:22px;margin-bottom:5px">✅ Document Checklist</h2><p style="font-size:13px;color:var(--ink-3)">Gather these before you start eFiling. Tick each as you get it — progress: <strong id="checkProgress2">0 / 8</strong></p></div>
+        <div style="margin-bottom:22px"><h2 class="serif" style="font-size:22px;margin-bottom:5px">✅ eFiling Checklist</h2><p style="font-size:13px;color:var(--ink-3)">Gather these before you start eFiling. Tick each as you get it — <strong id="checkProgress2">0 / 10</strong> ready</p></div>
         <div class="card">
           <div style="padding:14px 22px">
-            <div class="cl-item"><div class="cl-box" onclick="tickItem(this)"></div><div><div class="cl-text">SARS eFiling login details</div><div class="cl-note">Register at efiling.sars.gov.za if you haven't already. You'll need your SA ID number.</div></div></div>
-            <div class="cl-item"><div class="cl-box" onclick="tickItem(this)"></div><div><div class="cl-text">South African bank account details</div><div class="cl-note">SARS pays refunds directly to your bank. Ensure your details are updated on eFiling.</div></div></div>
-            <div class="cl-item"><div class="cl-box" onclick="tickItem(this)"></div><div><div class="cl-text">IRP5 certificate from your employer</div><div class="cl-note">Your employer must provide this by March each year. It shows your salary and PAYE paid.</div></div></div>
-            <div class="cl-item"><div class="cl-box" onclick="tickItem(this)"></div><div><div class="cl-text">Medical aid tax certificate (IT3(f))</div><div class="cl-note">From your medical aid scheme. Shows total contributions for the tax year.</div></div></div>
-            <div class="cl-item"><div class="cl-box" onclick="tickItem(this)"></div><div><div class="cl-text">Retirement annuity certificate (IT3(f))</div><div class="cl-note">If you contribute to an RA. From your RA provider — confirms annual contributions.</div></div></div>
-            <div class="cl-item"><div class="cl-box" onclick="tickItem(this)"></div><div><div class="cl-text">Travel logbook (if claiming car allowance)</div><div class="cl-note">Required by SARS if you receive a car allowance. Must show business km for the year.</div></div></div>
-            <div class="cl-item"><div class="cl-box" onclick="tickItem(this)"></div><div><div class="cl-text">Home office calculation (if applicable)</div><div class="cl-note">Floor space percentage × annual home costs. Employer must confirm work-from-home arrangement.</div></div></div>
-            <div class="cl-item"><div class="cl-box" onclick="tickItem(this)"></div><div><div class="cl-text">Section 18A donation certificates</div><div class="cl-note">If you donated to approved public benefit organisations during the tax year.</div></div></div>
+            <div class="cl-item"><div class="cl-box" onclick="tickItem(this)"></div><div><div class="cl-text">SARS eFiling login details</div><div class="cl-note">Register at efiling.sars.gov.za if you haven't already. You'll need your SA ID number and a cellphone number for OTP.</div></div></div>
+            <div class="cl-item"><div class="cl-box" onclick="tickItem(this)"></div><div><div class="cl-text">SA ID document</div><div class="cl-note">Your South African ID book or smart ID card — required for registration and identity verification.</div></div></div>
+            <div class="cl-item"><div class="cl-box" onclick="tickItem(this)"></div><div><div class="cl-text">Bank account details confirmed on eFiling</div><div class="cl-note">SARS pays refunds directly to your bank. Log in and confirm your banking details under My Profile before filing.</div></div></div>
+            <div class="cl-item"><div class="cl-box" onclick="tickItem(this)"></div><div><div class="cl-text">IRP5 certificate from your employer</div><div class="cl-note">Your employer provides this by March each year. Shows your gross salary, PAYE paid, and all source codes. Use the IRP5 Capture tool to understand it.</div></div></div>
+            <div class="cl-item"><div class="cl-box" onclick="tickItem(this)"></div><div><div class="cl-text">Medical aid tax certificate (IT3(f))</div><div class="cl-note">From your medical aid scheme. Shows your total annual contributions and number of dependants — needed to claim your medical tax credit.</div></div></div>
+            <div class="cl-item"><div class="cl-box" onclick="tickItem(this)"></div><div><div class="cl-text">Retirement annuity certificate (IT3(f))</div><div class="cl-note">If you contribute to an RA or pension fund. From your RA provider — confirms annual contributions for the deduction.</div></div></div>
+            <div class="cl-item"><div class="cl-box" onclick="tickItem(this)"></div><div><div class="cl-text">Travel logbook (if claiming travel allowance)</div><div class="cl-note">Required if you receive a travel allowance or claim business km. Must record date, destination, purpose, and km for every business trip during the tax year.</div></div></div>
+            <div class="cl-item"><div class="cl-box" onclick="tickItem(this)"></div><div><div class="cl-text">Home office employer confirmation letter</div><div class="cl-note">If claiming home office — your employer must confirm in writing that you work from home on a regular and fixed basis. Without this letter, the deduction won't be accepted.</div></div></div>
+            <div class="cl-item"><div class="cl-box" onclick="tickItem(this)"></div><div><div class="cl-text">Section 18A donation certificates</div><div class="cl-note">If you donated to SARS-approved public benefit organisations during the tax year. Deductible up to 10% of taxable income.</div></div></div>
+            <div class="cl-item"><div class="cl-box" onclick="tickItem(this)"></div><div><div class="cl-text">Previous year's Notice of Assessment (ITA34)</div><div class="cl-note">Useful for reference — shows what SARS assessed last year. Download from eFiling under Returns → Notice of Assessment.</div></div></div>
           </div>
         </div>
       </div>
 
-      <!-- BANK ANALYSIS -->
-      <div class="section" id="section-bankanalysis">
-        <div style="margin-bottom:22px"><h2 class="serif" style="font-size:22px;margin-bottom:5px">🏦 Bank Statement Analysis</h2><p style="font-size:13px;color:var(--ink-3)">Upload up to 3 months of bank statements. Our AI extracts income, expenses, and generates insights to maximise your refund.</p></div>
-
-        <!-- MONTH SLOTS -->
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px">
-          <div class="card" id="slot1card">
-            <div class="card-head"><div class="card-title">Month 1</div><span class="badge b-blue" id="slot1badge">Required</span></div>
-            <div style="padding:18px">
-              <div class="upload-zone" id="dz1" onclick="document.getElementById('fi1').click()" style="border:2px dashed var(--border2);border-radius:10px;padding:28px 16px;text-align:center;cursor:pointer;transition:all .2s">
-                <input type="file" id="fi1" accept=".csv,.txt,.xlsx,.ofx,.qif" style="display:none" onchange="handlePersonalFile(event,1)" />
-                <div style="font-size:32px;margin-bottom:8px">📄</div>
-                <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px">Upload Statement</div>
-                <div style="font-size:11px;color:var(--ink-4)">CSV, TXT or OFX</div>
-              </div>
-            </div>
+      <!-- IRP5 CAPTURE -->
+      <div style="margin-bottom:22px"><h2 class="serif" style="font-size:22px;margin-bottom:5px">🧾 IRP5 Income Capture</h2><p style="font-size:13px;color:var(--ink-3)">Enter the source codes from your IRP5 certificate to calculate your tax and estimated refund.</p></div>
+        <div style="background:var(--blue-pale);border:1px solid rgba(37,99,235,.15);border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:var(--ink-2);line-height:1.7">
+          📄 <strong>What is an IRP5?</strong> It's the tax certificate your employer gives you every year showing your salary, benefits, and all tax deducted. Your employer must provide it by March. All the numbers below come directly from the source codes printed on it.
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-head"><div class="card-title">Income (from your IRP5)</div><span class="badge b-blue">2025/26</span></div>
+          <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div><label class="f-label">3601 — Basic Salary / Regular Income (R)</label><input class="f-input" id="irp5-3601" type="number" placeholder="e.g. 280000" oninput="calcIRP5()" /></div>
+            <div><label class="f-label">3605 — Annual Bonus / Annual Payment (R)</label><input class="f-input" id="irp5-3605" type="number" placeholder="e.g. 20000" oninput="calcIRP5()" /></div>
+            <div><label class="f-label">3713 — Employer Retirement Fund Contributions (R)</label><input class="f-input" id="irp5-3713" type="number" placeholder="e.g. 0" oninput="calcIRP5()" /></div>
+            <div><label class="f-label">Other Income (rental, freelance, interest) (R)</label><input class="f-input" id="irp5-other" type="number" placeholder="e.g. 0" oninput="calcIRP5()" /></div>
           </div>
-          <div class="card" id="slot2card">
-            <div class="card-head"><div class="card-title">Month 2</div><span class="badge b-amber" id="slot2badge">Optional</span></div>
-            <div style="padding:18px">
-              <div class="upload-zone" id="dz2" onclick="document.getElementById('fi2').click()" style="border:2px dashed var(--border2);border-radius:10px;padding:28px 16px;text-align:center;cursor:pointer;transition:all .2s">
-                <input type="file" id="fi2" accept=".csv,.txt,.xlsx,.ofx,.qif" style="display:none" onchange="handlePersonalFile(event,2)" />
-                <div style="font-size:32px;margin-bottom:8px">📄</div>
-                <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px">Upload Statement</div>
-                <div style="font-size:11px;color:var(--ink-4)">CSV, TXT or OFX</div>
-              </div>
-            </div>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-head"><div class="card-title">Deductions &amp; Tax Paid</div></div>
+          <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div><label class="f-label">4001 — Employee Pension Fund Contributions (R)</label><input class="f-input" id="irp5-4001" type="number" placeholder="e.g. 12000" oninput="calcIRP5()" /></div>
+            <div><label class="f-label">4003 — Retirement Annuity Contributions (R)</label><input class="f-input" id="irp5-4003" type="number" placeholder="e.g. 0" oninput="calcIRP5()" /></div>
+            <div><label class="f-label">4005 — Medical Aid Contributions (R)</label><input class="f-input" id="irp5-4005" type="number" placeholder="e.g. 33600" oninput="calcIRP5()" /></div>
+            <div><label class="f-label">4116 — PAYE Deducted by Employer (R)</label><input class="f-input" id="irp5-4116" type="number" placeholder="e.g. 48000" oninput="calcIRP5()" /></div>
           </div>
-          <div class="card" id="slot3card">
-            <div class="card-head"><div class="card-title">Month 3</div><span class="badge b-amber" id="slot3badge">Optional</span></div>
-            <div style="padding:18px">
-              <div class="upload-zone" id="dz3" onclick="document.getElementById('fi3').click()" style="border:2px dashed var(--border2);border-radius:10px;padding:28px 16px;text-align:center;cursor:pointer;transition:all .2s">
-                <input type="file" id="fi3" accept=".csv,.txt,.xlsx,.ofx,.qif" style="display:none" onchange="handlePersonalFile(event,3)" />
-                <div style="font-size:32px;margin-bottom:8px">📄</div>
-                <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px">Upload Statement</div>
-                <div style="font-size:11px;color:var(--ink-4)">CSV, TXT or OFX</div>
-              </div>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-head"><div class="card-title">Personal Details</div></div>
+          <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+            <div><label class="f-label">Age Group</label>
+              <select class="f-input" id="irp5-age" onchange="calcIRP5()">
+                <option value="under65">Under 65</option>
+                <option value="65to75">65 – 75</option>
+                <option value="over75">Over 75</option>
+              </select>
+            </div>
+            <div><label class="f-label">Monthly Medical Aid Contribution (R)</label><input class="f-input" id="irp5-medmonthly" type="number" placeholder="e.g. 2800" oninput="calcIRP5()" /></div>
+            <div><label class="f-label">Medical Aid Dependants</label>
+              <select class="f-input" id="irp5-deps" onchange="calcIRP5()">
+                <option value="0">Just me</option>
+                <option value="1">Me + 1</option>
+                <option value="2">Me + 2</option>
+                <option value="3">Me + 3+</option>
+              </select>
             </div>
           </div>
         </div>
-
-        <!-- RETRY BANNER — shows on failure -->
-        <div id="retryBanner" style="display:none;align-items:center;gap:12px;background:var(--red-pale);border:1px solid rgba(220,38,38,.2);border-radius:10px;padding:14px 18px;margin-bottom:16px">
-          <div style="font-size:20px">⚠️</div>
-          <div style="flex:1">
-            <div style="font-size:13.5px;font-weight:700;color:var(--red);margin-bottom:2px">Analysis failed</div>
-            <div style="font-size:12.5px;color:var(--ink-3)">Click a slot above to replace the file, then try again.</div>
-          </div>
-          <button onclick="document.getElementById('retryBanner').style.display='none';analysePersonalStatements()" style="background:var(--red);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap">🔄 Retry</button>
-        </div>
-
-        <div style="text-align:center;margin-bottom:20px">
-          <button class="dp-btn" id="analyseBtn" onclick="analysePersonalStatements()" style="opacity:.4;cursor:not-allowed" disabled>🔍 Analyse My Statements</button>
-        </div>
-
-        <!-- PROGRESS -->
-        <div class="card" id="pProgressWrap" style="display:none">
-          <div style="padding:44px 20px;text-align:center;display:flex;flex-direction:column;align-items:center">
-            <div style="width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:18px"></div>
-            <div style="font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:6px">Analysing your statements...</div>
-            <div style="font-size:13px;color:var(--ink-3)">Finding deductions and SARS insights</div>
-          </div>
-        </div>
-
-        <!-- UNREADABLE FILE -->
-        <div id="pUnreadableWrap" style="display:none;margin-top:16px">
-          <div style="background:rgba(245,158,11,.08);border:1.5px solid rgba(245,158,11,.3);border-radius:14px;padding:20px;margin-bottom:16px;display:flex;gap:14px;align-items:flex-start">
-            <div style="font-size:26px">⚠️</div>
-            <div>
-              <div style="font-size:14px;font-weight:700;color:#d97706;margin-bottom:5px">Unable to read this file</div>
-              <div style="font-size:13px;color:var(--ink-2);line-height:1.6">The AI could not extract data — it may be a scanned image or unsupported format. Please export your statement as CSV or TXT from your bank's internet banking, or enter your totals manually below. <strong>Only enter figures you can verify on your actual statement.</strong></div>
-            </div>
-          </div>
-          <div style="background:var(--white);border:1px solid var(--border2);border-radius:14px;padding:20px">
-            <div style="font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:16px">📋 Manual Entry</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-              <div>
-                <label style="font-size:11px;color:var(--ink-3);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Total Income</label>
-                <div style="position:relative"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-size:13px">R</span><input type="number" id="pman-income" placeholder="0.00" step="0.01" min="0" style="width:100%;border:1px solid var(--border2);border-radius:8px;padding:10px 10px 10px 24px;font-size:13px;font-family:'Inter',sans-serif;outline:none;color:var(--ink)"></div>
-              </div>
-              <div>
-                <label style="font-size:11px;color:var(--ink-3);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Total Expenses</label>
-                <div style="position:relative"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-size:13px">R</span><input type="number" id="pman-expenses" placeholder="0.00" step="0.01" min="0" style="width:100%;border:1px solid var(--border2);border-radius:8px;padding:10px 10px 10px 24px;font-size:13px;font-family:'Inter',sans-serif;outline:none;color:var(--ink)"></div>
-              </div>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-              <div>
-                <label style="font-size:11px;color:var(--ink-3);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Period</label>
-                <input type="text" id="pman-period" placeholder="e.g. Jan 2025" style="width:100%;border:1px solid var(--border2);border-radius:8px;padding:10px;font-size:13px;font-family:'Inter',sans-serif;outline:none;color:var(--ink)">
-              </div>
-              <div>
-                <label style="font-size:11px;color:var(--ink-3);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Estimated Annual Salary</label>
-                <div style="position:relative"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink-3);font-size:13px">R</span><input type="number" id="pman-salary" placeholder="0.00" step="0.01" min="0" style="width:100%;border:1px solid var(--border2);border-radius:8px;padding:10px 10px 10px 24px;font-size:13px;font-family:'Inter',sans-serif;outline:none;color:var(--ink)"></div>
-              </div>
-            </div>
-            <div style="display:flex;gap:10px">
-              <button onclick="submitPersonalManual()" style="flex:1;background:var(--blue);color:#fff;border:none;padding:12px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer">Save Manual Entry</button>
-              <button onclick="resetPersonalAnalysis()" style="background:var(--bg);color:var(--ink-3);border:1px solid var(--border2);padding:12px 18px;border-radius:9px;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif">Try Again</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- RESULTS -->
-        <div id="pResultWrap" style="display:none;animation:fadeUp .4s ease">
-          <!-- SMART REFUND BANNER -->
-          <div class="smart-banner" id="smartBanner" style="display:none">
-            <div class="sb-text">
-              <strong>✅ Income extracted from your statement</strong>
-              <span>We've found your income and deductible expenses. Add your payslip details (gross salary, PAYE, medical, RA) in the Refund Estimator to complete your estimate.</span>
-            </div>
-            <button class="sb-btn" onclick="smartFillRefund()">Auto-Fill Income →</button>
-            <button class="sb-btn" onclick="smartFillDocs()" style="background:var(--green);margin-left:8px">Open Estimator →</button>
-          </div>
-          <div class="card" style="margin-bottom:16px">
-            <div class="card-head">
-              <div class="card-title">📊 Analysis Results</div>
-              <button onclick="resetPersonalAnalysis()" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--ink-3);cursor:pointer">↑ Upload New</button>
-            </div>
-            <div style="padding:18px 22px">
-              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px">
+        <div id="irp5Result" style="display:none;margin-bottom:16px">
+          <div class="card">
+            <div class="card-head"><div class="card-title">📊 Tax Calculation</div><span class="badge b-blue">2025/26 SARS Tables</span></div>
+            <div style="padding:20px">
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px">
                 <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
-                  <div style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--green);margin-bottom:3px" id="p-income">—</div>
-                  <div style="font-size:10px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.7px">Total Income</div>
+                  <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--ink);margin-bottom:3px" id="irp5-r-gross">R —</div>
+                  <div style="font-size:10px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.7px">Gross Income</div>
                 </div>
                 <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
-                  <div style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--red);margin-bottom:3px" id="p-expenses">—</div>
-                  <div style="font-size:10px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.7px">Total Expenses</div>
+                  <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--blue);margin-bottom:3px" id="irp5-r-taxable">R —</div>
+                  <div style="font-size:10px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.7px">Taxable Income</div>
                 </div>
                 <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
-                  <div style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--blue);margin-bottom:3px" id="p-deduct">—</div>
-                  <div style="font-size:10px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.7px">Potential Deductions</div>
-                </div>
-                <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center">
-                  <div style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--amber);margin-bottom:3px" id="p-months-covered">—</div>
-                  <div style="font-size:10px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.7px">Months Analysed</div>
+                  <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--ink);margin-bottom:3px" id="irp5-r-finaltax">R —</div>
+                  <div style="font-size:10px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.7px">Final Tax Liability</div>
                 </div>
               </div>
-              <div id="pInsightsBox" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
-              <!-- SARS FLAGS -->
-              <div id="pFlagsCard" style="display:none;background:rgba(245,158,11,.06);border:1.5px solid rgba(245,158,11,.25);border-radius:12px;padding:14px;margin-bottom:16px">
-                <div style="font-size:12px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">⚠ SARS Risk Flags</div>
-                <div id="pFlagsBox" style="display:flex;flex-direction:column;gap:8px"></div>
+              <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;margin-bottom:16px">
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--ink-3)">Tax before rebates</span><span id="irp5-r-rawtax">—</span></div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--ink-3)">Primary rebate</span><span id="irp5-r-rebate">—</span></div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--ink-3)">Medical tax credit</span><span id="irp5-r-medcredit">—</span></div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--ink-3)">PAYE paid by employer</span><span id="irp5-r-paye">—</span></div>
               </div>
-              <table style="width:100%;border-collapse:collapse;font-size:12.5px">
-                <thead><tr>
-                  <th style="text-align:left;padding:9px 12px;background:var(--surface2);color:var(--ink-3);font-size:10.5px;text-transform:uppercase;letter-spacing:.7px">Date</th>
-                  <th style="text-align:left;padding:9px 12px;background:var(--surface2);color:var(--ink-3);font-size:10.5px;text-transform:uppercase;letter-spacing:.7px">Description</th>
-                  <th style="text-align:left;padding:9px 12px;background:var(--surface2);color:var(--ink-3);font-size:10.5px;text-transform:uppercase;letter-spacing:.7px">Amount</th>
-                  <th style="text-align:left;padding:9px 12px;background:var(--surface2);color:var(--ink-3);font-size:10.5px;text-transform:uppercase;letter-spacing:.7px">Type</th>
-                  <th style="text-align:left;padding:9px 12px;background:var(--surface2);color:var(--ink-3);font-size:10.5px;text-transform:uppercase;letter-spacing:.7px">Deductible?</th>
-                </tr></thead>
-                <tbody id="pTxBody"></tbody>
-              </table>
+              <div id="irp5-r-banner" style="border-radius:10px;padding:16px 20px;text-align:center">
+                <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px" id="irp5-r-label"></div>
+                <div style="font-family:'DM Serif Display',serif;font-size:28px;font-weight:700" id="irp5-r-amount"></div>
+                <div style="font-size:11px;margin-top:6px;opacity:.8">⚠ Estimate only — verify on SARS eFiling before submitting</div>
+              </div>
             </div>
+          </div>
+          <div style="text-align:center;margin-top:14px">
+            <button class="dp-btn" onclick="genIRP5PDF()">📄 Download IRP5 Tax Summary PDF</button>
           </div>
         </div>
       </div>
 
-      <!-- EFILING WALKTHROUGH -->
-      <div class="section" id="section-efiling">
-        <div style="margin-bottom:22px"><h2 class="serif" style="font-size:22px;margin-bottom:5px">📋 eFiling Walkthrough</h2><p style="font-size:13px;color:var(--ink-3)">Step-by-step guide to filing your ITR12 on SARS eFiling.</p></div>
-        <div class="ef-step"><div class="ef-num">1</div><div><div class="ef-title">Register or log in to SARS eFiling</div><div class="ef-desc">Go to efiling.sars.gov.za and log in. New user? Click "Register" — you'll need your SA ID number, personal details, and a cellphone number.</div><div class="ef-code">👉 efiling.sars.gov.za</div></div></div>
-        <div class="ef-step"><div class="ef-num">2</div><div><div class="ef-title">Check for an auto-assessment</div><div class="ef-desc">SARS may have pre-assessed you. Go to Returns → Income Tax → ITR12. If there's a pre-filled return, review it carefully. <strong>Don't just accept it</strong> — SARS sometimes misses deductions you're entitled to.</div></div></div>
-        <div class="ef-step"><div class="ef-num">3</div><div><div class="ef-title">Request your ITR12</div><div class="ef-desc">If no auto-assessment, click "Request Return". SARS pre-fills what they know — your job is to complete and verify the rest.</div><div class="ef-code">In eFiling: Returns → Income Tax → ITR12 → Request Return</div></div></div>
-        <div class="ef-step"><div class="ef-num">4</div><div><div class="ef-title">Capture your income</div><div class="ef-desc">Enter your salary from your IRP5. Include all income sources: rental, freelance, interest. Match every number to your IRP5 certificate.</div></div></div>
-        <div class="ef-step"><div class="ef-num">5</div><div><div class="ef-title">Add your deductions</div><div class="ef-desc">Medical aid credits (source code 4116), RA contributions (source code 4001/4006), travel allowance, home office. Each has a specific section in the ITR12.</div></div></div>
-        <div class="ef-step"><div class="ef-num">6</div><div><div class="ef-title">Review, sign and submit</div><div class="ef-desc">eFiling will show your tax summary — what you owe or what SARS owes you. Check it against our Refund Estimator. Sign electronically and submit. Refund arrives within 7–21 business days.</div></div></div>
+      <!-- DEDUCTIONS -->
+      <div class="section" id="section-deductions">
+        <div style="margin-bottom:22px"><h2 class="serif" style="font-size:22px;margin-bottom:5px">💊 Deductions Calculator</h2><p style="font-size:13px;color:var(--ink-3)">Calculate your medical aid tax credit and retirement annuity deduction before entering them on your ITR12.</p></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
+
+          <div class="card">
+            <div class="card-head"><div class="card-title">🏥 Medical Aid Tax Credit</div></div>
+            <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+              <div style="background:var(--blue-pale);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--blue)">💡 A tax credit directly reduces your tax bill — not just your taxable income. This is one of the most valuable deductions.</div>
+              <div><label class="f-label">Monthly Medical Aid Contribution (R)</label><input class="f-input" id="ded-medmonth" type="number" placeholder="e.g. 2800" oninput="calcMedCredit()" /></div>
+              <div><label class="f-label">Number of Dependants</label>
+                <select class="f-input" id="ded-meddeps" onchange="calcMedCredit()">
+                  <option value="0">Just me</option>
+                  <option value="1">Me + 1 dependant</option>
+                  <option value="2">Me + 2 dependants</option>
+                  <option value="3">Me + 3 dependants</option>
+                  <option value="4">Me + 4+ dependants</option>
+                </select>
+              </div>
+              <div id="medCreditResult" style="display:none;background:var(--green-pale);border:1px solid rgba(5,150,105,.2);border-radius:10px;padding:14px;text-align:center">
+                <div style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px">Annual Medical Tax Credit</div>
+                <div style="font-family:'DM Serif Display',serif;font-size:26px;color:var(--green)" id="medCreditVal">R 0</div>
+                <div style="font-size:11px;color:var(--ink-3);margin-top:6px" id="medCreditBreak"></div>
+                <div style="font-size:11px;color:var(--ink-3);margin-top:4px">Enter this at <strong>source code 4116</strong> on your ITR12</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><div class="card-title">🏦 Retirement Annuity Deduction</div></div>
+            <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+              <div style="background:var(--blue-pale);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--blue)">💡 RA contributions reduce your taxable income — capped at 27.5% of income or R350,000 per year.</div>
+              <div><label class="f-label">Annual Gross Income (R)</label><input class="f-input" id="ded-raincome" type="number" placeholder="e.g. 320000" oninput="calcRA()" /></div>
+              <div><label class="f-label">Annual RA Contributions (R)</label><input class="f-input" id="ded-racontrib" type="number" placeholder="e.g. 36000" oninput="calcRA()" /></div>
+              <div id="raResult" style="display:none;background:var(--green-pale);border:1px solid rgba(5,150,105,.2);border-radius:10px;padding:14px;text-align:center">
+                <div style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px">Deductible Amount</div>
+                <div style="font-family:'DM Serif Display',serif;font-size:26px;color:var(--green)" id="raDeductVal">R 0</div>
+                <div style="font-size:11px;color:var(--ink-3);margin-top:6px" id="raDeductNote"></div>
+                <div style="font-size:11px;color:var(--ink-3);margin-top:4px">Enter this at <strong>source code 4001/4003</strong> on your ITR12</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
 
-      <!-- AUTO-ASSESSMENT CHECKER -->
-      <div class="section" id="section-assessment">
-        <div style="margin-bottom:22px"><h2 class="serif" style="font-size:22px;margin-bottom:5px">🔍 Auto-Assessment Checker</h2><p style="font-size:13px;color:var(--ink-3)">Not sure whether to accept or dispute your SARS auto-assessment? Describe your situation and our AI will advise you.</p></div>
+      <!-- TRAVEL ALLOWANCE -->
+      <div class="section" id="section-travel">
+        <div style="margin-bottom:22px"><h2 class="serif" style="font-size:22px;margin-bottom:5px">🚗 Travel Allowance Calculator</h2><p style="font-size:13px;color:var(--ink-3)">If your employer pays a travel allowance, you can claim a deduction for business km. You must have a logbook.</p></div>
+
+        <div style="background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.25);border-radius:10px;padding:14px 18px;margin-bottom:18px;font-size:13px;color:#92400e;line-height:1.7">
+          ⚠ <strong>Logbook required.</strong> SARS will disallow the deduction without a logbook showing date, destination, purpose, and km for every business trip during the tax year (1 March 2025 – 28 February 2026).
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
+
+          <div class="card">
+            <div class="card-head"><div class="card-title">Method 1 — SARS Fixed Rate</div><span class="badge b-blue">Simpler</span></div>
+            <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+              <div style="font-size:13px;color:var(--ink-3);line-height:1.6">Use the SARS prescribed rate per km. Simpler — just needs your business km total from your logbook.</div>
+              <div><label class="f-label">Business km Traveled (km)</label><input class="f-input" id="trav-km" type="number" placeholder="e.g. 8500" oninput="calcTravel()" /></div>
+              <div style="background:var(--surface2);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--ink-3)">SARS fixed rate: <strong>R4.84/km</strong> (2025/26)</div>
+              <div id="travFixed" style="display:none;background:var(--green-pale);border:1px solid rgba(5,150,105,.2);border-radius:10px;padding:14px;text-align:center">
+                <div style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px">Deductible (Fixed Rate)</div>
+                <div style="font-family:'DM Serif Display',serif;font-size:26px;color:var(--green)" id="travFixedVal">R 0</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><div class="card-title">Method 2 — Actual Costs</div><span class="badge b-amber">More detail</span></div>
+            <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+              <div style="font-size:13px;color:var(--ink-3);line-height:1.6">Use actual costs if you have receipts — may give a higher deduction. Needs fuel, maintenance, and insurance records.</div>
+              <div><label class="f-label">Business km Traveled (km)</label><input class="f-input" id="trav-bkm" type="number" placeholder="e.g. 8500" oninput="calcTravelActual()" /></div>
+              <div><label class="f-label">Total km Traveled (incl private) (km)</label><input class="f-input" id="trav-tkm" type="number" placeholder="e.g. 22000" oninput="calcTravelActual()" /></div>
+              <div><label class="f-label">Annual Fuel Costs (R)</label><input class="f-input" id="trav-fuel" type="number" placeholder="e.g. 28000" oninput="calcTravelActual()" /></div>
+              <div><label class="f-label">Annual Maintenance + Insurance (R)</label><input class="f-input" id="trav-maint" type="number" placeholder="e.g. 12000" oninput="calcTravelActual()" /></div>
+              <div><label class="f-label">Vehicle Purchase Price (R)</label><input class="f-input" id="trav-price" type="number" placeholder="e.g. 280000" oninput="calcTravelActual()" /></div>
+              <div id="travActual" style="display:none;background:var(--green-pale);border:1px solid rgba(5,150,105,.2);border-radius:10px;padding:14px;text-align:center">
+                <div style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px">Deductible (Actual Costs)</div>
+                <div style="font-family:'DM Serif Display',serif;font-size:26px;color:var(--green)" id="travActualVal">R 0</div>
+                <div style="font-size:11px;color:var(--ink-3);margin-top:5px" id="travActualNote"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div style="background:var(--blue-pale);border-radius:10px;padding:14px 18px;margin-top:16px;font-size:13px;color:var(--ink-2);line-height:1.7">
+          💡 <strong>Which method to use?</strong> You can calculate both and use whichever gives the higher deduction — as long as you have the records to support it. If your employer paid you a travel allowance, <strong>80% of that allowance</strong> is included in your taxable income on the IRP5. Your deduction reduces this.
+        </div>
+      </div>
+
+      <!-- HOME OFFICE -->
+      <div class="section" id="section-homeoffice">
+        <div style="margin-bottom:22px"><h2 class="serif" style="font-size:22px;margin-bottom:5px">🏡 Home Office Deduction</h2><p style="font-size:13px;color:var(--ink-3)">If you work from home on a regular and fixed basis, you may claim a portion of your home expenses.</p></div>
+
+        <div style="background:rgba(217,119,6,.08);border:1.5px solid rgba(217,119,6,.3);border-radius:12px;padding:18px 20px;margin-bottom:20px">
+          <div style="font-size:14px;font-weight:700;color:#92400e;margin-bottom:10px">⚠ Requirements — all three must apply</div>
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:#78350f">
+            <div style="display:flex;gap:10px"><span>1.</span><span>Your employer must confirm in writing that you work from home on a <strong>regular and fixed basis</strong> (not just occasionally)</span></div>
+            <div style="display:flex;gap:10px"><span>2.</span><span>The office space must be <strong>used exclusively for work</strong> — a couch with a laptop does not qualify</span></div>
+            <div style="display:flex;gap:10px"><span>3.</span><span>You must have receipts for all home expenses claimed</span></div>
+          </div>
+        </div>
+
         <div class="card">
-          <div style="padding:22px">
-            <div class="field-row">
-              <div class="field"><label>SARS Assessment Amount (R)</label><input id="aa-amount" type="number" placeholder="e.g. -4200 for refund, 1500 for owe" /></div>
-              <div class="field"><label>Annual Gross Salary (R)</label><input id="aa-salary" type="number" placeholder="e.g. 320000" /></div>
+          <div class="card-head"><div class="card-title">Home Office Calculator</div><span class="badge b-blue">2025/26</span></div>
+          <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div><label class="f-label">Home Office Floor Space (m²)</label><input class="f-input" id="ho-office" type="number" placeholder="e.g. 12" oninput="calcHomeOffice()" /></div>
+            <div><label class="f-label">Total Home Floor Space (m²)</label><input class="f-input" id="ho-total" type="number" placeholder="e.g. 120" oninput="calcHomeOffice()" /></div>
+            <div><label class="f-label">Annual Rent or Bond Interest (R)</label><input class="f-input" id="ho-rent" type="number" placeholder="e.g. 96000" oninput="calcHomeOffice()" /></div>
+            <div><label class="f-label">Annual Rates &amp; Levies (R)</label><input class="f-input" id="ho-rates" type="number" placeholder="e.g. 8400" oninput="calcHomeOffice()" /></div>
+            <div><label class="f-label">Annual Electricity &amp; Water (R)</label><input class="f-input" id="ho-elec" type="number" placeholder="e.g. 14400" oninput="calcHomeOffice()" /></div>
+            <div><label class="f-label">Annual Repairs &amp; Maintenance (R)</label><input class="f-input" id="ho-repairs" type="number" placeholder="e.g. 3000" oninput="calcHomeOffice()" /></div>
+          </div>
+          <div id="hoResult" style="display:none;padding:0 20px 20px">
+            <div style="background:var(--green-pale);border:1px solid rgba(5,150,105,.2);border-radius:10px;padding:16px;text-align:center;margin-bottom:12px">
+              <div style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px">Annual Home Office Deduction</div>
+              <div style="font-family:'DM Serif Display',serif;font-size:28px;color:var(--green)" id="hoDeductVal">R 0</div>
+              <div style="font-size:12px;color:var(--ink-3);margin-top:6px" id="hoRatioNote"></div>
             </div>
-            <div class="field" style="margin-bottom:14px"><label>Your Situation</label><input id="aa-desc" placeholder="e.g. I have medical aid with 2 dependants, contribute R2000/month to RA, and worked from home 3 days a week" /></div>
-            <button class="dp-btn" onclick="checkAssessment()">🔍 Analyse My Assessment</button>
-            <div class="assess-result" id="assessResult"></div>
+            <div style="font-size:12.5px;color:var(--ink-3);line-height:1.7;background:var(--surface2);border-radius:8px;padding:12px">
+              💡 You can also claim <strong>wear and tear on office furniture</strong> (e.g. desk, chair, monitor) separately at SARS rates. Keep purchase receipts and calculate at 33.3% per year for computer equipment, 16.7% for furniture.
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- ASSISTANT -->
+      <!-- (removed: assessment, assistant) -->
 
 
     
@@ -1131,7 +1076,7 @@ h1,h2,h3,.serif{font-family:'DM Serif Display',serif}
             <div style="padding:14px 20px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700;color:var(--ink)">⭐ Current Plan</div>
             <div style="padding:20px">
               <div style="font-size:17px;font-weight:700;color:var(--ink)" id="pset-plan-name">Personal</div>
-              <div style="font-size:12px;color:var(--ink-3);margin-top:4px">Full access to personal tax tools for the 2024/25 tax year</div>
+              <div style="font-size:12px;color:var(--ink-3);margin-top:4px">Full access to personal tax tools for the 2025/26 tax year</div>
             </div>
           </div>
 
@@ -1181,20 +1126,20 @@ h1,h2,h3,.serif{font-family:'DM Serif Display',serif}
         <div style="font-size:11px;color:var(--blue);margin-left:auto">View →</div>
       </div>
       <div class="wc-actions">
-        <button class="wc-action" onclick="closeWelcomeAndGo('refund')">
-          <div class="wc-action-icon">💰</div>
-          <span class="wc-action-label">Refund Estimator</span>
-          <div class="wc-action-sub">How much back?</div>
-        </button>
-        <button class="wc-action" onclick="closeWelcomeAndGo('bankanalysis')">
-          <div class="wc-action-icon">🏦</div>
-          <span class="wc-action-label">Bank Analysis</span>
-          <div class="wc-action-sub">Upload statement</div>
-        </button>
-        <button class="wc-action" onclick="closeWelcomeAndGo('autoassess')">
+        <button class="wc-action" onclick="closeWelcomeAndGo('guide')">
           <div class="wc-action-icon">📋</div>
-          <span class="wc-action-label">Auto-Assessment</span>
-          <div class="wc-action-sub">Accept or dispute?</div>
+          <span class="wc-action-label">eFiling Guide</span>
+          <div class="wc-action-sub">Step-by-step</div>
+        </button>
+        <button class="wc-action" onclick="closeWelcomeAndGo('irp5')">
+          <div class="wc-action-icon">🧾</div>
+          <span class="wc-action-label">IRP5 Capture</span>
+          <div class="wc-action-sub">Calculate your tax</div>
+        </button>
+        <button class="wc-action" onclick="closeWelcomeAndGo('checklist')">
+          <div class="wc-action-icon">✅</div>
+          <span class="wc-action-label">Checklist</span>
+          <div class="wc-action-sub">Am I ready to file?</div>
         </button>
       </div>
     </div>
@@ -1204,16 +1149,6 @@ h1,h2,h3,.serif{font-family:'DM Serif Display',serif}
   </div>
 </div>
 
-<!-- UPGRADE PROMPT -->
-<div id="upgradePrompt" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--white);border:1.5px solid var(--amber);border-radius:14px;padding:16px 22px;align-items:center;gap:14px;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,.15);min-width:320px">
-  <div style="font-size:24px">⭐</div>
-  <div style="flex:1">
-    <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px" id="up-msg">Upgrade required</div>
-    <div style="font-size:11.5px;color:var(--amber);font-weight:600" id="up-plan"></div>
-  </div>
-  <a id="up-cta" href="https://pay.yoco.com/r/mRgMqn" target="_blank" style="background:var(--amber);color:#000;border:none;padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:700;cursor:pointer;text-decoration:none;white-space:nowrap">Upgrade Now</a>
-  <button onclick="document.getElementById('upgradePrompt').style.display='none'" style="background:none;border:none;color:var(--ink-3);cursor:pointer;font-size:16px">✕</button>
-</div>
 
 <!-- LEGAL MODAL -->
 <div class="legal-overlay" id="legalModal" style="display:none" onclick="if(event.target===this)closeLegal()">
@@ -1250,7 +1185,7 @@ h1,h2,h3,.serif{font-family:'DM Serif Display',serif}
     <span class="footer-link" onclick="openLegal('disclaimer')">Tax Disclaimer</span>
     <a href="/cdn-cgi/l/email-protection#83f0f6f3f3ecf1f7c3ecede6f7ecf6e0ebadede6f7adf9e2" class="footer-link" style="text-decoration:none">Support</a>
   </div>
-  <div style="font-size:11px;color:var(--ink-4)">© 2025 OneTouch TaxApp · Powered by official SARS 2024/25 tax tables · Always verify with SARS eFiling</div>
+  <div style="font-size:11px;color:var(--ink-4)">© 2025 OneTouch TaxApp · Powered by official SARS 2025/26 tax tables · Always verify with SARS eFiling</div>
 </div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
@@ -1300,7 +1235,7 @@ const legalContent = {
   terms: `<h4>Terms of Service</h4><p>Welcome to OneTouch TaxApp ("the Platform"). By accessing or using this platform, you agree to these Terms of Service.</p><h4>1. Use of the Platform</h4><p>OneTouch TaxApp is a personal tax guidance tool for South African taxpayers aged 18+. It helps estimate tax refunds, prepare documents, and organise tax information.</p><h4>2. No Professional Advice</h4><p>OneTouch TaxApp does not provide professional legal, tax, or financial advice. All calculations and documents are for guidance only. Verify all information with a registered tax practitioner before submitting to SARS.</p><h4>3. Accuracy of Information</h4><p>Tax laws change frequently. OneTouch TaxApp accepts no liability for errors or outdated information. Always verify current rates at sars.gov.za.</p><h4>4. User Responsibilities</h4><ul><li>You are responsible for the accuracy of information you enter</li><li>You must verify all figures before submitting to SARS</li><li>You must keep your eFiling credentials secure</li><li>You must not use this platform for fraudulent purposes</li></ul><h4>5. Limitation of Liability</h4><p>OneTouch shall not be liable for any damages, SARS penalties, interest, or assessments arising from your use of this platform.</p><h4>6. Changes to Terms</h4><p>We reserve the right to update these terms at any time. Continued use constitutes acceptance.</p>`,
   privacy: `<h4>Privacy Policy</h4><p>OneTouch is committed to protecting your personal information in accordance with POPIA and South African law.</p><h4>Information We Collect</h4><ul><li><strong>Account info:</strong> Name, email address, profile details</li><li><strong>Financial data:</strong> Salary, tax calculations, bank statement data you upload</li><li><strong>Usage data:</strong> How you interact with the platform (anonymised)</li></ul><h4>How We Use Your Information</h4><ul><li>To provide and improve the OneTouch service</li><li>To calculate tax estimates and generate documents</li><li>To save your statement history for your reference</li></ul><h4>Data Storage</h4><p>Your data is stored securely using Supabase (SOC 2 Type II certified). Data is encrypted at rest and in transit. We do not sell your personal information.</p><h4>AI Processing</h4><p>Uploaded documents are processed via the Anthropic API for analysis. Documents are not stored by Anthropic beyond the processing request.</p><h4>Your Rights</h4><p>You have the right to access, correct, or delete your personal information. Contact: privacy@onetouch.net.za</p><h4>Cookies</h4><p>We use session cookies for authentication only — no tracking or advertising cookies.</p>`,
   popia: `<h4>POPIA Compliance Notice</h4><p>OneTouch complies with the Protection of Personal Information Act 4 of 2013 (POPIA), in full effect from 1 July 2021.</p><h4>Information Officer</h4><p>Contact our Information Officer at: privacy@onetouch.net.za</p><h4>Lawful Processing Grounds</h4><ul><li><strong>Consent:</strong> You agree to our terms on registration</li><li><strong>Contract:</strong> Necessary to provide the requested service</li><li><strong>Legitimate interest:</strong> Platform improvement and fraud prevention</li></ul><h4>Special Personal Information</h4><p>Financial data (salary, tax data, bank statements) is sensitive personal information processed only with your explicit consent for tax guidance purposes.</p><h4>Your Rights as a Data Subject</h4><ul><li>Right to be notified of processing</li><li>Right to access your personal information</li><li>Right to request correction of inaccurate information</li><li>Right to object to processing</li><li>Right to request deletion</li><li>Right to lodge a complaint with the Information Regulator</li></ul><h4>Information Regulator of South Africa</h4><p>inforeg.org.za | complaints.IR@justice.gov.za</p><h4>Cross-Border Transfers</h4><p>Data may be processed outside South Africa (Supabase, Anthropic). Adequate protection is ensured per POPIA Section 72.</p>`,
-  disclaimer: `<h4>Tax Disclaimer</h4><p><strong>Please read carefully before using any calculations or documents from OneTouch.</strong></p><h4>How We Use Tax Data</h4><p>OneTouch TaxApp is a self-service tool. Nothing here constitutes professional tax, legal, or financial advice. OneTouch TaxApp uses official SARS tables with SAIT or SARS.</p><h4>Estimates Only</h4><p>All refund estimates and tax calculations are estimates based on information you provide. Actual SARS assessments may differ due to:</p><ul><li>Employer-specific benefits and allowances</li><li>Prior year assessments and carried-forward losses</li><li>SARS interpretation of deductions</li><li>Legislative changes not yet in our tables</li></ul><h4>Document Templates</h4><p>Generated documents are templates only. Verify all figures and details before submitting anything to SARS. Incorrect submissions may result in SARS penalties and interest.</p><h4>Tax Tables</h4><p>We use 2024/25 SARS tax tables. Verify current rates at sars.gov.za before filing.</p><h4>Professional Advice</h4><p>For complex situations (multiple income sources, trusts, foreign income) consult a registered tax practitioner at sait.org.za.</p><h4>Liability</h4><p>OneTouch TaxApp accepts no liability for SARS penalties, interest, assessments, or financial losses arising from use of this platform.</p>`
+  disclaimer: `<h4>Tax Disclaimer</h4><p><strong>Please read carefully before using any calculations or documents from OneTouch.</strong></p><h4>How We Use Tax Data</h4><p>OneTouch TaxApp is a self-service tool. Nothing here constitutes professional tax, legal, or financial advice. OneTouch TaxApp uses official SARS tables with SAIT or SARS.</p><h4>Estimates Only</h4><p>All refund estimates and tax calculations are estimates based on information you provide. Actual SARS assessments may differ due to:</p><ul><li>Employer-specific benefits and allowances</li><li>Prior year assessments and carried-forward losses</li><li>SARS interpretation of deductions</li><li>Legislative changes not yet in our tables</li></ul><h4>Document Templates</h4><p>Generated documents are templates only. Verify all figures and details before submitting anything to SARS. Incorrect submissions may result in SARS penalties and interest.</p><h4>Tax Tables</h4><p>We use 2025/26 SARS tax tables. Verify current rates at sars.gov.za before filing.</p><h4>Professional Advice</h4><p>For complex situations (multiple income sources, trusts, foreign income) consult a registered tax practitioner at sait.org.za.</p><h4>Liability</h4><p>OneTouch TaxApp accepts no liability for SARS penalties, interest, assessments, or financial losses arising from use of this platform.</p>`
 };
 
 function openLegal(tab) {
@@ -1318,114 +1253,6 @@ function switchTab(tab, el) {
   document.getElementById('legalBody').innerHTML = legalContent[tab] || '';
 }
 
-// ── SMART REFUND FILL ──
-let analysisExtracted = null;
-
-function smartFillRefund() {
-  console.log('smartFillRefund called, analysisExtracted:', JSON.stringify(analysisExtracted));
-  if (!analysisExtracted) { alert('No data extracted yet — analysisExtracted is null'); return; }
-  const refBtn = Array.from(document.querySelectorAll('.s-btn')).find(b => b.textContent.includes('Refund'));
-  if (refBtn) showSection('refund', refBtn);
-  setTimeout(() => {
-    const setVal = (id, val) => { const el = document.getElementById(id); if(el) el.value = (val != null ? val : ''); };
-    // Only fill what bank statement can reliably provide — total income after tax
-    // Salary (gross), PAYE, medical, RA must come from payslip — user fills manually
-    if (analysisExtracted.salary) setVal('r-salary', analysisExtracted.salary);
-    // Calculate immediately with whatever is there
-    calculateRefund();
-    showToast('✅ Income filled — add your payslip details to complete the estimate');
-    document.getElementById('r-salary')?.scrollIntoView({behavior:'smooth', block:'center'});
-  }, 400);
-}
-
-// Open Estimator button — just navigate there
-function smartFillDocs() {
-  const refBtn = Array.from(document.querySelectorAll('.s-btn')).find(b => b.textContent.includes('Refund'));
-  if (refBtn) showSection('refund', refBtn);
-  showToast('Add your payslip details to complete your refund estimate');
-}
-
-// Fill Tax Summary docs from bank analysis result
-function smartFillDocs() {
-  if (!analysisExtracted) return;
-
-  // Go directly to dashboard section
-  showSection('dashboard', document.querySelector('.s-btn[onclick*="dashboard"]'));
-
-  setTimeout(() => {
-    // Fill all relevant fields
-    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = (val != null ? val : ''); };
-    setVal('it-salary', analysisExtracted.salary);
-    setVal('it-paye',   analysisExtracted.paye);
-    setVal('it-med',    analysisExtracted.medMonthly);
-    setVal('it-ra',     analysisExtracted.ra);
-    setVal('r-salary',  analysisExtracted.salary);
-    setVal('r-paye',    analysisExtracted.paye);
-    setVal('r-med',     analysisExtracted.medMonthly);
-    setVal('r-ra',      analysisExtracted.ra);
-    calculateRefund();
-
-    // Open Personal Tax Summary panel and scroll to it
-    const panel = document.getElementById('pp-itr12');
-    if (panel) {
-      document.querySelectorAll('.doc-panel').forEach(p => p.classList.remove('open'));
-      panel.classList.add('open');
-      setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-    }
-    showToast('✅ Personal Tax Summary filled — review and download');
-  }, 300);
-}
-
-// ── PLAN TIERS ──
-const PLANS = { free: 0, starter: 1, pro: 2, business: 3 };
-const PLAN_NAMES = { free: 'Free', starter: 'Starter', pro: 'Pro', business: 'Business' };
-const PLAN_PRICES = { free: 'R0', starter: 'R0', pro: 'R0', business: 'R0' };
-const PLAN_LIMITS = {
-  free:     { aiCalls: 0,  docs: 1,  features: [] },
-  starter:  { aiCalls: 5,  docs: 999, features: ['analysis','estimator'] },
-  pro:      { aiCalls: 999,docs: 999, features: ['analysis','estimator','dispute','assistant'] },
-  business: { aiCalls: 999,docs: 999, features: ['analysis','estimator','dispute','assistant'] }
-};
-
-function getUserPlan() { return userProfile?.plan || 'free'; }
-
-function canUse(feature) {
-  const plan = getUserPlan();
-  const limits = PLAN_LIMITS[plan];
-  if (feature === 'ai') return limits.aiCalls > 0;
-  if (feature === 'docs') return limits.docs > 0;
-  return limits.features.includes(feature);
-}
-
-function showUpgradePrompt(feature) {
-  const messages = {
-    ai:       { needed: 'starter', msg: 'AI features require Starter or above', icon: '🤖' },
-    analysis: { needed: 'starter', msg: 'Bank analysis requires Starter or above', icon: '🏦' },
-    dispute:  { needed: 'pro',     msg: 'Dispute letter AI requires Pro or above', icon: '📝' },
-    assistant:{ needed: 'starter', msg: 'Tax assistant requires Starter or above', icon: '💬' },
-    docs:     { needed: 'starter', msg: 'Unlimited documents require Starter or above', icon: '📄' },
-  };
-  const info = messages[feature] || { needed: 'starter', msg: 'This feature requires an upgrade', icon: '⭐' };
-  showToast(`${info.icon} ${info.msg} — ${PLAN_PRICES[info.needed]}`, 'var(--amber)', 5000);
-  const el = document.getElementById('upgradePrompt');
-  if (el) {
-    document.getElementById('up-msg').textContent = info.msg;
-    document.getElementById('up-plan').textContent = PLAN_NAMES[info.needed] + ' — ' + PLAN_PRICES[info.needed];
-    const yocoLinks = {
-      starter: 'https://pay.yoco.com/r/mRgMqL',
-      pro: 'https://pay.yoco.com/r/70pEvv',
-      business: 'https://pay.yoco.com/r/mRgMqn'
-    };
-    const cta = document.getElementById('up-cta');
-    if (cta) cta.href = yocoLinks[info.needed] || yocoLinks.starter;
-    const refEl = document.getElementById('up-ref');
-    const refMap = { starter:'STARTER-[email]', pro:'PRO-[email]', business:'BUSINESS-[email]' };
-    if (refEl) refEl.textContent = refMap[info.needed] || 'STARTER-[email]';
-    el.style.display = 'flex';
-    setTimeout(() => el.style.display = 'none', 8000);
-  }
-}
-
 // ── MOBILE MENU ──
 function toggleMobMenu() {
   const sidebar = document.getElementById('sidebar');
@@ -1434,8 +1261,6 @@ function toggleMobMenu() {
   sidebar.classList.toggle('open', !isOpen);
   overlay.classList.toggle('open', !isOpen);
 }
-
-// ── AI CALL HELPER ──
 
 // ── SUPABASE ──
 const { createClient } = supabase;
@@ -1523,32 +1348,6 @@ function populateUI() {
   document.getElementById('appFooter').style.display = 'flex';
   document.getElementById('legalBody').innerHTML = legalContent.terms;
 
-  // Show plan badge
-  const plan = getUserPlan();
-  const planBadge = document.getElementById('planBadge');
-  if (planBadge) {
-    const colors = { free:'var(--ink-3)', starter:'var(--blue)', pro:'var(--green)', business:'#c9a84c' };
-    planBadge.textContent = PLAN_NAMES[plan];
-    planBadge.style.color = colors[plan] || 'var(--ink-3)';
-  }
-  // Free plan upgrade nudge in sidebar
-  let pFreeHint = document.getElementById('pFreePlanHint');
-  if (!pFreeHint) {
-    pFreeHint = document.createElement('div');
-    pFreeHint.id = 'pFreePlanHint';
-    pFreeHint.style.cssText = 'margin:8px 14px 0;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:8px 12px;font-size:11px;color:#a07c2a;line-height:1.6';
-    document.querySelector('.s-foot')?.prepend(pFreeHint);
-  }
-  pFreeHint.style.display = plan === 'free' ? 'block' : 'none';
-  pFreeHint.innerHTML = plan === 'free' ? '✨ <strong>Free plan</strong> — Unlock AI analysis &amp; all documents for <strong>R99 once off</strong>. <a href="/" target="_blank" style="color:#c9a84c;font-weight:700;text-decoration:none">Upgrade ↗</a>' : '';
-
-  // Lock nav items based on plan
-  document.querySelectorAll('.s-btn[data-plan]').forEach(btn => {
-    const required = btn.getAttribute('data-plan');
-    const locked = PLANS[plan] < PLANS[required];
-    if (locked) { btn.style.opacity = '.45'; btn.title = `Requires ${PLAN_NAMES[required]} plan`; }
-  });
-
   // Show welcome popup once per session
   if (!sessionStorage.getItem('wc_shown')) {
     setTimeout(() => showWelcomePopup(first, name), 1000);
@@ -1635,327 +1434,166 @@ function tickItem(el) {
   const cp2 = document.getElementById('checkProgress2'); if(cp2) cp2.textContent = prog;
 }
 
-// ── REFUND ESTIMATOR ──
-function advanceStep(n) {
-  document.querySelectorAll('.step-page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.step').forEach((s,i) => {
-    s.classList.remove('active');
-    if (i+1 < n) { s.classList.add('done'); if(document.getElementById('line'+(i+1))) document.getElementById('line'+(i+1)).classList.add('step-done-line'); }
-    if (i+1 === n) s.classList.add('active');
-  });
-  document.getElementById('sp'+n).classList.add('active');
+// ── CALCULATORS ──
+const fmtZA = v => 'R ' + (parseFloat(v)||0).toLocaleString('en-ZA',{minimumFractionDigits:0,maximumFractionDigits:0});
+
+function calcTax(taxable) {
+  if(taxable<=237100) return taxable*.18;
+  if(taxable<=370500) return 42678+(taxable-237100)*.26;
+  if(taxable<=512800) return 77362+(taxable-370500)*.31;
+  if(taxable<=673000) return 121475+(taxable-512800)*.36;
+  if(taxable<=857900) return 172357+(taxable-673000)*.39;
+  if(taxable<=1817000) return 251258+(taxable-857900)*.41;
+  return 644489+(taxable-1817000)*.45;
 }
 
-function calculateRefund() {
-  const salary = parseFloat(document.getElementById('r-salary').value)||0;
-  const paye = parseFloat(document.getElementById('r-paye').value)||0;
-  const other = parseFloat(document.getElementById('r-other').value)||0;
-  const ra = parseFloat(document.getElementById('r-ra').value)||0;
-  const medMonthly = parseFloat(document.getElementById('r-med').value)||0;
-  const deps = parseInt(document.getElementById('r-deps').value)||0;
-  const homeOffice = parseFloat(document.getElementById('r-homeoffice').value)||0;
-  const travel = parseFloat(document.getElementById('r-travel').value)||0;
-  const age = document.getElementById('r-age').value;
-  const months = parseInt(document.getElementById('r-months').value)||12;
-
-  // If employed less than 12 months, employer may have over-deducted PAYE
-  // because they annualised on a full year — common source of refunds
-  const annualisedSalary = months < 12 ? (salary / months) * 12 : salary;
-  const rental = parseFloat(document.getElementById('r-rental')?.value)||0;
-  const totalIncome = annualisedSalary + other + rental;
-  const raDeduction = Math.min(ra, totalIncome * 0.275, 350000);
-  // Interest exemption: R23,800 under 65, R34,500 over 65 (2024/25)
-  const interestExempt = age === 'under65' ? 23800 : 34500;
-  const interestIncome = parseFloat(document.getElementById('r-interest')?.value)||0;
-  const interestDeduction = Math.min(interestIncome, interestExempt);
-  const taxable = Math.max(0, totalIncome - raDeduction - homeOffice - travel - interestDeduction);
-
-  let annualTax = 0;
-  if(taxable<=237100) annualTax=taxable*.18;
-  else if(taxable<=370500) annualTax=42678+(taxable-237100)*.26;
-  else if(taxable<=512800) annualTax=77362+(taxable-370500)*.31;
-  else if(taxable<=673000) annualTax=121475+(taxable-512800)*.36;
-  else if(taxable<=857900) annualTax=172357+(taxable-673000)*.39;
-  else if(taxable<=1817000) annualTax=251258+(taxable-857900)*.41;
-  else annualTax=644489+(taxable-1817000)*.45;
-
+function calcIRP5() {
+  const s3601 = parseFloat(document.getElementById('irp5-3601').value)||0;
+  const s3605 = parseFloat(document.getElementById('irp5-3605').value)||0;
+  const s3713 = parseFloat(document.getElementById('irp5-3713').value)||0;
+  const sother= parseFloat(document.getElementById('irp5-other').value)||0;
+  const s4001 = parseFloat(document.getElementById('irp5-4001').value)||0;
+  const s4003 = parseFloat(document.getElementById('irp5-4003').value)||0;
+  const s4116 = parseFloat(document.getElementById('irp5-4116').value)||0;
+  const medM  = parseFloat(document.getElementById('irp5-medmonthly').value)||0;
+  const deps  = parseInt(document.getElementById('irp5-deps').value)||0;
+  const age   = document.getElementById('irp5-age').value;
+  if (!s3601 && !s3605 && !s3713 && !sother) { document.getElementById('irp5Result').style.display='none'; return; }
+  const gross = s3601 + s3605 + s3713 + sother;
+  const raDeduct = Math.min(s4001+s4003, gross*0.275, 350000);
+  const taxable = Math.max(0, gross - raDeduct);
+  const rawTax = calcTax(taxable);
   const rebates = {under65:17235,'65to75':26679,over75:29824};
   const rebate = rebates[age]||17235;
-  const medCredit = medMonthly>0 ? (364+Math.min(deps,1)*364+Math.max(0,deps-1)*246)*12 : 0;
-
-  // Pro-rate tax and rebates if not full year employed
-  const taxForPeriod = months < 12 ? (annualTax * months/12) : annualTax;
-  const rebateForPeriod = months < 12 ? (rebate * months/12) : rebate;
-  const medCreditForPeriod = months < 12 ? (medCredit * months/12) : medCredit;
-
-  const finalTax = Math.max(0, taxForPeriod - rebateForPeriod - medCreditForPeriod);
-  const diff = paye - finalTax;
+  const medCredit = medM>0 ? (364+Math.min(deps,1)*364+Math.max(0,deps-1)*246)*12 : 0;
+  const finalTax = Math.max(0, rawTax - rebate - medCredit);
+  const diff = s4116 - finalTax;
   const isRefund = diff >= 0;
-
-  advanceStep(3);
-  const result = document.getElementById('refundResult');
-  const banner = document.getElementById('resultBanner');
-  const amount = document.getElementById('rbAmount');
-  const label = document.getElementById('rbLabel');
-  const cta = document.getElementById('rbCta');
-
-  banner.className = 'result-banner ' + (isRefund?'refund':'owe');
-  label.textContent = isRefund ? '🎉 Estimated Refund' : '⚠ Estimated Amount Owed';
-  amount.className = 'rb-amount ' + (isRefund?'refund':'owe');
-  amount.textContent = 'R ' + Math.abs(diff).toLocaleString('en-ZA',{maximumFractionDigits:0});
-  cta.style.background = isRefund ? 'var(--green)' : 'var(--amber)';
-  cta.style.color = '#fff';
-  cta.textContent = isRefund ? 'File Now to Claim' : 'Recalculate';
-  if (!isRefund) cta.onclick = () => advanceStep(1);
-
-  const monthsNote = months < 12 ? `<div class="br-row"><span class="br-label" style="color:var(--blue)">💡 Employed ${months}/12 months — employer may have over-deducted PAYE</span><span class="br-val" style="color:var(--blue)">Check IRP5</span></div>` : '';
-
-  document.getElementById('breakdown').innerHTML = `
-    ${monthsNote}
-    <div class="br-row"><span class="br-label">Salary Received (${months} months)</span><span class="br-val">R ${salary.toLocaleString('en-ZA')}</span></div>
-    <div class="br-row"><span class="br-label">RA Deduction</span><span class="br-val" style="color:var(--green)">− R ${raDeduction.toLocaleString('en-ZA',{maximumFractionDigits:0})}</span></div>
-    <div class="br-row"><span class="br-label">Taxable Income</span><span class="br-val">R ${taxable.toLocaleString('en-ZA',{maximumFractionDigits:0})}</span></div>
-    <div class="br-row"><span class="br-label">Tax on Taxable Income</span><span class="br-val" style="color:var(--red)">R ${taxForPeriod.toLocaleString('en-ZA',{maximumFractionDigits:0})}</span></div>
-    <div class="br-row"><span class="br-label">Primary Rebate (${months} months)</span><span class="br-val" style="color:var(--green)">− R ${rebateForPeriod.toLocaleString('en-ZA',{maximumFractionDigits:0})}</span></div>
-    <div class="br-row"><span class="br-label">Medical Aid Tax Credit</span><span class="br-val" style="color:var(--green)">− R ${medCreditForPeriod.toLocaleString('en-ZA',{maximumFractionDigits:0})}</span></div>
-    <div class="br-row"><span class="br-label">Total Tax Liability</span><span class="br-val">R ${finalTax.toLocaleString('en-ZA',{maximumFractionDigits:0})}</span></div>
-    <div class="br-row"><span class="br-label">PAYE Paid by Employer</span><span class="br-val">R ${paye.toLocaleString('en-ZA')}</span></div>
-    <div class="br-row"><span class="br-label" style="color:${isRefund?'var(--green)':'var(--amber)'}">${isRefund?'Refund Due to You':'Amount Owed to SARS'}</span><span class="br-val" style="color:${isRefund?'var(--green)':'var(--amber)'}; font-size:16px">R ${Math.abs(diff).toLocaleString('en-ZA',{maximumFractionDigits:0})}</span></div>
-  `;
-  result.classList.add('show');
-  document.getElementById('dashRefund').textContent = (isRefund?'+':'−')+'R '+Math.abs(diff).toLocaleString('en-ZA',{maximumFractionDigits:0});
+  document.getElementById('irp5-r-gross').textContent = fmtZA(gross);
+  document.getElementById('irp5-r-taxable').textContent = fmtZA(taxable);
+  document.getElementById('irp5-r-finaltax').textContent = fmtZA(finalTax);
+  document.getElementById('irp5-r-rawtax').textContent = fmtZA(rawTax);
+  document.getElementById('irp5-r-rebate').textContent = '− '+fmtZA(rebate);
+  document.getElementById('irp5-r-medcredit').textContent = medCredit>0 ? '− '+fmtZA(medCredit) : 'R 0 (no medical aid entered)';
+  document.getElementById('irp5-r-paye').textContent = fmtZA(s4116);
+  const banner = document.getElementById('irp5-r-banner');
+  banner.style.background = isRefund ? 'var(--green-pale)' : 'var(--amber-pale)';
+  banner.style.border = '1px solid ' + (isRefund ? 'rgba(5,150,105,.2)' : 'rgba(217,119,6,.2)');
+  document.getElementById('irp5-r-label').style.color = isRefund ? 'var(--green)' : 'var(--amber)';
+  document.getElementById('irp5-r-label').textContent = isRefund ? '🎉 Estimated Refund' : '⚠ Estimated Amount Owed';
+  document.getElementById('irp5-r-amount').style.color = isRefund ? 'var(--green)' : 'var(--amber)';
+  document.getElementById('irp5-r-amount').textContent = fmtZA(Math.abs(diff));
+  document.getElementById('irp5Result').style.display = 'block';
 }
 
-// ── AUTO-ASSESSMENT ──
-async function checkAssessment() {
-  const amount = document.getElementById('aa-amount').value;
-  const salary = document.getElementById('aa-salary').value;
-  const desc = document.getElementById('aa-desc').value;
-  const result = document.getElementById('assessResult');
-  result.innerHTML = '<div style="font-size:13px;color:var(--blue)">🔍 Analysing your assessment...</div>';
-  result.classList.add('show');
-  try {
-    const data = await aiCall({
-      model:'claude-sonnet-4-20250514', max_tokens:1000,
-      system:'You are a South African personal tax expert. Advise whether the user should accept or dispute their SARS auto-assessment. Be concise, practical, and specific. Mention key deductions they might be missing. End with a clear recommendation.',
-      messages:[{role:'user',content:`Auto-assessment amount (positive=owe, negative=refund): R${amount}\nAnnual gross salary: R${salary}\nSituation: ${desc}`}]
-    });
-    result.innerHTML = '<div style="font-size:13.5px;line-height:1.75;color:var(--ink)">'+data.content[0].text+'</div>';
-  } catch(e) { result.innerHTML = '<div style="color:var(--red)">'+(e.message||'Could not connect. Please try again.')+'</div>'; }
+function calcMedCredit() {
+  const m = parseFloat(document.getElementById('ded-medmonth').value)||0;
+  const d = parseInt(document.getElementById('ded-meddeps').value)||0;
+  if (!m) { document.getElementById('medCreditResult').style.display='none'; return; }
+  const monthly = 364 + Math.min(d,1)*364 + Math.max(0,d-1)*246;
+  const annual = monthly * 12;
+  document.getElementById('medCreditVal').textContent = fmtZA(annual);
+  document.getElementById('medCreditBreak').textContent = `Main member R364 + ${Math.min(d,1)} × R364 + ${Math.max(0,d-1)} × R246 = R${monthly}/month × 12`;
+  document.getElementById('medCreditResult').style.display = 'block';
 }
 
-// ── CHAT ──
-function sendQ(el) { document.getElementById('chatInput').value = el.textContent; sendChat(); }
-
-function appendMsg(text, role) {
-  const wrap = document.getElementById('chatMsgs');
-  const div = document.createElement('div'); div.className = 'msg ' + role;
-  const time = new Date().toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'});
-  div.innerHTML = `<div class="msg-av ${role}">${role==='ai'?'🤖':'👤'}</div><div><div class="msg-bub">${text}</div><div class="msg-time">${time}</div></div>`;
-  wrap.appendChild(div); wrap.scrollTop = wrap.scrollHeight; return div;
+function calcRA() {
+  const income = parseFloat(document.getElementById('ded-raincome').value)||0;
+  const contrib = parseFloat(document.getElementById('ded-racontrib').value)||0;
+  if (!income || !contrib) { document.getElementById('raResult').style.display='none'; return; }
+  const cap1 = income * 0.275;
+  const cap2 = 350000;
+  const deduct = Math.min(contrib, cap1, cap2);
+  let note = `Limited to 27.5% of income (${fmtZA(cap1)}) and R350,000 cap`;
+  if (contrib <= cap1 && contrib <= cap2) note = 'Full contribution is deductible';
+  document.getElementById('raDeductVal').textContent = fmtZA(deduct);
+  document.getElementById('raDeductNote').textContent = note;
+  document.getElementById('raResult').style.display = 'block';
 }
 
-function appendTyping() {
-  const wrap = document.getElementById('chatMsgs');
-  const div = document.createElement('div'); div.className = 'msg ai';
-  div.innerHTML = `<div class="msg-av ai">🤖</div><div><div class="msg-bub"><div class="typing"><div class="td"></div><div class="td"></div><div class="td"></div></div></div></div>`;
-  wrap.appendChild(div); wrap.scrollTop = wrap.scrollHeight; return div;
+function calcTravel() {
+  const km = parseFloat(document.getElementById('trav-km').value)||0;
+  if (!km) { document.getElementById('travFixed').style.display='none'; return; }
+  document.getElementById('travFixedVal').textContent = fmtZA(km * 4.84);
+  document.getElementById('travFixed').style.display = 'block';
 }
 
-// ── PERSONAL BANK ANALYSIS ──
-const pFiles = { 1: null, 2: null, 3: null };
-
-function handlePersonalFile(e, slot) {
-  const file = e.target.files[0]; if (!file) return;
-  pFiles[slot] = file;
-  const badge = document.getElementById('slot'+slot+'badge');
-  const dz = document.getElementById('dz'+slot);
-  badge.textContent = '✅ ' + file.name.substring(0,18) + (file.name.length>18?'...':'');
-  badge.className = 'badge b-green';
-  dz.style.background = 'var(--green-pale)';
-  dz.style.borderColor = 'var(--green)';
-  dz.innerHTML = `<div style="font-size:28px;margin-bottom:6px">✅</div><div style="font-size:12px;font-weight:600;color:var(--green)">${file.name.substring(0,22)}</div><div style="font-size:10px;color:var(--ink-4);margin-top:3px">Click to replace</div>`;
-  dz.onclick = () => document.getElementById('fi'+slot).click();
-  // Enable analyse button if at least 1 file
-  if (pFiles[1]) {
-    const btn = document.getElementById('analyseBtn');
-    btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
-  }
+function calcTravelActual() {
+  const bkm = parseFloat(document.getElementById('trav-bkm').value)||0;
+  const tkm = parseFloat(document.getElementById('trav-tkm').value)||0;
+  const fuel = parseFloat(document.getElementById('trav-fuel').value)||0;
+  const maint= parseFloat(document.getElementById('trav-maint').value)||0;
+  const price= parseFloat(document.getElementById('trav-price').value)||0;
+  if (!bkm || !tkm || tkm === 0) { document.getElementById('travActual').style.display='none'; return; }
+  const ratio = bkm / tkm;
+  const depreciation = price * 0.15;
+  const total = (fuel + maint + depreciation) * ratio;
+  document.getElementById('travActualVal').textContent = fmtZA(total);
+  document.getElementById('travActualNote').textContent = `Business ratio ${(ratio*100).toFixed(1)}% × (fuel + maintenance + ${fmtZA(depreciation)} wear&tear)`;
+  document.getElementById('travActual').style.display = 'block';
 }
 
-async function analysePersonalStatements() {
-  const uploadedFiles = Object.values(pFiles).filter(Boolean);
-  console.log('analysePersonalStatements called, files:', uploadedFiles.length);
-  if (!uploadedFiles.length) { console.log('No files — returning'); return; }
-
-  document.getElementById('pProgressWrap').style.display = 'block';
-  document.getElementById('pResultWrap').style.display = 'none';
-  document.getElementById('analyseBtn').disabled = true;
-  const retryBanner = document.getElementById('retryBanner');
-  if (retryBanner) retryBanner.style.display = 'none';
-
-  try {
-    // Read all uploaded files
-    const contents = await Promise.all(uploadedFiles.map(readFile));
-    const combinedContent = contents.map((c,i) => `--- Statement ${i+1} (${uploadedFiles[i].name}) ---\n${c.substring(0,6000)}`).join('\n\n');
-    const monthCount = uploadedFiles.length;
-    console.log('Calling AI, content length:', combinedContent.length, 'months:', monthCount);
-
-    const data = await aiCall({
-      model:'claude-sonnet-4-20250514', max_tokens:3000,
-      system:`You are a South African personal tax analysis AI. Analyse personal bank statements and return ONLY valid JSON, no markdown, no explanation.
-Return exactly this structure:
-{"monthsCovered":number,"totalIncome":"R XX,XXX","totalExpenses":"R XX,XXX","potentialDeductions":"R X,XXX","extractedSalary":number,"extractedPAYE":number,"extractedMedicalMonthly":number,"extractedRA":number,"insights":["insight1","insight2","insight3","insight4"],"transactions":[{"date":"DD MMM","description":"name","amount":"R X,XXX","type":"income or expense","category":"Salary|Medical|RA|Travel|Groceries|Entertainment|Insurance|Other","deductible":true or false,"deductionReason":"why it may be deductible"}]}
-Rules:
-- ALWAYS attempt to extract data from ANY text file — CSV, TXT, bank exports are all readable
-- Only return unreadable:true if the content is literally empty or binary/image data with zero text
-- extractedSalary: best estimate of annual salary from visible deposits labelled salary/payroll/remuneration, else 0
-- extractedPAYE: PAYE or income tax deducted if visible, else 0
-- extractedMedicalMonthly: monthly medical aid contribution if visible, else 0
-- extractedRA: RA/retirement annuity contribution if visible, else 0
-- totalIncome: sum of all credit/income transactions
-- totalExpenses: sum of all debit/expense transactions
-- Identify potential tax deductions: medical, RA, home office, travel, donations
-- All amounts in South African Rand
-- Include all transactions visible in the data, up to 50 most relevant`,
-      messages:[{role:'user',content:`Analyse these ${monthCount} South African personal bank statement(s):\n\n${combinedContent}`}]
-    });
-
-    const rawP = data.content[0].text;
-    console.log('RAW AI RESPONSE:', rawP);
-    let result;
-    try {
-      const sp = rawP.indexOf('{'), ep = rawP.lastIndexOf('}');
-      result = JSON.parse(sp > -1 ? rawP.substring(sp, ep+1) : rawP.replace(/```json|```/g,'').trim());
-    } catch(parseErr) {
-      console.error('JSON parse failed:', parseErr, 'Raw:', rawP);
-      throw new Error('AI returned unreadable response — try again');
-    }
-
-    document.getElementById('pProgressWrap').style.display = 'none';
-
-    // Handle unreadable file
-    if (result.unreadable) {
-      console.log('❌ AI returned unreadable:true — raw was:', rawP.substring(0, 300));
-      document.getElementById('pUnreadableWrap').style.display = 'block';
-      return;
-    }
-
-    console.log('✅ Analysis result:', JSON.stringify(result).substring(0, 300));
-
-    document.getElementById('p-income').textContent = result.totalIncome || '—';
-    document.getElementById('p-expenses').textContent = result.totalExpenses || '—';
-    document.getElementById('p-deduct').textContent = result.potentialDeductions || '—';
-    document.getElementById('p-months-covered').textContent = (result.monthsCovered || monthCount) + ' month' + (monthCount>1?'s':'');
-
-    // Always store extracted data — even if salary/PAYE are 0
-    // User can correct values manually in the estimator
-    analysisExtracted = {
-      salary: result.extractedSalary || 0,
-      paye: result.extractedPAYE || 0,
-      medMonthly: result.extractedMedicalMonthly || 0,
-      ra: result.extractedRA || 0,
-      months: result.monthsCovered || monthCount
-    };
-    // Always show the smart banner after a successful analysis
-    document.getElementById('smartBanner').style.display = 'flex';
-
-    const ib = document.getElementById('pInsightsBox');
-    ib.innerHTML = (result.insights||[]).map(i=>`<div style="background:var(--blue-pale);border-left:3px solid var(--blue);border-radius:0 8px 8px 0;padding:10px 14px;font-size:13px;color:var(--ink);line-height:1.65">${i}</div>`).join('');
-
-    // Render flagged items
-    const pfb = document.getElementById('pFlagsBox');
-    const pfCard = document.getElementById('pFlagsCard');
-    const pflags = result.flags || [];
-    if (pfCard) {
-      if (!pflags.length) { pfCard.style.display = 'none'; }
-      else {
-        pfCard.style.display = 'block';
-        pfb.innerHTML = pflags.map(f=>`<div style="display:flex;gap:12px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:9px;padding:12px 14px"><div style="font-size:18px">🚩</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px">${f.item||'Flagged item'}</div><div style="font-size:12px;color:#d97706;line-height:1.5">${f.reason||'May affect your tax return'}</div></div></div>`).join('');
-      }
-    }
-
-    const tb = document.getElementById('pTxBody');
-    tb.innerHTML = (result.transactions||[]).map(t=>`
-      <tr style="border-bottom:1px solid var(--border)">
-        <td style="padding:10px 12px;font-size:12.5px">${t.date||''}</td>
-        <td style="padding:10px 12px;font-size:12.5px">${t.description||''}</td>
-        <td style="padding:10px 12px;font-size:12.5px;font-weight:600">${t.amount||''}</td>
-        <td style="padding:10px 12px"><span style="display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:600;background:${t.type==='income'?'var(--green-pale)':'var(--red-pale)'};color:${t.type==='income'?'var(--green)':'var(--red)'}">${t.category||t.type}</span></td>
-        <td style="padding:10px 12px;font-size:11.5px;color:${t.deductible?'var(--green)':'var(--ink-4)'}">${t.deductible?'✓ '+t.deductionReason:'—'}</td>
-      </tr>`).join('');
-
-    document.getElementById('pResultWrap').style.display = 'block';
-
-  } catch(err) {
-    document.getElementById('pProgressWrap').style.display = 'none';
-    const btn = document.getElementById('analyseBtn');
-    btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
-    // Show retry banner
-    const retryBanner = document.getElementById('retryBanner');
-    if (retryBanner) retryBanner.style.display = 'flex';
-    console.error(err);
-    showToast('Analysis failed — check your file and try again', 'var(--red)');
-  }
+function calcHomeOffice() {
+  const office = parseFloat(document.getElementById('ho-office').value)||0;
+  const total  = parseFloat(document.getElementById('ho-total').value)||0;
+  const rent   = parseFloat(document.getElementById('ho-rent').value)||0;
+  const rates  = parseFloat(document.getElementById('ho-rates').value)||0;
+  const elec   = parseFloat(document.getElementById('ho-elec').value)||0;
+  const repairs= parseFloat(document.getElementById('ho-repairs').value)||0;
+  if (!office || !total || total === 0) { document.getElementById('hoResult').style.display='none'; return; }
+  const ratio = office / total;
+  const totalCosts = rent + rates + elec + repairs;
+  const deduct = totalCosts * ratio;
+  document.getElementById('hoDeductVal').textContent = fmtZA(deduct);
+  document.getElementById('hoRatioNote').textContent = `${office}m² ÷ ${total}m² = ${(ratio*100).toFixed(1)}% of ${fmtZA(totalCosts)} total home costs`;
+  document.getElementById('hoResult').style.display = 'block';
 }
 
-function resetPersonalAnalysis() {
-  [1,2,3].forEach(s => {
-    pFiles[s] = null;
-    document.getElementById('slot'+s+'badge').textContent = s===1?'Required':'Optional';
-    document.getElementById('slot'+s+'badge').className = s===1?'badge b-blue':'badge b-amber';
-    const dz = document.getElementById('dz'+s);
-    dz.style.background = ''; dz.style.borderColor = '';
-    dz.innerHTML = `<input type="file" id="fi${s}" accept=".csv,.txt,.xlsx,.ofx,.qif" style="display:none" onchange="handlePersonalFile(event,${s})" /><div style="font-size:32px;margin-bottom:8px">📄</div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px">Upload Statement</div><div style="font-size:11px;color:var(--ink-4)">CSV, TXT or OFX</div>`;
-    dz.onclick = () => document.getElementById('fi'+s).click();
-  });
-  document.getElementById('pResultWrap').style.display = 'none';
-  document.getElementById('pUnreadableWrap').style.display = 'none';
-  const btn = document.getElementById('analyseBtn');
-  btn.disabled = true; btn.style.opacity = '.4'; btn.style.cursor = 'not-allowed';
-}
-
-async function submitPersonalManual() {
-  const income = parseFloat(document.getElementById('pman-income').value) || 0;
-  const expenses = parseFloat(document.getElementById('pman-expenses').value) || 0;
-  const period = document.getElementById('pman-period').value.trim();
-  const salary = parseFloat(document.getElementById('pman-salary').value) || 0;
-
-  if (!income && !expenses) { showToast('Please enter at least one amount', '#d97706'); return; }
-  if (!period) { showToast('Please enter the statement period', '#d97706'); return; }
-
-  const fmt = v => 'R ' + v.toLocaleString('en-ZA', {minimumFractionDigits:2, maximumFractionDigits:2});
-
-  document.getElementById('pUnreadableWrap').style.display = 'none';
-  document.getElementById('pResultWrap').style.display = 'block';
-  document.getElementById('p-income').textContent = fmt(income);
-  document.getElementById('p-expenses').textContent = fmt(expenses);
-  document.getElementById('p-deduct').textContent = '—';
-  document.getElementById('p-months-covered').textContent = period;
-
-  if (salary > 0) {
-    analysisExtracted = { salary, paye: 0, medMonthly: 0, ra: 0, months: 1 };
-    document.getElementById('smartBanner').style.display = 'flex';
-  }
-
-  document.getElementById('pInsightsBox').innerHTML = `
-    <div style="background:rgba(245,158,11,.08);border-left:3px solid #d97706;border-radius:0 8px 8px 0;padding:10px 14px;font-size:13px;color:var(--ink);line-height:1.65">
-      ⚠ Manually entered figures for ${period} — please verify all amounts against your original bank statement before filing with SARS.
-    </div>
-    <div style="background:var(--blue-pale);border-left:3px solid var(--blue);border-radius:0 8px 8px 0;padding:10px 14px;font-size:13px;color:var(--ink);line-height:1.65">
-      Add each transaction individually using the invoice section to build your full expense record for filing.
-    </div>`;
-
-  showToast('✅ Manual entry saved', 'var(--green)');
-}
-
-async function readFile(file) {
-  return new Promise(resolve => {
-    const reader = new FileReader();
-    reader.onload = e => resolve(e.target.result);
-    if (file.type === 'application/pdf') { resolve('PDF not supported. Please export as CSV from your bank.'); return; }
-    else reader.readAsText(file);
-  });
+async function genIRP5PDF() {
+  if (!window.jspdf) { showToast('⏳ Loading PDF library...', 'var(--blue)'); await waitForjsPDF(); }
+  const s3601 = parseFloat(document.getElementById('irp5-3601').value)||0;
+  const s3605 = parseFloat(document.getElementById('irp5-3605').value)||0;
+  const s3713 = parseFloat(document.getElementById('irp5-3713').value)||0;
+  const sother= parseFloat(document.getElementById('irp5-other').value)||0;
+  const s4001 = parseFloat(document.getElementById('irp5-4001').value)||0;
+  const s4003 = parseFloat(document.getElementById('irp5-4003').value)||0;
+  const s4116 = parseFloat(document.getElementById('irp5-4116').value)||0;
+  const medM  = parseFloat(document.getElementById('irp5-medmonthly').value)||0;
+  const deps  = parseInt(document.getElementById('irp5-deps').value)||0;
+  const age   = document.getElementById('irp5-age').value;
+  const gross = s3601+s3605+s3713+sother;
+  const raDeduct = Math.min(s4001+s4003, gross*0.275, 350000);
+  const taxable = Math.max(0, gross-raDeduct);
+  const rawTax = calcTax(taxable);
+  const rebates = {under65:17235,'65to75':26679,over75:29824};
+  const rebate = rebates[age]||17235;
+  const medCredit = medM>0 ? (364+Math.min(deps,1)*364+Math.max(0,deps-1)*246)*12 : 0;
+  const finalTax = Math.max(0, rawTax-rebate-medCredit);
+  const diff = s4116 - finalTax;
+  const isRefund = diff >= 0;
+  const name = (currentUser?.email||'').split('@')[0];
+  const ctx = makePDF('IRP5 Tax Summary', name+' · Tax Year 2025/26');
+  addSection(ctx,'Income (IRP5 Source Codes)');
+  if(s3601) addRow(ctx,'3601 — Basic Salary',fmtR(s3601));
+  if(s3605) addRow(ctx,'3605 — Annual Bonus',fmtR(s3605));
+  if(s3713) addRow(ctx,'3713 — Employer Retirement Fund',fmtR(s3713));
+  if(sother) addRow(ctx,'Other Income',fmtR(sother));
+  addRow(ctx,'Gross Income',fmtR(gross));
+  addSection(ctx,'Deductions');
+  if(s4001) addRow(ctx,'4001 — Pension Fund Contributions',fmtR(s4001));
+  if(s4003) addRow(ctx,'4003 — RA Contributions',fmtR(s4003));
+  addRow(ctx,'RA Deduction (capped 27.5%)',fmtR(raDeduct));
+  addRow(ctx,'Taxable Income',fmtR(taxable));
+  addSection(ctx,'Tax Calculation (2025/26)');
+  addRow(ctx,'Tax Before Rebates',fmtR(rawTax));
+  addRow(ctx,'Primary Rebate',fmtR(rebate));
+  addRow(ctx,'Medical Tax Credit',fmtR(medCredit));
+  addRow(ctx,'Final Tax Liability',fmtR(finalTax));
+  addRow(ctx,'4116 — PAYE Paid',fmtR(s4116));
+  addRow(ctx,isRefund?'✅ ESTIMATED REFUND':'⚠ ESTIMATED AMOUNT OWED',fmtR(Math.abs(diff)),true);
+  addDisclaimer(ctx);
+  ctx.doc.save('OneTouch_IRP5_Summary_2025-26.pdf');
+  showPDFToast('IRP5 tax summary downloaded');
 }
 
 function waitForjsPDF() {
@@ -2007,7 +1645,7 @@ function addDisclaimer(ctx) {
   doc.setFillColor(239,246,255); doc.rect(M, ctx.y, W-M*2, 14, 'F');
   doc.setFontSize(7.5); doc.setFont('helvetica','italic'); doc.setTextColor(100,116,139);
   doc.text('⚠ For preparation purposes only. Verify all figures on SARS eFiling before submitting.', M+4, ctx.y+5);
-  doc.text('Powered by official SARS 2024/25 tax tables · Verify with SARS eFiling before submitting.', M+4, ctx.y+11);
+  doc.text('Powered by official SARS 2025/26 tax tables · Verify with SARS eFiling before submitting.', M+4, ctx.y+11);
 }
 
 function fmtR(v) { return 'R '+(parseFloat(v)||0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2}); }
@@ -2034,12 +1672,12 @@ async function genPersonalTax() {
   const medCredit=medM>0?(364+Math.min(deps,1)*364+Math.max(0,deps-1)*246)*12:0;
   const finalTax=Math.max(0,tax-rebate-medCredit);
   const diff=paye-finalTax;
-  const ctx=makePDF('Personal Income Tax Summary',gv('it-name')+' · Tax Year 2024/25');
+  const ctx=makePDF('Personal Income Tax Summary',gv('it-name')+' · Tax Year 2025/26');
   addSection(ctx,'Taxpayer Details');
   addRow(ctx,'Full Name',gv('it-name'));
   if(gv('it-id')) addRow(ctx,'ID Number',gv('it-id'));
   if(gv('it-ref')) addRow(ctx,'Tax Reference',gv('it-ref'));
-  addRow(ctx,'Age Group',age); addRow(ctx,'Tax Year','2024/25');
+  addRow(ctx,'Age Group',age); addRow(ctx,'Tax Year','2025/26');
   addSection(ctx,'Income & Deductions');
   addRow(ctx,'Annual Gross Salary',fmtR(salary));
   if(other>0) addRow(ctx,'Other Income',fmtR(other));
@@ -2098,7 +1736,7 @@ async function genMedicalPDF() {
   addRow(ctx,'Name',gv('med-name')); addRow(ctx,'Scheme',gv('med-scheme'));
   addRow(ctx,'Monthly Contribution',fmtR(monthly)); addRow(ctx,'Annual Contribution',fmtR(monthly*12));
   addRow(ctx,'Number of Dependants',deps);
-  addSection(ctx,'Tax Credit Calculation (2024/25)');
+  addSection(ctx,'Tax Credit Calculation (2025/26)');
   addRow(ctx,'Main member monthly credit','R 364');
   addRow(ctx,'Spouse / first dependant','R '+(Math.min(deps,1)*364));
   addRow(ctx,'Additional dependants ('+Math.max(0,deps-1)+' × R246)','R '+Math.max(0,deps-1)*246);
@@ -2153,18 +1791,10 @@ function showWelcomePopup(first, fullName) {
   document.getElementById('wcName').textContent = first;
   document.getElementById('wcAvatar').textContent = first.substring(0,2).toUpperCase();
 
-  // Smart message based on plan
-  const plan = getUserPlan();
-  const messages = {
-    free:     `Welcome to OneTouch Personal, ${first}. Start with the Refund Estimator — see exactly how much SARS owes you before spending a cent.`,
-    starter:  `Good to have you back, ${first}. Upload your latest bank statement and we'll find every deduction you're entitled to.`,
-    pro:      `Welcome back, ${first}. Your full tax toolkit is ready — from refund estimation to dispute letters.`,
-    business: `Welcome back, ${first}. Everything is unlocked — let's make sure SARS doesn't keep a cent more than they should.`
-  };
-  document.getElementById('wcAiLine').textContent = messages[plan] || messages.free;
+  document.getElementById('wcAiLine').textContent = `Welcome, ${first}. Your free eFiling toolkit is ready — start with the eFiling Guide or use IRP5 Capture to see if SARS owes you a refund.`;
 
-  // Show urgent deadline
-  const deadline = { name: 'ITR12 Tax Season', due: 'Opens July 2025 — prepare now', color: '#3b82f6' };
+  // Show upcoming deadline
+  const deadline = { name: 'ITR12 Tax Season', due: 'Opens 1 July 2026 — prepare now', color: '#3b82f6' };
   document.getElementById('wcDlDot').style.background = deadline.color;
   document.getElementById('wcDlName').textContent = deadline.name;
   document.getElementById('wcDlDue').textContent = deadline.due;
@@ -2207,10 +1837,8 @@ function loadPersonalSettings() {
   pSettingsState.ra = userProfile.has_ra ? 'yes' : 'no';
   pUpdateToggles();
 
-  const plan = getUserPlan();
-  const planDescs = { free:'Upgrade for AI analysis and full filing documents', starter:'Full AI analysis · All documents · Valid this tax year' };
-  if (document.getElementById('pset-plan-name')) document.getElementById('pset-plan-name').textContent = (plan === 'free' ? 'Free' : 'Personal — R99') + ' Plan';
-  if (document.getElementById('pset-plan-desc')) document.getElementById('pset-plan-desc').textContent = planDescs[plan] || planDescs.free;
+  if (document.getElementById('pset-plan-name')) document.getElementById('pset-plan-name').textContent = 'Free Plan';
+  if (document.getElementById('pset-plan-desc')) document.getElementById('pset-plan-desc').textContent = 'Full access to all personal tax tools for the 2025/26 tax year';
 }
 
 function pSetToggle(key, val) {
