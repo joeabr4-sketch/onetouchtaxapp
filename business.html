@@ -680,7 +680,7 @@ h1,h2,h3,.logo-text,.stat-value{font-family:'Syne',sans-serif}
       <button class="s-btn active" onclick="showSection('dashboard',this)"><span class="s-icon">📊</span><span data-i18n="nav_dashboard">Dashboard</span></button>
       <button class="s-btn" onclick="showSection('calendar',this)"><span class="s-icon">📅</span><span data-i18n="nav_calendar">Compliance Calendar</span></button>
       <button class="s-btn" onclick="showSection('checklist',this)"><span class="s-icon">✅</span><span data-i18n="nav_checklists">Checklists</span></button>
-      <button class="s-btn" onclick="showSection('history',this);loadMonthlyHistory()"><span class="s-icon">📁</span><span data-i18n="nav_history">Financial History</span></button>
+      <button class="s-btn" onclick="showSection('history',this);loadPeriodHistory()"><span class="s-icon">📁</span><span data-i18n="nav_history">Financial History</span></button>
       <div class="s-section" data-i18n="nav_business_tools">Business Tools</div>
       <button class="s-btn" onclick="showSection('invoices',this)"><span class="s-icon">🧾</span><span data-i18n="nav_invoices">Invoices</span></button>
       <button class="s-btn" onclick="showSection('financials',this)"><span class="s-icon">📈</span><span data-i18n="nav_financials">Financials & P&L</span></button>
@@ -949,18 +949,33 @@ h1,h2,h3,.logo-text,.stat-value{font-family:'Syne',sans-serif}
         <button class="hist-tab" id="htab-opening" onclick="switchHistTab('opening')">🔢 Opening Balances</button>
       </div>
       <div id="htab-monthly-content">
-        <div class="card" style="margin-bottom:14px">
-          <div class="card-head"><div class="card-title">Month-by-Month Breakdown</div><div style="display:flex;gap:8px;align-items:center"><span class="badge b-blue" id="monthlyHistBadge">Loading...</span><button onclick="saveMonthlySnapshot()" style="background:var(--blue);color:#0f1520;border:none;padding:6px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">💾 Save This Month</button></div></div>
-          <div id="monthlyHistList" style="padding:0 20px 16px"><div style="text-align:center;padding:40px 20px;color:var(--text-3)"><div style="font-size:36px;margin-bottom:10px">📊</div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px">No monthly snapshots yet</div><div style="font-size:12px">Click "Save This Month" to capture your current financials.</div></div></div>
-        </div>
-        <div class="card">
-          <div class="card-head"><div class="card-title">Year-to-Date Totals</div><span class="badge b-green">From saved snapshots</span></div>
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px 20px">
-            <div style="background:var(--green-dim);border:1px solid rgba(34,197,94,.15);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">YTD Revenue</div><div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--green)" id="ytd-rev">R 0</div></div>
-            <div style="background:var(--red-dim);border:1px solid rgba(244,63,94,.15);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">YTD Expenses</div><div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--red)" id="ytd-exp">R 0</div></div>
-            <div style="background:var(--blue-dim);border:1px solid rgba(184,196,216,.15);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">YTD Profit</div><div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--blue)" id="ytd-profit">R 0</div></div>
-            <div style="background:var(--amber-dim);border:1px solid rgba(245,158,11,.15);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">YTD VAT Owing</div><div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--amber)" id="ytd-vat">R 0</div></div>
+        <!-- Filter bar -->
+        <div class="card" style="margin-bottom:14px;padding:14px 20px">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input type="text" id="ph-search" placeholder="Search period..." oninput="filterPeriodHistory()" style="flex:1;min-width:140px;background:var(--bg-input,var(--bg-card));border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-size:12.5px;font-family:'DM Sans',sans-serif">
+            <select id="ph-status" onchange="filterPeriodHistory()" style="background:var(--bg-input,var(--bg-card));border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12.5px;font-family:'DM Sans',sans-serif">
+              <option value="">All Periods</option>
+              <option value="reconciled">✅ Reconciled</option>
+              <option value="pending">⏳ Pending</option>
+              <option value="locked">🔒 Locked</option>
+            </select>
+            <input type="month" id="ph-from" onchange="filterPeriodHistory()" style="background:var(--bg-input,var(--bg-card));border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12.5px;font-family:'DM Sans',sans-serif">
+            <input type="month" id="ph-to" onchange="filterPeriodHistory()" style="background:var(--bg-input,var(--bg-card));border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12.5px;font-family:'DM Sans',sans-serif">
+            <button onclick="clearPeriodFilters()" style="background:transparent;border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text-3);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Clear</button>
+            <button onclick="saveMonthlySnapshot()" style="background:var(--blue);color:#0f1520;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">💾 Save Month</button>
           </div>
+        </div>
+        <!-- YTD summary -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
+          <div style="background:var(--green-dim);border:1px solid rgba(34,197,94,.15);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">YTD Revenue</div><div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--green)" id="ytd-rev">R 0</div></div>
+          <div style="background:var(--red-dim);border:1px solid rgba(244,63,94,.15);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">YTD Expenses</div><div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--red)" id="ytd-exp">R 0</div></div>
+          <div style="background:var(--blue-dim);border:1px solid rgba(184,196,216,.15);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">YTD Profit</div><div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--blue)" id="ytd-profit">R 0</div></div>
+          <div style="background:var(--amber-dim);border:1px solid rgba(245,158,11,.15);border-radius:10px;padding:12px;text-align:center"><div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">YTD VAT Owing</div><div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--amber)" id="ytd-vat">R 0</div></div>
+        </div>
+        <!-- Period audit list -->
+        <div class="card">
+          <div class="card-head"><div class="card-title">Period Audit Trail</div><span class="badge b-blue" id="monthlyHistBadge">Loading...</span></div>
+          <div id="periodHistList" style="padding:0"></div>
         </div>
       </div>
       <div id="htab-docs-content" style="display:none">
@@ -4735,44 +4750,240 @@ function switchHistTab(tab) {
     if (btn) btn.classList.toggle('active', t===tab);
     if (content) content.style.display = t===tab?'block':'none';
   });
-  if (tab==='monthly') loadMonthlyHistory();
+  if (tab==='monthly') loadPeriodHistory();
   if (tab==='statements') loadStatementHistory();
   if (tab==='docs') loadDocHistory();
   if (tab==='opening') loadOpeningBalances();
 }
 
-async function loadMonthlyHistory() {
+let _periodData = [];
+
+function formatPeriodLabel(key) {
+  if (!key) return '—';
+  const [y, m] = key.split('-');
+  const d = new Date(parseInt(y), parseInt(m) - 1, 1);
+  return d.toLocaleString('en-ZA', {month: 'long', year: 'numeric'});
+}
+
+async function loadPeriodHistory() {
   const badge = document.getElementById('monthlyHistBadge');
-  let data = null;
+  if (badge) badge.textContent = 'Loading...';
   try {
-    const r = await sb.from('monthly_snapshots').select('*').eq('user_id',currentUser.id).order('month_key',{ascending:false});
-    if (r.error) throw r.error;
-    data = r.data;
+    const [snapRes, reconRes] = await Promise.all([
+      sb.from('monthly_snapshots').select('*').eq('user_id', currentUser.id).order('month_key', {ascending: false}),
+      sb.from('reconciliation_sessions').select('*').eq('user_id', currentUser.id).order('period', {ascending: false})
+    ]);
+    if (snapRes.error) throw snapRes.error;
+    const snaps = snapRes.data || [];
+    const recons = reconRes.error ? [] : (reconRes.data || []);
+    const reconMap = {}, snapMap = {};
+    recons.forEach(r => { reconMap[r.period] = r; });
+    snaps.forEach(s => { snapMap[s.month_key] = s; });
+    const allKeys = new Set([...snaps.map(s => s.month_key), ...recons.map(r => r.period)]);
+    _periodData = Array.from(allKeys).sort().reverse().map(key => {
+      const snap = snapMap[key] || {};
+      const recon = reconMap[key] || {};
+      return {
+        period: key,
+        label: snap.month_label || formatPeriodLabel(key),
+        revenue: snap.revenue || 0,
+        expenses: snap.expenses || 0,
+        profit: snap.profit || 0,
+        vat_owing: snap.vat_owing || 0,
+        invoice_count: snap.invoice_count || 0,
+        confidence: recon.confidence || snap.reconciliation_confidence || 0,
+        locked: recon.locked || false,
+        session_id: recon.id || null,
+        mid_month_done: recon.mid_month_done || false,
+        month_end_done: recon.month_end_done || false
+      };
+    });
+    renderPeriodHistory(_periodData);
+    const totRev = snaps.reduce((s, m) => s + (m.revenue || 0), 0);
+    const totExp = snaps.reduce((s, m) => s + (m.expenses || 0), 0);
+    const totVat = snaps.reduce((s, m) => s + (m.vat_owing || 0), 0);
+    const e1=document.getElementById('ytd-rev'),e2=document.getElementById('ytd-exp'),e3=document.getElementById('ytd-profit'),e4=document.getElementById('ytd-vat');
+    if(e1)e1.textContent=fmtR(totRev); if(e2)e2.textContent=fmtR(totExp);
+    if(e3)e3.textContent=fmtR(totRev-totExp); if(e4)e4.textContent=fmtR(totVat);
   } catch(e) {
-    if (badge) badge.textContent = 'Error loading';
-    console.warn('loadMonthlyHistory:', e.message);
+    if (badge) badge.textContent = 'Error';
+    console.error('loadPeriodHistory:', e.message);
+    const list = document.getElementById('periodHistList');
+    if (list) list.innerHTML = `<div style="text-align:center;padding:32px;color:var(--red);font-size:13px">Could not load: ${e.message}</div>`;
+  }
+}
+
+// Keep old name as alias so any stale callers don't break
+function loadMonthlyHistory() { return loadPeriodHistory(); }
+
+function renderPeriodHistory(data) {
+  const badge = document.getElementById('monthlyHistBadge');
+  const list = document.getElementById('periodHistList');
+  if (!list) return;
+  if (!data || !data.length) {
+    if (badge) badge.textContent = 'No data';
+    list.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--text-3)"><div style="font-size:36px;margin-bottom:10px">📊</div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px">No periods yet</div><div style="font-size:12px">Invoice entries and reconciliation sessions appear here automatically.</div></div>`;
     return;
   }
-  const list = document.getElementById('monthlyHistList'); if (!list) return;
-  if (badge) badge.textContent = data && data.length ? data.length + ' month' + (data.length === 1 ? '' : 's') : 'No snapshots';
-  if (!data||!data.length) return;
-  list.innerHTML = data.map(s=>`<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)">
-    <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--text)">${s.month_label||s.month_key||'—'}</div></div>
-    <div style="display:flex;gap:16px;font-size:12.5px;align-items:center;flex-wrap:wrap">
-      <span style="color:var(--green)">${fmtR(s.revenue||0)}</span>
-      <span style="color:var(--red)">${fmtR(s.expenses||0)}</span>
-      <span style="color:var(--blue)">${fmtR((s.revenue||0)-(s.expenses||0))}</span>
-      <span style="font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;background:${(s.reconciliation_confidence||0)===100?'rgba(34,197,94,.12)':'rgba(245,158,11,.1)'};color:${(s.reconciliation_confidence||0)===100?'var(--green)':'var(--amber)'}">
-        ${(s.reconciliation_confidence||0)===100?'✅ Reconciled':`⏳ ${s.reconciliation_confidence||0}% reconciled`}
-      </span>
-    </div>
-  </div>`).join('');
-  const totRev = data.reduce((s,m)=>s+(m.revenue||0),0);
-  const totExp = data.reduce((s,m)=>s+(m.expenses||0),0);
-  const totVat = data.reduce((s,m)=>s+(m.vat_owing||0),0);
-  const e1=document.getElementById('ytd-rev'),e2=document.getElementById('ytd-exp'),e3=document.getElementById('ytd-profit'),e4=document.getElementById('ytd-vat');
-  if(e1)e1.textContent=fmtR(totRev); if(e2)e2.textContent=fmtR(totExp);
-  if(e3)e3.textContent=fmtR(totRev-totExp); if(e4)e4.textContent=fmtR(totVat);
+  if (badge) badge.textContent = data.length + ' period' + (data.length === 1 ? '' : 's');
+  list.innerHTML = data.map(p => {
+    const conf = p.confidence || 0;
+    const confBadge = conf === 100
+      ? `<span style="font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;background:rgba(34,197,94,.12);color:var(--green)">✅ Reconciled</span>`
+      : `<span style="font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;background:rgba(245,158,11,.1);color:var(--amber)">⏳ ${conf}%</span>`;
+    const lockBadge = p.locked ? `<span style="font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;background:rgba(244,63,94,.1);color:var(--red)">🔒 Locked</span>` : '';
+    const midBadge = p.mid_month_done ? `<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(184,196,216,.08);color:var(--text-3)">Mid ✓</span>` : '';
+    const endBadge = p.month_end_done ? `<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(184,196,216,.08);color:var(--text-3)">End ✓</span>` : '';
+    const profit = p.revenue - p.expenses;
+    return `<div class="period-card" id="pcard-${p.period}" style="border-bottom:1px solid var(--border)">
+      <div onclick="expandPeriod('${p.period}')" style="display:flex;align-items:center;gap:10px;padding:14px 20px;cursor:pointer" onmouseover="this.style.background='rgba(255,255,255,.02)'" onmouseout="this.style.background=''">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span style="font-size:13.5px;font-weight:700;color:var(--text)">${p.label}</span>
+            ${confBadge}${lockBadge}${midBadge}${endBadge}
+          </div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:3px">${p.invoice_count} invoice${p.invoice_count !== 1 ? 's' : ''}</div>
+        </div>
+        <div style="display:flex;gap:16px;font-size:12.5px;align-items:center;text-align:right;flex-shrink:0">
+          <div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;margin-bottom:2px">Revenue</div><div style="color:var(--green);font-weight:600">${fmtR(p.revenue)}</div></div>
+          <div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;margin-bottom:2px">Expenses</div><div style="color:var(--red);font-weight:600">${fmtR(p.expenses)}</div></div>
+          <div><div style="font-size:9px;color:var(--text-3);text-transform:uppercase;margin-bottom:2px">Net</div><div style="color:${profit>=0?'var(--green)':'var(--red)'};font-weight:700">${fmtR(profit)}</div></div>
+        </div>
+        <div style="display:flex;gap:5px;margin-left:10px;flex-shrink:0" onclick="event.stopPropagation()">
+          ${p.session_id ? `<button onclick="downloadPeriodCSV('${p.period}')" title="Download CSV" style="background:transparent;border:1.5px solid var(--border);border-radius:7px;padding:5px 9px;color:var(--text-3);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">📥 CSV</button>` : ''}
+          ${p.session_id ? (p.locked
+            ? `<button onclick="unlockPeriod('${p.period}','${p.session_id}')" title="Unlock period" style="background:transparent;border:1.5px solid rgba(245,158,11,.4);border-radius:7px;padding:5px 9px;color:var(--amber);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">🔓</button>`
+            : `<button onclick="lockPeriod('${p.period}','${p.session_id}')" title="Lock period" style="background:transparent;border:1.5px solid var(--border);border-radius:7px;padding:5px 9px;color:var(--text-3);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif">🔒</button>`
+          ) : ''}
+          <div style="color:var(--text-3);font-size:14px;padding:4px 6px;user-select:none" id="pchev-${p.period}">▸</div>
+        </div>
+      </div>
+      <div id="pdetail-${p.period}" style="display:none;border-top:1px solid var(--border);background:rgba(0,0,0,.12)"></div>
+    </div>`;
+  }).join('');
+}
+
+function expandPeriod(period) {
+  const detail = document.getElementById('pdetail-' + period);
+  const chev = document.getElementById('pchev-' + period);
+  if (!detail) return;
+  const isOpen = detail.style.display !== 'none';
+  detail.style.display = isOpen ? 'none' : 'block';
+  if (chev) chev.textContent = isOpen ? '▸' : '▾';
+  if (!isOpen && !detail.dataset.loaded) {
+    detail.dataset.loaded = '1';
+    loadPeriodTransactions(period, detail);
+  }
+}
+
+async function loadPeriodTransactions(period, container) {
+  container.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text-3);font-size:13px">Loading transactions...</div>`;
+  const p = _periodData.find(x => x.period === period);
+  try {
+    let txns = [];
+    if (p && p.session_id) {
+      const r = await sb.from('bank_transactions').select('*').eq('session_id', p.session_id).order('date', {ascending: true});
+      if (!r.error) txns = r.data || [];
+    }
+    if (!txns.length) {
+      container.innerHTML = `<div style="text-align:center;padding:28px;color:var(--text-3);font-size:12.5px">No bank transactions for this period.<br><span style="font-size:11px">Upload a bank statement in Reconciliation to see transactions here.</span></div>`;
+      return;
+    }
+    const isLocked = p && p.locked;
+    const matched = txns.filter(t => t.match_status === 'matched').length;
+    container.innerHTML = `<div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="border-bottom:1px solid var(--border)">
+          <th style="text-align:left;padding:8px 20px;color:var(--text-3);font-size:10px;text-transform:uppercase;font-weight:600;white-space:nowrap">Date</th>
+          <th style="text-align:left;padding:8px 12px;color:var(--text-3);font-size:10px;text-transform:uppercase;font-weight:600">Description</th>
+          <th style="text-align:right;padding:8px 12px;color:var(--text-3);font-size:10px;text-transform:uppercase;font-weight:600">Amount</th>
+          <th style="text-align:left;padding:8px 12px;color:var(--text-3);font-size:10px;text-transform:uppercase;font-weight:600">Type</th>
+          <th style="text-align:left;padding:8px 12px;color:var(--text-3);font-size:10px;text-transform:uppercase;font-weight:600">Status</th>
+          <th style="text-align:left;padding:8px 12px;color:var(--text-3);font-size:10px;text-transform:uppercase;font-weight:600">Classification</th>
+          <th style="text-align:left;padding:8px 20px;color:var(--text-3);font-size:10px;text-transform:uppercase;font-weight:600">Invoice</th>
+        </tr></thead>
+        <tbody>${txns.map(t => {
+          const statusColor = t.match_status==='matched'?'var(--green)':t.match_status==='suggested'?'var(--amber)':'var(--text-3)';
+          const statusLabel = t.ignored ? '⊘ Ignored' : t.match_status==='matched' ? '✅ Matched' : t.match_status==='suggested' ? '🔶 Suggested' : '⏳ Unmatched';
+          const rowBg = t.match_status==='matched'?'rgba(34,197,94,.04)':t.match_status==='suggested'?'rgba(245,158,11,.04)':'';
+          return `<tr style="border-bottom:1px solid rgba(255,255,255,.03);background:${rowBg};opacity:${t.ignored?'.5':'1'}">
+            <td style="padding:8px 20px;color:var(--text-3);white-space:nowrap">${t.date||'—'}</td>
+            <td style="padding:8px 12px;color:var(--text);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(t.description||'').replace(/"/g,'&quot;')}">${t.description||'—'}</td>
+            <td style="padding:8px 12px;color:${t.type==='credit'?'var(--green)':'var(--red)'};font-weight:600;text-align:right;white-space:nowrap">${t.type==='credit'?'+':'-'}${fmtR(Math.abs(t.amount||0))}</td>
+            <td style="padding:8px 12px;color:var(--text-3);text-transform:capitalize">${t.type||'—'}</td>
+            <td style="padding:8px 12px;color:${statusColor};font-size:11px;white-space:nowrap">${statusLabel}</td>
+            <td style="padding:8px 12px;color:var(--text-3);font-size:11px">${t.classification||'—'}</td>
+            <td style="padding:8px 20px;color:var(--text-3);font-size:11px">${t.matched_invoice_id?'🔗 Linked':'—'}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 20px;border-top:1px solid var(--border)">
+        <span style="font-size:11px;color:var(--text-3)">${txns.length} transaction${txns.length!==1?'s':''} · ${matched} matched</span>
+        ${isLocked?`<span style="font-size:11px;color:var(--red)">🔒 Period locked — changes not allowed</span>`:''}
+      </div>
+    </div>`;
+  } catch(e) {
+    container.innerHTML = `<div style="text-align:center;padding:24px;color:var(--red);font-size:12.5px">Error: ${e.message}</div>`;
+    console.error('loadPeriodTransactions:', e.message);
+  }
+}
+
+async function downloadPeriodCSV(period) {
+  const p = _periodData.find(x => x.period === period);
+  if (!p || !p.session_id) { showToast('No transactions to export', 'var(--amber)'); return; }
+  try {
+    const r = await sb.from('bank_transactions').select('*').eq('session_id', p.session_id).order('date', {ascending: true});
+    if (r.error) throw r.error;
+    const txns = r.data || [];
+    if (!txns.length) { showToast('No transactions for this period', 'var(--amber)'); return; }
+    const cols = ['date','description','amount','type','reference','match_status','match_type','classification','ignored','ignore_reason'];
+    const esc = v => { const s = String(v ?? ''); return (s.includes(',')||s.includes('"')||s.includes('\n')) ? `"${s.replace(/"/g,'""')}"` : s; };
+    const csv = [cols.join(','), ...txns.map(t => cols.map(c => esc(t[c])).join(','))].join('\n');
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `transactions-${period}.csv`; a.click();
+    URL.revokeObjectURL(url);
+    showToast(`✅ Downloaded ${txns.length} transactions`, 'var(--green)');
+  } catch(e) { showToast('Export failed: ' + e.message, 'var(--red)'); }
+}
+
+async function lockPeriod(period, sessionId) {
+  if (!confirm(`Lock ${formatPeriodLabel(period)}?\n\nLocked periods cannot be modified. You can unlock them later.`)) return;
+  const r = await sb.from('reconciliation_sessions').update({locked: true}).eq('id', sessionId);
+  if (r.error) { showToast('Error: ' + r.error.message, 'var(--red)'); return; }
+  showToast('🔒 Period locked', 'var(--green)');
+  loadPeriodHistory();
+}
+
+async function unlockPeriod(period, sessionId) {
+  if (!confirm(`Unlock ${formatPeriodLabel(period)}?\n\nThis re-opens a closed period and allows changes.`)) return;
+  const r = await sb.from('reconciliation_sessions').update({locked: false}).eq('id', sessionId);
+  if (r.error) { showToast('Error: ' + r.error.message, 'var(--red)'); return; }
+  showToast('🔓 Period unlocked', 'var(--amber)');
+  loadPeriodHistory();
+}
+
+function filterPeriodHistory() {
+  const search = (document.getElementById('ph-search')?.value || '').toLowerCase().trim();
+  const status = document.getElementById('ph-status')?.value || '';
+  const from = document.getElementById('ph-from')?.value || '';
+  const to = document.getElementById('ph-to')?.value || '';
+  const filtered = _periodData.filter(p => {
+    if (from && p.period < from) return false;
+    if (to && p.period > to) return false;
+    if (status === 'reconciled' && p.confidence < 100) return false;
+    if (status === 'pending' && p.confidence >= 100) return false;
+    if (status === 'locked' && !p.locked) return false;
+    if (search && !(p.label||'').toLowerCase().includes(search) && !String(p.revenue).includes(search) && !String(p.expenses).includes(search)) return false;
+    return true;
+  });
+  renderPeriodHistory(filtered);
+}
+
+function clearPeriodFilters() {
+  ['ph-search','ph-from','ph-to'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
+  const sel = document.getElementById('ph-status'); if (sel) sel.value = '';
+  renderPeriodHistory(_periodData);
 }
 
 async function autoSaveMonthlySnapshot() {
@@ -4801,7 +5012,7 @@ async function autoSaveMonthlySnapshot() {
       reconciliation_confidence: reconConf,
       saved_at: new Date().toISOString()
     });
-    if (document.getElementById('section-history')?.classList.contains('active')) loadMonthlyHistory();
+    if (document.getElementById('section-history')?.classList.contains('active')) loadPeriodHistory();
   } catch(e) { console.warn('Snapshot save:', e.message); }
 }
 
