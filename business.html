@@ -5294,19 +5294,21 @@ function autoSaveMonthlySnapshot() {
 async function _doAutoSaveSnapshot() {
   if (!currentUser?.id || !invoices.length) return;
   try {
-    const income = rnd(invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0));
-    const exp    = rnd(invoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0));
-    const vat    = rnd(invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.vat||0),0));
     const now = new Date();
     const monthKey   = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
     const monthLabel = now.toLocaleString('en-ZA',{month:'long',year:'numeric'});
+    // Filter to current month only — snapshots are per-period, not cumulative
+    const monthInvs = invoices.filter(i => (i.date||'').startsWith(monthKey));
+    const income = rnd(monthInvs.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0));
+    const exp    = rnd(monthInvs.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0));
+    const vat    = rnd(monthInvs.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.vat||0),0));
     const reconConf  = reconSession?.confidence || 0;
     await sb.from('monthly_snapshots').delete().eq('user_id', currentUser.id).eq('month_key', monthKey);
     await sb.from('monthly_snapshots').insert({
       user_id: currentUser.id, month_key: monthKey, month_label: monthLabel,
       year: now.getFullYear(), revenue: income, expenses: exp,
       profit: rnd(income - exp), vat_owing: vat,
-      invoice_count: invoices.filter(i=>i.type==='income').length,
+      invoice_count: monthInvs.filter(i=>i.type==='income').length,
       reconciliation_confidence: reconConf, saved_at: new Date().toISOString()
     });
     if (document.getElementById('section-history')?.classList.contains('active')) loadPeriodHistory();
@@ -5314,14 +5316,16 @@ async function _doAutoSaveSnapshot() {
 }
 
 async function saveMonthlySnapshot() {
-  const income = rnd(invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0));
-  const exp    = rnd(invoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0));
-  const vat    = rnd(invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.vat||0),0));
   const now = new Date();
   const monthKey   = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   const monthLabel = now.toLocaleString('en-ZA',{month:'long',year:'numeric'});
+  // Filter to current month only — snapshots are per-period, not cumulative
+  const monthInvs = invoices.filter(i => (i.date||'').startsWith(monthKey));
+  const income = rnd(monthInvs.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0));
+  const exp    = rnd(monthInvs.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0));
+  const vat    = rnd(monthInvs.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.vat||0),0));
   await sb.from('monthly_snapshots').delete().eq('user_id', currentUser.id).eq('month_key', monthKey);
-  const {error} = await sb.from('monthly_snapshots').insert({user_id:currentUser.id,month_key:monthKey,month_label:monthLabel,year:now.getFullYear(),revenue:income,expenses:exp,profit:rnd(income-exp),vat_owing:vat,invoice_count:invoices.filter(i=>i.type==='income').length,reconciliation_confidence:reconSession?.confidence||0,saved_at:new Date().toISOString()});
+  const {error} = await sb.from('monthly_snapshots').insert({user_id:currentUser.id,month_key:monthKey,month_label:monthLabel,year:now.getFullYear(),revenue:income,expenses:exp,profit:rnd(income-exp),vat_owing:vat,invoice_count:monthInvs.filter(i=>i.type==='income').length,reconciliation_confidence:reconSession?.confidence||0,saved_at:new Date().toISOString()});
   if (error) { showToast('Error: '+error.message,'var(--red)'); return; }
   showToast('✅ Snapshot saved for '+monthLabel,'var(--green)');
   loadMonthlyHistory();
@@ -5351,8 +5355,8 @@ async function loadStatementHistory() {
       <div onclick="toggleStmtDetail('stmtd-${i}')" style="display:flex;align-items:center;gap:14px;padding:13px 20px;cursor:pointer">
         <div style="font-size:20px">🏦</div>
         <div style="flex:1">
-          <div style="font-size:13px;font-weight:600;color:var(--text)">${s.filename||'Statement'}</div>
-          <div style="font-size:11.5px;color:var(--text-3)">${s.period||''} · ${new Date(s.created_at).toLocaleDateString('en-ZA')}</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">${escHtml(s.filename||'Statement')}</div>
+          <div style="font-size:11.5px;color:var(--text-3)">${escHtml(s.period||'')} · ${new Date(s.created_at).toLocaleDateString('en-ZA')}</div>
         </div>
         <div style="text-align:right;margin-right:10px"><div style="font-size:12px;color:var(--green)">${fmtR(s.total_income||0)}</div><div style="font-size:10.5px;color:var(--text-3)">income</div></div>
         <button onclick="event.stopPropagation();deleteStatement('${s.id}')" style="background:none;border:none;color:var(--text-3);font-size:14px;cursor:pointer;padding:4px 6px;border-radius:5px;flex-shrink:0" title="Delete">🗑</button>
