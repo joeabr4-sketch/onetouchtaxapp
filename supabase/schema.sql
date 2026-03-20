@@ -259,3 +259,27 @@ ALTER TABLE payroll_runs ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users manage own payroll runs" ON payroll_runs;
 CREATE POLICY "Users manage own payroll runs" ON payroll_runs
   FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+
+-- ── 11. RECONCILIATION AUDIT LOG ─────────────────────────────────────────────
+-- Immutable tamper-evident audit trail for every reconciliation action.
+-- Written by the app on every match, ignore, classify, and session event.
+
+CREATE TABLE IF NOT EXISTS recon_audit (
+  id           uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id      uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  session_id   uuid REFERENCES reconciliation_sessions(id) ON DELETE SET NULL,
+  type         text NOT NULL,   -- 'auto' | 'suggest' | 'manual' | 'ignore' | 'upload' | 'close' | 'reset' | 'clear'
+  message      text NOT NULL,
+  created_at   timestamptz DEFAULT now()
+);
+
+ALTER TABLE recon_audit ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users read own audit log" ON recon_audit;
+CREATE POLICY "Users read own audit log" ON recon_audit
+  FOR SELECT USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Users insert own audit log" ON recon_audit;
+CREATE POLICY "Users insert own audit log" ON recon_audit
+  FOR INSERT WITH CHECK (auth.uid() = user_id);

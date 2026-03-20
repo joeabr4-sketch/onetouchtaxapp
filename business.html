@@ -1960,6 +1960,12 @@ let logoDataUrl = null;
 // ── HELPERS ──
 function fmtR(v) { return 'R ' + (parseFloat(v)||0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function fmtRShort(v) { const n=parseFloat(v)||0; if(n>=1000000) return 'R '+(n/1000000).toFixed(1)+'M'; if(n>=1000) return 'R '+(n/1000).toFixed(0)+'k'; return 'R '+n.toFixed(0); }
+// ── MONEY HELPERS ─────────────────────────────────────────────────────────────
+// All financial arithmetic must go through these to avoid floating-point drift
+function rnd(v) { return Math.round((parseFloat(v) || 0) * 100) / 100; }
+function vatOn(subtotal) { return rnd(subtotal * 0.15); }      // VAT on excl-VAT amount
+function vatFrom(gross) { return rnd(gross * 15 / 115); }       // Extract VAT from incl-VAT amount
+function exclVat(gross) { return rnd(gross - vatFrom(gross)); }  // Strip VAT from incl-VAT amount
 
 function showToast(msg, color) {
   const t = document.getElementById('toast');
@@ -2560,9 +2566,9 @@ function renderLineItems() {
 }
 
 function updateInvTotals() {
-  const subtotal = lineItems.reduce((s,li) => s + (li.qty||1)*(li.price||0), 0);
-  const vat = invVATEnabled ? subtotal * 0.15 : 0;
-  const total = subtotal + vat;
+  const subtotal = rnd(lineItems.reduce((s,li) => s + (li.qty||1)*(li.price||0), 0));
+  const vat = invVATEnabled ? vatOn(subtotal) : 0;
+  const total = rnd(subtotal + vat);
   document.getElementById('invSubtotal').textContent = fmtR(subtotal);
   document.getElementById('invVAT').textContent = fmtR(vat);
   document.getElementById('invTotal').textContent = fmtR(total);
@@ -2578,7 +2584,8 @@ function setInvVAT(enabled) {
 }
 
 function updateDepositBalance() {
-  const total = lineItems.reduce((s,li)=>s+(li.qty||1)*(li.price||0),0) * (invVATEnabled?1.15:1);
+  const _sub = rnd(lineItems.reduce((s,li)=>s+(li.qty||1)*(li.price||0),0));
+  const total = rnd(_sub + (invVATEnabled ? vatOn(_sub) : 0));
   const deposit = parseFloat(document.getElementById('inv-deposit')?.value)||0;
   const balance = Math.max(0, total - deposit);
   const row = document.getElementById('balanceRow');
@@ -2590,9 +2597,9 @@ function updateDepositBalance() {
 }
 
 async function saveInvoice(exportPDF) {
-  const subtotal = lineItems.reduce((s,li)=>s+(li.qty||1)*(li.price||0),0);
-  const vatAmt = invVATEnabled ? subtotal * 0.15 : 0;
-  const total = subtotal + vatAmt;
+  const subtotal = rnd(lineItems.reduce((s,li)=>s+(li.qty||1)*(li.price||0),0));
+  const vatAmt = invVATEnabled ? vatOn(subtotal) : 0;
+  const total = rnd(subtotal + vatAmt);
   const client = document.getElementById('inv-client').value.trim();
   if (!client) {
     showToast('Please enter a client name', 'var(--amber)'); return;
@@ -2621,6 +2628,16 @@ async function saveInvoice(exportPDF) {
     doc_type: document.getElementById('invFormOverlay').getAttribute('data-is-quote')==='true' ? 'quote' : 'invoice',
     client_whatsapp: document.getElementById('inv-whatsapp')?.value?.trim() || ''
   };
+  // Block saves into locked periods
+  if (invData.date) {
+    const invPeriod = invData.date.substring(0, 7);
+    const { data: lockedSession } = await sb.from('reconciliation_sessions')
+      .select('id').eq('user_id', currentUser.id).eq('period', invPeriod).eq('locked', true).maybeSingle();
+    if (lockedSession) {
+      showToast(`⛔ ${formatPeriodLabel(invPeriod)} is locked — unlock it in Financial History first`, 'var(--red)');
+      return;
+    }
+  }
   // Clear quote flag
   document.getElementById('invFormOverlay').removeAttribute('data-is-quote');
   let error;
@@ -2809,9 +2826,9 @@ function exportInvoicePDF(inv) {
   y += 8;
 
   // Totals
-  const subtotal = items.reduce((s,li)=>s+(li.qty||1)*(li.price||0),0);
-  const vatAmt = inv.has_vat ? subtotal*0.15 : 0;
-  const total = subtotal + vatAmt;
+  const subtotal = rnd(items.reduce((s,li)=>s+(li.qty||1)*(li.price||0),0));
+  const vatAmt = inv.has_vat ? vatOn(subtotal) : 0;
+  const total = rnd(subtotal + vatAmt);
   const totX = W-M-60;
 
   doc.setFont('helvetica','normal');
@@ -3198,14 +3215,24 @@ function genVAT201() {
 }
 
 // Auto-calculate UIF and SDL from gross salaries
+// ── SARS 2025/26 CONSTANTS ─────────────────────────────────────────────────
+const UIF_MONTHLY_CAP   = 1476;    // R17,712/year ÷ 12 — update when SARS revises
+const UIF_RATE          = 0.01;    // Employee 1% + Employer 1% (each)
+const SDL_RATE          = 0.01;    // 1% of leviable amount
+const SDL_ANNUAL_THRESHOLD = 500000; // SDL only applies if annual payroll > R500,000
+const CORP_TAX_RATE     = 0.27;    // Corporate income tax 2025/26
+
 function calcPAYE() {
   const gross = parseFloat(document.getElementById('e-gross')?.value) || 0;
   const uifEl = document.getElementById('e-uif');
   const sdlEl = document.getElementById('e-sdl');
-  // UIF = 1% of gross, capped at R177.12 per employee (SARS 2025 limit R17,712/month threshold)
-  if (uifEl && !uifEl.value) uifEl.value = Math.min(gross * 0.01, 1476).toFixed(2);
-  // SDL = 1% of gross
-  if (sdlEl && !sdlEl.value) sdlEl.value = (gross * 0.01).toFixed(2);
+  // UIF: 1% employee + 1% employer, each capped at UIF_MONTHLY_CAP
+  if (uifEl && !uifEl.value) uifEl.value = Math.min(gross * UIF_RATE, UIF_MONTHLY_CAP).toFixed(2);
+  // SDL: 1% — only if annual payroll exceeds R500,000 (assume monthly * 12 for estimate)
+  if (sdlEl && !sdlEl.value) {
+    const annualEstimate = gross * 12;
+    sdlEl.value = annualEstimate > SDL_ANNUAL_THRESHOLD ? (gross * SDL_RATE).toFixed(2) : '0.00';
+  }
 }
 
 function genEMP201() {
@@ -3223,14 +3250,17 @@ function genEMP201() {
   doc.text('Payroll Figures', M, y); y+=10;
   const gross = parseFloat(document.getElementById('e-gross')?.value)||0;
   const paye = parseFloat(document.getElementById('e-paye')?.value)||0;
-  const uif = Math.min(parseFloat(document.getElementById('e-uif')?.value)||gross*0.01, 1476);
-  const sdl = parseFloat(document.getElementById('e-sdl')?.value)||gross*0.01;
+  const uif = Math.min(parseFloat(document.getElementById('e-uif')?.value)||rnd(gross*UIF_RATE), UIF_MONTHLY_CAP);
+  const annualEst = gross * 12;
+  const sdlApplies = annualEst > SDL_ANNUAL_THRESHOLD;
+  const sdl = sdlApplies ? (parseFloat(document.getElementById('e-sdl')?.value)||rnd(gross*SDL_RATE)) : 0;
   y = makePDFRow(doc,'Gross Salaries', 'R '+gross.toLocaleString('en-ZA',{minimumFractionDigits:2}), y, true);
   y = makePDFRow(doc,'PAYE Deducted', 'R '+paye.toLocaleString('en-ZA',{minimumFractionDigits:2}), y, false);
-  y = makePDFRow(doc,'UIF (capped at R1,476)', 'R '+uif.toLocaleString('en-ZA',{minimumFractionDigits:2}), y, true);
-  y = makePDFRow(doc,'SDL (1% of leviable amount)', 'R '+sdl.toLocaleString('en-ZA',{minimumFractionDigits:2}), y, false);
+  y = makePDFRow(doc,'UIF — Employee (capped R'+UIF_MONTHLY_CAP+'/mo)', 'R '+uif.toLocaleString('en-ZA',{minimumFractionDigits:2}), y, true);
+  y = makePDFRow(doc,'UIF — Employer (capped R'+UIF_MONTHLY_CAP+'/mo)', 'R '+uif.toLocaleString('en-ZA',{minimumFractionDigits:2}), y, false);
+  y = makePDFRow(doc,'SDL (1% — '+(sdlApplies?'applicable':'exempt, payroll < R500k/yr')+')', 'R '+sdl.toLocaleString('en-ZA',{minimumFractionDigits:2}), y, true);
   y+=10;
-  const total = paye+uif+sdl;
+  const total = paye + uif + uif + sdl; // PAYE + employee UIF + employer UIF + SDL
   doc.setFillColor(244,63,94); doc.roundedRect(M,y,210-M*2,16,2,2,'F');
   doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(255,255,255);
   doc.text('TOTAL PAYABLE TO SARS', M+6, y+10);
@@ -3244,7 +3274,7 @@ function genEMP201() {
 function genIRP6() {
   if (!window.jspdf) { showToast('PDF loading...','var(--amber)'); return; }
   const {jsPDF} = window.jspdf; const doc = new jsPDF();
-  let y = makePDFHeader(doc,'IRP6 Provisional Tax Estimate','Provisional Tax Calculation — 2024/25');
+  let y = makePDFHeader(doc,'IRP6 Provisional Tax Estimate','Provisional Tax Calculation — 2025/26');
   const M=20;
   const income = parseFloat(document.getElementById('p-income')?.value)||0;
   const ded = parseFloat(document.getElementById('p-ded')?.value)||0;
@@ -3268,7 +3298,7 @@ function genIRP6() {
   doc.text('Taxpayer Details', M, y); y+=10;
   y = makePDFRow(doc,'Name / Company', document.getElementById('p-name')?.value||userProfile?.biz_name||'—', y, true);
   y = makePDFRow(doc,'Tax Reference', document.getElementById('p-ref')?.value||'—', y, false);
-  y = makePDFRow(doc,'Tax Year', document.getElementById('p-year')?.value||'2024/25', y, true);
+  y = makePDFRow(doc,'Tax Year', document.getElementById('p-year')?.value||'2025/26', y, true);
   y = makePDFRow(doc,'Period', period, y, false);
   y+=8; doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(15,21,32);
   doc.text('Tax Calculation', M, y); y+=10;
@@ -3298,7 +3328,7 @@ function genITR14() {
   const turnover = parseFloat(document.getElementById('i-turn')?.value)||invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0);
   const expenses = parseFloat(document.getElementById('i-exp')?.value)||invoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0);
   const profit = turnover-expenses;
-  const corpTax = Math.max(0,profit)*0.27;
+  const corpTax = Math.max(0, rnd(profit * CORP_TAX_RATE));
   doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(15,21,32);
   doc.text('Company Details', M, y); y+=10;
   y = makePDFRow(doc,'Company Name', document.getElementById('i-biz')?.value||userProfile?.biz_name||'—', y, true);
@@ -3587,8 +3617,8 @@ async function importTransactionsAsInvoices() {
     const amt = parseFloat((t.amount||'0').replace(/[^0-9.]/g,''))||0;
     if (!amt) { skipped++; continue; }
     const applyVat = isVatRegistered() && t.vatClaimable;
-    const vatAmt = applyVat ? +(amt*15/115).toFixed(2) : 0;
-    const amtExcl = applyVat ? +(amt-vatAmt).toFixed(2) : amt;
+    const vatAmt = applyVat ? vatFrom(amt) : 0;
+    const amtExcl = applyVat ? exclVat(amt) : amt;
     const {error} = await sb.from('invoices').insert({user_id:currentUser.id,type:t.type==='income'?'income':'expense',date:today,description:t.description||'Imported',category:t.category||'Other',amount:amtExcl,vat:vatAmt,total:amt,has_vat:applyVat,reconciled:true,status:'paid'});
     if (!error) imported++; else skipped++;
   }
@@ -3899,7 +3929,22 @@ async function processReconFile(file) {
 
     if (!rows.length) { showToast('No transactions found — check column headers', 'var(--amber)'); resetReconDropZone(); return; }
 
-    const inserts = rows.map(r => ({
+    // Dedup: fetch existing transactions for this session and skip exact matches
+    const { data: existing } = await sb.from('bank_transactions')
+      .select('date,amount,type,description').eq('session_id', reconSession.id);
+    const existingKeys = new Set((existing||[]).map(t =>
+      `${t.date}|${t.amount}|${t.type}|${String(t.description||'').substring(0,30)}`
+    ));
+    const newRows = rows.filter(r =>
+      !existingKeys.has(`${r.date}|${r.amount}|${r.type}|${String(r.description||'').substring(0,30)}`)
+    );
+    const dupeCount = rows.length - newRows.length;
+    if (!newRows.length) {
+      showToast(`All ${rows.length} transactions already uploaded — nothing new to add`, 'var(--amber)');
+      resetReconDropZone(); return;
+    }
+
+    const inserts = newRows.map(r => ({
       user_id: currentUser.id, session_id: reconSession.id,
       date: r.date, description: r.description, amount: r.amount,
       reference: r.reference, type: r.type,
@@ -3926,7 +3971,7 @@ async function processReconFile(file) {
 
     const fn = document.getElementById('reconFileName');
     if (fn) fn.textContent = file.name;
-    addReconAudit('upload', `Uploaded ${rows.length} transactions from ${file.name} (${rows.filter(r=>r.type==='credit').length} credits, ${rows.filter(r=>r.type==='debit').length} debits)`);
+    addReconAudit('upload', `Uploaded ${newRows.length} transactions from ${file.name} (${newRows.filter(r=>r.type==='credit').length} credits, ${newRows.filter(r=>r.type==='debit').length} debits${dupeCount>0?' · '+dupeCount+' duplicates skipped':''})`);
     await loadBankTransactions();
     updateReconUI();
     renderTxTable();
@@ -4380,24 +4425,48 @@ async function resetReconSession() {
 
 // ── AUDIT ──
 function addReconAudit(type, message) {
+  // Write to DB — primary, tamper-evident record
+  if (currentUser?.id) {
+    sb.from('recon_audit').insert({
+      user_id: currentUser.id,
+      session_id: reconSession?.id || null,
+      type, message
+    }).then(({ error }) => {
+      if (error) console.warn('Audit DB write failed:', error.message);
+    });
+  }
+  // Also update localStorage cache for immediate UI refresh
   const log = JSON.parse(localStorage.getItem('ot_recon_audit_' + currentUser?.id) || '[]');
   log.unshift({ type, message, time: new Date().toISOString() });
   localStorage.setItem('ot_recon_audit_' + currentUser?.id, JSON.stringify(log.slice(0, 200)));
-  renderReconAudit();
+  renderReconAudit(log);
 }
 
-function renderReconAudit() {
+async function renderReconAudit(cachedLog) {
   const list = document.getElementById('reconAuditList');
   if (!list) return;
-  const log = JSON.parse(localStorage.getItem('ot_recon_audit_' + currentUser?.id) || '[]');
-  if (!log.length) { list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-3);font-size:13px">No entries yet</div>'; return; }
   const colors = { auto:'var(--green)', suggest:'var(--amber)', manual:'var(--blue)', close:'var(--green)', reset:'var(--red)', upload:'var(--blue)', ignore:'var(--text-3)', clear:'var(--red)' };
   const labels = { auto:'Auto', suggest:'Suggested', manual:'Manual', close:'Closed', reset:'Reset', upload:'Upload', ignore:'Ignored', clear:'Cleared' };
-  list.innerHTML = log.map(e => `<div class="audit-row">
-    <span style="background:${colors[e.type]||'var(--text-3)'};background:${colors[e.type]?`rgba(${e.type==='auto'?'34,197,94':e.type==='suggest'?'245,158,11':e.type==='reset'||e.type==='clear'?'244,63,94':'184,196,216'},.1)`:' rgba(184,196,216,.1)'};color:${colors[e.type]||'var(--text-3)'};padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;white-space:nowrap">${labels[e.type]||e.type}</span>
-    <span style="flex:1;font-size:12px">${e.message}</span>
-    <span style="color:var(--text-3);font-size:11px;white-space:nowrap">${new Date(e.time).toLocaleString('en-ZA')}</span>
-  </div>`).join('');
+  const renderLog = (log) => {
+    if (!log.length) { list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-3);font-size:13px">No entries yet</div>'; return; }
+    list.innerHTML = log.map(e => `<div class="audit-row">
+      <span style="background:${colors[e.type]?`rgba(${e.type==='auto'?'34,197,94':e.type==='suggest'?'245,158,11':e.type==='reset'||e.type==='clear'?'244,63,94':'184,196,216'},.1)`:'rgba(184,196,216,.1)'};color:${colors[e.type]||'var(--text-3)'};padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;white-space:nowrap">${labels[e.type]||e.type}</span>
+      <span style="flex:1;font-size:12px">${e.message}</span>
+      <span style="color:var(--text-3);font-size:11px;white-space:nowrap">${new Date(e.time||e.created_at).toLocaleString('en-ZA')}</span>
+    </div>`).join('');
+  };
+  // Render immediately from cache, then refresh from DB
+  if (cachedLog) { renderLog(cachedLog); }
+  try {
+    const q = reconSession?.id
+      ? sb.from('recon_audit').select('*').eq('session_id', reconSession.id).order('created_at', { ascending: false }).limit(200)
+      : sb.from('recon_audit').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(200);
+    const { data } = await q;
+    if (data?.length) renderLog(data.map(e => ({ type: e.type, message: e.message, time: e.created_at })));
+    else if (!cachedLog) renderLog(JSON.parse(localStorage.getItem('ot_recon_audit_' + currentUser?.id) || '[]'));
+  } catch(e) {
+    if (!cachedLog) renderLog(JSON.parse(localStorage.getItem('ot_recon_audit_' + currentUser?.id) || '[]'));
+  }
 }
 
 function switchReconTab(tab, el) {
@@ -5131,45 +5200,44 @@ function clearPeriodFilters() {
   renderPeriodHistory(_periodData);
 }
 
-async function autoSaveMonthlySnapshot() {
-  // Silently saves current month snapshot — called automatically
+let _snapshotTimer = null;
+function autoSaveMonthlySnapshot() {
+  // Debounced — waits 1.5s after last call before writing, preventing race conditions
+  clearTimeout(_snapshotTimer);
+  _snapshotTimer = setTimeout(_doAutoSaveSnapshot, 1500);
+}
+
+async function _doAutoSaveSnapshot() {
   if (!currentUser?.id || !invoices.length) return;
   try {
-    const income = invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.total||i.amount||0),0);
-    const exp = invoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.total||i.amount||0),0);
-    const vat = invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.vat||0),0);
+    const income = rnd(invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0));
+    const exp    = rnd(invoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0));
+    const vat    = rnd(invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.vat||0),0));
     const now = new Date();
-    const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    const monthKey   = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
     const monthLabel = now.toLocaleString('en-ZA',{month:'long',year:'numeric'});
-    const reconConf = reconSession?.confidence || 0;
-    // Delete existing snapshot for this month then insert fresh
+    const reconConf  = reconSession?.confidence || 0;
     await sb.from('monthly_snapshots').delete().eq('user_id', currentUser.id).eq('month_key', monthKey);
     await sb.from('monthly_snapshots').insert({
-      user_id: currentUser.id,
-      month_key: monthKey,
-      month_label: monthLabel,
-      year: now.getFullYear(),
-      revenue: income,
-      expenses: exp,
-      profit: income - exp,
-      vat_owing: vat,
+      user_id: currentUser.id, month_key: monthKey, month_label: monthLabel,
+      year: now.getFullYear(), revenue: income, expenses: exp,
+      profit: rnd(income - exp), vat_owing: vat,
       invoice_count: invoices.filter(i=>i.type==='income').length,
-      reconciliation_confidence: reconConf,
-      saved_at: new Date().toISOString()
+      reconciliation_confidence: reconConf, saved_at: new Date().toISOString()
     });
     if (document.getElementById('section-history')?.classList.contains('active')) loadPeriodHistory();
   } catch(e) { console.warn('Snapshot save:', e.message); }
 }
 
 async function saveMonthlySnapshot() {
-  const income = invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0);
-  const exp = invoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0);
-  const vat = invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.vat||0),0);
+  const income = rnd(invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0));
+  const exp    = rnd(invoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0));
+  const vat    = rnd(invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.vat||0),0));
   const now = new Date();
-  const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const monthKey   = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   const monthLabel = now.toLocaleString('en-ZA',{month:'long',year:'numeric'});
   await sb.from('monthly_snapshots').delete().eq('user_id', currentUser.id).eq('month_key', monthKey);
-  const {error} = await sb.from('monthly_snapshots').insert({user_id:currentUser.id,month_key:monthKey,month_label:monthLabel,year:now.getFullYear(),revenue:income,expenses:exp,profit:income-exp,vat_owing:vat,invoice_count:invoices.filter(i=>i.type==='income').length,saved_at:new Date().toISOString()});
+  const {error} = await sb.from('monthly_snapshots').insert({user_id:currentUser.id,month_key:monthKey,month_label:monthLabel,year:now.getFullYear(),revenue:income,expenses:exp,profit:rnd(income-exp),vat_owing:vat,invoice_count:invoices.filter(i=>i.type==='income').length,reconciliation_confidence:reconSession?.confidence||0,saved_at:new Date().toISOString()});
   if (error) { showToast('Error: '+error.message,'var(--red)'); return; }
   showToast('✅ Snapshot saved for '+monthLabel,'var(--green)');
   loadMonthlyHistory();
