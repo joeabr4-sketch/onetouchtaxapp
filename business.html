@@ -3802,6 +3802,8 @@ function calcConfidence() {
     t.classification === 'expense' ||
     t.classification === 'other_income' ||
     t.classification === 'transfer' ||
+    t.classification === 'payroll_salary' ||
+    t.classification === 'payroll_sars' ||
     t.ignored === true
   ).length;
   return Math.round((resolved / total) * 100);
@@ -3873,7 +3875,8 @@ function updateSummaryCards() {
 function updateCloseBtn() {
   const btn = document.getElementById('closeMonthBtn');
   const msg = document.getElementById('closeMonthMsg');
-  const unmatched = reconTransactions.filter(t => !t.ignored && t.match_status === 'unmatched').length;
+  // Classified transactions (expense/transfer/payroll/etc) are resolved even if match_status is still 'unmatched'
+  const unmatched = reconTransactions.filter(t => !t.ignored && !t.classification && t.match_status === 'unmatched').length;
   const flagged = reconTransactions.filter(t => !t.ignored && t.match_status === 'suggested').length;
   const unclassified = reconTransactions.filter(t => !t.ignored && !t.classification && t.match_status === 'matched').length;
   const blocking = unmatched + flagged + unclassified;
@@ -4468,7 +4471,7 @@ function detectConflicts() {
 
 // ── CLOSE SESSION ──
 async function closeReconSession() {
-  const unmatched = reconTransactions.filter(t => !t.ignored && t.match_status === 'unmatched').length;
+  const unmatched = reconTransactions.filter(t => !t.ignored && !t.classification && t.match_status === 'unmatched').length;
   const flagged = reconTransactions.filter(t => !t.ignored && t.match_status === 'suggested').length;
   const unclassified = reconTransactions.filter(t => !t.ignored && !t.classification && t.match_status === 'matched').length;
   if (unmatched > 0 || flagged > 0 || unclassified > 0) {
