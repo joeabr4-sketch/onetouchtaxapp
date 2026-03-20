@@ -751,6 +751,28 @@ h1,h2,h3,.logo-text,.stat-value{font-family:'Syne',sans-serif}
         <div class="stat red"><div class="stat-label">Overdue</div><div class="stat-value" id="statOverdue">—</div><div class="stat-sub" id="statOverdueSub">Check calendar</div></div>
         <div class="stat green"><div class="stat-label">Invoices Logged</div><div class="stat-value" id="statCount">0</div><div class="stat-sub">this financial year</div></div>
       </div>
+      <!-- RECONCILIATION STATUS BAR -->
+      <div id="reconStatusBar" style="display:none;border-radius:12px;padding:12px 18px;margin-bottom:16px;border:1px solid rgba(245,158,11,.2);background:rgba(245,158,11,.06);transition:all .3s">
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <div style="font-size:20px" id="rsb-icon">📊</div>
+          <div style="flex:1;min-width:120px">
+            <div style="font-size:12.5px;font-weight:700;color:var(--text)" id="rsb-label">—</div>
+            <div style="font-size:11px;color:var(--text-3);margin-top:2px" id="rsb-sub">Loading...</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;flex-shrink:0;flex-wrap:wrap">
+            <div style="text-align:center;min-width:44px">
+              <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700" id="rsb-pct">—</div>
+              <div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px">Reconciled</div>
+            </div>
+            <div style="width:1px;height:28px;background:var(--border)"></div>
+            <div style="text-align:center;min-width:44px">
+              <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--red)" id="rsb-unresolved">—</div>
+              <div style="font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px">Unresolved</div>
+            </div>
+            <button id="rsb-btn" onclick="showSection('reconcile',document.querySelector('.s-btn[onclick*=reconcile]'))" style="background:var(--amber);color:#0f1520;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap">Continue Reconciliation →</button>
+          </div>
+        </div>
+      </div>
       <!-- DEADLINES -->
       <div class="g2">
         <div class="card">
@@ -1620,6 +1642,25 @@ h1,h2,h3,.logo-text,.stat-value{font-family:'Syne',sans-serif}
 </div>
 
 
+    <!-- ═══ RECON BLOCK MODAL ═══ -->
+    <div id="reconBlockModal" style="position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:600;display:none;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)this.style.display='none'">
+      <div style="background:#1a1d24;border:1px solid rgba(244,63,94,.3);border-radius:20px;width:100%;max-width:440px;padding:28px;box-shadow:0 32px 80px rgba(0,0,0,.6);animation:fadeUp .3s ease">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+          <div style="width:44px;height:44px;background:rgba(244,63,94,.12);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🚫</div>
+          <div>
+            <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text)">Cannot Close Period</div>
+            <div style="font-size:12px;color:var(--text-3);margin-top:2px">Resolve all transactions before closing</div>
+          </div>
+        </div>
+        <div id="reconBlockBreakdown" style="background:rgba(0,0,0,.2);border-radius:10px;padding:14px;margin-bottom:20px;display:flex;flex-direction:column;gap:8px"></div>
+        <p style="font-size:12.5px;color:var(--text-3);margin-bottom:20px;line-height:1.6">Period closure requires 100% reconciliation. Match, classify, or mark transactions as ignored before closing.</p>
+        <div style="display:flex;gap:10px">
+          <button onclick="document.getElementById('reconBlockModal').style.display='none';showSection('reconcile',document.querySelector('.s-btn[onclick*=reconcile]'))" style="flex:1;background:var(--blue);color:#0f1520;border:none;padding:10px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">→ Go to Reconciliation</button>
+          <button onclick="document.getElementById('reconBlockModal').style.display='none'" style="background:var(--surface2);border:1px solid var(--border);color:var(--text-2);padding:10px 16px;border-radius:9px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif">Dismiss</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══ IMPORT TRANSACTIONS MODAL ═══ -->
     <div id="importModal" style="position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:400;display:none;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeImportModal()">
       <div style="background:#1a1d24;border:1px solid rgba(255,255,255,.12);border-radius:20px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;animation:fadeUp .3s ease;box-shadow:0 32px 80px rgba(0,0,0,.6)">
@@ -2165,6 +2206,7 @@ async function initDashboard() {
   checkAccountantLinkStatus();
   startClock();
   updateTipsState();
+  loadReconStatusBar();
   const savedLogo = localStorage.getItem('ot_logo_' + currentUser.id);
   if (savedLogo) { logoDataUrl = savedLogo; showLogoPreview(savedLogo); }
   showWelcomePopup();
@@ -3763,16 +3805,19 @@ function updateSummaryCards() {
 function updateCloseBtn() {
   const btn = document.getElementById('closeMonthBtn');
   const msg = document.getElementById('closeMonthMsg');
-  const unresolved = reconTransactions.filter(t =>
-    t.match_status === 'unmatched' && !t.classification && !t.ignored
-  ).length;
+  const unmatched = reconTransactions.filter(t => !t.ignored && t.match_status === 'unmatched').length;
+  const flagged = reconTransactions.filter(t => !t.ignored && t.match_status === 'suggested').length;
+  const unclassified = reconTransactions.filter(t => !t.ignored && !t.classification && t.match_status === 'matched').length;
+  const blocking = unmatched + flagged + unclassified;
   const confidence = calcConfidence();
 
-  if (btn) btn.disabled = unresolved > 0 || reconSession?.locked;
+  if (btn) btn.disabled = blocking > 0 || reconSession?.locked;
   if (msg) {
     if (reconSession?.locked) msg.textContent = '🔒 This session is locked';
-    else if (unresolved === 0 && reconTransactions.length > 0) msg.textContent = '✅ All transactions resolved — ready to close';
-    else if (unresolved > 0) msg.textContent = `${unresolved} unresolved transaction${unresolved !== 1 ? 's' : ''} — must be matched, assigned, or ignored`;
+    else if (blocking === 0 && reconTransactions.length > 0) msg.textContent = '✅ All transactions resolved — ready to close';
+    else if (unmatched > 0) msg.textContent = `${unmatched} unmatched · ${flagged} unconfirmed · ${unclassified} unclassified`;
+    else if (flagged > 0) msg.textContent = `${flagged} suggested match${flagged !== 1 ? 'es' : ''} need confirmation`;
+    else if (unclassified > 0) msg.textContent = `${unclassified} matched transaction${unclassified !== 1 ? 's' : ''} need a category`;
     else msg.textContent = 'Upload a statement and run auto-match';
   }
 
@@ -3781,6 +3826,11 @@ function updateCloseBtn() {
     reconSession.confidence = confidence;
     sb.from('reconciliation_sessions').update({ confidence }).eq('id', reconSession.id)
       .then(({ error }) => { if (error) console.error('Confidence save failed:', error.message); });
+  }
+
+  // Refresh dashboard status bar if visible
+  if (document.getElementById('section-dashboard')?.classList.contains('active')) {
+    loadReconStatusBar();
   }
 }
 
@@ -4289,8 +4339,13 @@ function detectConflicts() {
 
 // ── CLOSE SESSION ──
 async function closeReconSession() {
-  const unresolved = reconTransactions.filter(t => !t.ignored && !t.classification && t.match_status === 'unmatched').length;
-  if (unresolved > 0) { showToast(`${unresolved} transactions still unresolved`, 'var(--amber)'); return; }
+  const unmatched = reconTransactions.filter(t => !t.ignored && t.match_status === 'unmatched').length;
+  const flagged = reconTransactions.filter(t => !t.ignored && t.match_status === 'suggested').length;
+  const unclassified = reconTransactions.filter(t => !t.ignored && !t.classification && t.match_status === 'matched').length;
+  if (unmatched > 0 || flagged > 0 || unclassified > 0) {
+    showReconBlockModal(unmatched, flagged, unclassified);
+    return;
+  }
   if (!confirm(`Close "${getCheckpointLabel()}"? This locks all matches for this period.`)) return;
   const isEnd = new Date().getDate() > 15;
   const updates = isEnd
@@ -4301,6 +4356,7 @@ async function closeReconSession() {
   addReconAudit('close', `Session closed: ${getCheckpointLabel()}`);
   await autoSaveMonthlySnapshot();
   updateReconUI();
+  loadReconStatusBar();
   showToast(`🔒 ${getCheckpointLabel()} closed!`, 'var(--green)');
 }
 
@@ -4353,6 +4409,95 @@ function switchReconTab(tab, el) {
   if (tab === 'audit') renderReconAudit();
   if (tab === 'invoices') renderInvoiceReconTable();
   if (tab === 'unrecorded') renderUnrecorded();
+}
+
+async function loadReconStatusBar() {
+  const bar = document.getElementById('reconStatusBar');
+  if (!bar || !currentUser?.id) return;
+  const period = getCurrentPeriod();
+  const label = formatPeriodLabel(period);
+  try {
+    const { data: session } = await sb.from('reconciliation_sessions')
+      .select('*').eq('user_id', currentUser.id).eq('period', period).maybeSingle();
+    const conf = session?.confidence || 0;
+    const isLocked = session?.locked || false;
+    let unresolved = 0;
+    if (session?.id) {
+      const { count } = await sb.from('bank_transactions')
+        .select('*', { count: 'exact', head: true })
+        .eq('session_id', session.id).eq('match_status', 'unmatched').eq('ignored', false);
+      unresolved = count || 0;
+    }
+    const labelEl = document.getElementById('rsb-label');
+    const subEl = document.getElementById('rsb-sub');
+    const pctEl = document.getElementById('rsb-pct');
+    const unresolvedEl = document.getElementById('rsb-unresolved');
+    const btnEl = document.getElementById('rsb-btn');
+    const iconEl = document.getElementById('rsb-icon');
+    if (labelEl) labelEl.textContent = label;
+    if (pctEl) pctEl.textContent = conf + '%';
+    if (unresolvedEl) unresolvedEl.textContent = unresolved;
+    bar.style.display = 'flex';
+    if (isLocked && conf === 100) {
+      bar.style.background = 'rgba(34,197,94,.06)';
+      bar.style.borderColor = 'rgba(34,197,94,.2)';
+      if (iconEl) iconEl.textContent = '✅';
+      if (pctEl) pctEl.style.color = 'var(--green)';
+      if (unresolvedEl) unresolvedEl.style.color = 'var(--green)';
+      if (subEl) subEl.textContent = 'Fully reconciled and closed';
+      if (btnEl) btnEl.style.display = 'none';
+    } else if (unresolved > 0) {
+      bar.style.background = 'rgba(244,63,94,.06)';
+      bar.style.borderColor = 'rgba(244,63,94,.2)';
+      if (iconEl) iconEl.textContent = '🔴';
+      if (pctEl) pctEl.style.color = 'var(--amber)';
+      if (unresolvedEl) unresolvedEl.style.color = 'var(--red)';
+      if (subEl) subEl.textContent = `${unresolved} transaction${unresolved !== 1 ? 's' : ''} need attention`;
+      if (btnEl) { btnEl.style.display = ''; btnEl.textContent = 'Continue Reconciliation →'; }
+    } else if (conf > 0) {
+      bar.style.background = 'rgba(245,158,11,.06)';
+      bar.style.borderColor = 'rgba(245,158,11,.2)';
+      if (iconEl) iconEl.textContent = '📊';
+      if (pctEl) pctEl.style.color = 'var(--amber)';
+      if (unresolvedEl) unresolvedEl.style.color = 'var(--text-3)';
+      if (subEl) subEl.textContent = 'Reconciliation in progress';
+      if (btnEl) { btnEl.style.display = ''; btnEl.textContent = 'Continue Reconciliation →'; }
+    } else {
+      bar.style.background = 'rgba(245,158,11,.04)';
+      bar.style.borderColor = 'rgba(245,158,11,.15)';
+      if (iconEl) iconEl.textContent = '📊';
+      if (pctEl) pctEl.style.color = 'var(--text-3)';
+      if (unresolvedEl) unresolvedEl.style.color = 'var(--text-3)';
+      if (subEl) subEl.textContent = 'No reconciliation started for this period';
+      if (btnEl) { btnEl.style.display = ''; btnEl.textContent = 'Start Reconciliation →'; }
+    }
+  } catch(e) { console.warn('loadReconStatusBar:', e.message); }
+}
+
+function showReconBlockModal(unmatched, flagged, unclassified) {
+  const modal = document.getElementById('reconBlockModal');
+  const breakdown = document.getElementById('reconBlockBreakdown');
+  if (!modal || !breakdown) return;
+  const total = reconTransactions.filter(t => !t.ignored).length;
+  const resolved = total - unmatched - flagged - unclassified;
+  const items = [
+    { count: unmatched, label: 'Unmatched', desc: 'No invoice linked — match or classify', color: 'var(--red)', icon: '⚠️' },
+    { count: flagged, label: 'Needs Confirmation', desc: 'AI suggested a match — confirm or reject', color: 'var(--amber)', icon: '🔶' },
+    { count: unclassified, label: 'Unclassified', desc: 'Matched but missing a category', color: 'var(--amber)', icon: '🏷' }
+  ].filter(i => i.count > 0);
+  breakdown.innerHTML = items.map(i => `
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="font-size:16px">${i.icon}</span>
+      <div style="flex:1">
+        <span style="font-size:13px;font-weight:600;color:${i.color}">${i.count} ${i.label}</span>
+        <span style="font-size:11px;color:var(--text-3)"> — ${i.desc}</span>
+      </div>
+    </div>`).join('') +
+    `<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;font-size:11px;color:var(--text-3)">
+      <span>${resolved} of ${total} resolved</span>
+      <span>${total - resolved} remaining</span>
+    </div>`;
+  modal.style.display = 'flex';
 }
 
 function checkReconReminders() {
@@ -5440,10 +5585,10 @@ async function showWelcomePopup() {
 
   // Small delay so dashboard loads first
   await new Promise(r => setTimeout(r, 1200));
-  popup.style.display = 'flex';
 
   // Build context for the greeting
   const today = new Date();
+  const day = today.getDate();
   const name = userProfile?.owner_name || userProfile?.biz_name || 'there';
   const deadlines = getDeadlines(today, userProfile);
   const upcoming = deadlines.filter(d => {
@@ -5453,7 +5598,36 @@ async function showWelcomePopup() {
   const overdue = deadlines.filter(d => Math.ceil((d.date - today) / 86400000) < 0);
   const outstanding = invoices.filter(i => i.type === 'income' && getInvStatus(i) !== 'paid' && i.doc_type !== 'quote');
 
-  // Build greeting message locally — no AI call needed for welcome
+  // Fetch recon status for current + previous month
+  let reconStatus = null;
+  try {
+    const curPeriod = getCurrentPeriod();
+    const [curY, curM] = curPeriod.split('-').map(Number);
+    const prevDate = new Date(curY, curM - 2, 1);
+    const prevPeriod = `${prevDate.getFullYear()}-${String(prevDate.getMonth()+1).padStart(2,'0')}`;
+    const [curRes, prevRes] = await Promise.all([
+      sb.from('reconciliation_sessions').select('confidence,locked,mid_month_done,month_end_done').eq('user_id', currentUser.id).eq('period', curPeriod).maybeSingle(),
+      sb.from('reconciliation_sessions').select('confidence,locked,month_end_done').eq('user_id', currentUser.id).eq('period', prevPeriod).maybeSingle()
+    ]);
+    reconStatus = {
+      cur: curRes.data || null,
+      prev: prevRes.data || null,
+      curPeriod, prevPeriod
+    };
+  } catch(e) { /* non-blocking */ }
+
+  // Determine if recon issues need a popup
+  const curConf = reconStatus?.cur?.confidence || 0;
+  const curLocked = reconStatus?.cur?.locked || false;
+  const prevClosed = reconStatus?.prev?.month_end_done || reconStatus?.prev?.locked || false;
+  const hasReconIssue = !curLocked || !prevClosed;
+
+  // Only show popup if there's something to say
+  const hasAnything = overdue.length || upcoming.length || outstanding.length || hasReconIssue;
+  if (!hasAnything) return;
+
+  popup.style.display = 'flex';
+
   const fullDays = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const fullMonths = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const hour = today.getHours();
@@ -5478,8 +5652,29 @@ async function showWelcomePopup() {
     const totalOwing = outstanding.reduce((s,i) => s + Number(i.total || i.amount || 0), 0);
     msg += `<span style="color:var(--amber)">💰 ${outstanding.length} unpaid invoice${outstanding.length > 1 ? 's' : ''} totalling ${fmtR(totalOwing)}</span><br><br>`;
   }
-  if (!overdue.length && !upcoming.length && !outstanding.length) {
-    msg += `✅ Everything looks good — no urgent deadlines or outstanding invoices.<br><br>`;
+
+  // Reconciliation reminders
+  if (reconStatus) {
+    const curLabel = formatPeriodLabel(reconStatus.curPeriod);
+    const prevLabel = formatPeriodLabel(reconStatus.prevPeriod);
+    if (!prevClosed && reconStatus.prev !== null) {
+      msg += `<span style="color:var(--red)">⚠️ ${prevLabel} is not closed.</span> Your previous month still has unresolved transactions — close it before it affects your VAT or tax submissions.<br><br>`;
+    }
+    if (!curLocked) {
+      if (day >= 25) {
+        msg += `<span style="color:var(--amber)">📅 Month-end approaching.</span> ${curLabel} reconciliation is at <strong>${curConf}%</strong> — complete it before closing the month.<br><br>`;
+      } else if (day >= 14 && day <= 16) {
+        msg += `<span style="color:var(--amber)">📊 Mid-month checkpoint.</span> Now is a good time to reconcile ${curLabel} (currently ${curConf}%). Staying on top of it takes just a few minutes.<br><br>`;
+      } else if (curConf === 0) {
+        msg += `<span style="color:var(--text-3)">📌 Reconciliation for ${curLabel} hasn't started yet.</span> Upload a bank statement when you're ready.<br><br>`;
+      } else {
+        msg += `<span style="color:var(--amber)">📊 ${curLabel} reconciliation is ${curConf}% complete.</span> Keep going to close the month cleanly.<br><br>`;
+      }
+    }
+  }
+
+  if (!overdue.length && !outstanding.length && !hasReconIssue) {
+    msg += `✅ Everything looks good — no urgent deadlines or outstanding items.<br><br>`;
   }
   msg += `<span style="color:var(--text-3);font-size:12px">Need help? Use the <strong>Ask AI</strong> button below or <strong>💬 Help & Support</strong> in the sidebar.</span>`;
 
