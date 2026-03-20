@@ -1959,6 +1959,7 @@ let logoDataUrl = null;
 
 // ── HELPERS ──
 function fmtR(v) { return 'R ' + (parseFloat(v)||0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function fmtRShort(v) { const n=parseFloat(v)||0; if(n>=1000000) return 'R '+(n/1000000).toFixed(1)+'M'; if(n>=1000) return 'R '+(n/1000).toFixed(0)+'k'; return 'R '+n.toFixed(0); }
 // ── MONEY HELPERS ─────────────────────────────────────────────────────────────
 // All financial arithmetic must go through these to avoid floating-point drift
@@ -3632,12 +3633,12 @@ function renderBankResults(result, filename) {
       </div>
     </div>`;
   }
-  insightsBox.innerHTML = qualityWarning + (result.insights||[]).map(i=>`<div class="insight-box">${i}</div>`).join('');
+  insightsBox.innerHTML = qualityWarning + (result.insights||[]).map(i=>`<div class="insight-box">${escHtml(i)}</div>`).join('');
 
   const flags = result.flags||[];
   document.getElementById('flagsCard').style.display = flags.length ? 'block' : 'none';
-  document.getElementById('flagsBox').innerHTML = flags.map(f=>`<div style="display:flex;align-items:flex-start;gap:12px;background:var(--amber-dim);border:1px solid rgba(245,158,11,.2);border-radius:9px;padding:12px 14px"><div style="font-size:18px">🚩</div><div><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">${f.item||'Flagged item'}</div><div style="font-size:12px;color:var(--amber);line-height:1.5">${f.reason||'May trigger SARS audit'}</div></div></div>`).join('');
-  document.getElementById('txBody').innerHTML = (result.transactions||[]).map(t=>`<tr><td>${t.date||'—'}</td><td>${t.description||'—'}</td><td style="font-weight:600">${t.amount||'—'}</td><td><span class="tx-cat ${t.type==='income'?'tx-in':'tx-ex'}">${t.category||t.type}</span></td><td style="font-size:11px;color:${t.vatClaimable?'var(--green)':'var(--text-3)'}">${t.vatClaimable?'✓ Yes':'No'}</td></tr>`).join('');
+  document.getElementById('flagsBox').innerHTML = flags.map(f=>`<div style="display:flex;align-items:flex-start;gap:12px;background:var(--amber-dim);border:1px solid rgba(245,158,11,.2);border-radius:9px;padding:12px 14px"><div style="font-size:18px">🚩</div><div><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px">${escHtml(f.item||'Flagged item')}</div><div style="font-size:12px;color:var(--amber);line-height:1.5">${escHtml(f.reason||'May trigger SARS audit')}</div></div></div>`).join('');
+  document.getElementById('txBody').innerHTML = (result.transactions||[]).map(t=>`<tr><td>${escHtml(t.date||'—')}</td><td>${escHtml(t.description||'—')}</td><td style="font-weight:600">${escHtml(t.amount||'—')}</td><td><span class="tx-cat ${t.type==='income'?'tx-in':'tx-ex'}">${escHtml(t.category||t.type)}</span></td><td style="font-size:11px;color:${t.vatClaimable?'var(--green)':'var(--text-3)'}">${t.vatClaimable?'✓ Yes':'No'}</td></tr>`).join('');
   const btn = document.getElementById('importInvoicesBtn');
   if (btn) { btn.textContent=`📥 Import ${(result.transactions||[]).length} Transactions as Invoices`; btn.style.display='flex'; }
   document.getElementById('resultWrap').classList.add('show');
@@ -5474,7 +5475,7 @@ async function loadOpeningBalances() {
 
 async function saveOpeningBalances() {
   const data = {user_id:currentUser.id,year_start:document.getElementById('ob-yearstart')?.value,verify_date:document.getElementById('ob-verifydate')?.value,accountant_name:document.getElementById('ob-accountant')?.value,ytd_revenue:parseFloat(document.getElementById('ob-revenue')?.value)||0,ytd_expenses:parseFloat(document.getElementById('ob-expenses')?.value)||0,vat_owing:parseFloat(document.getElementById('ob-vat')?.value)||0};
-  const {error} = await sb.from('opening_balances').upsert(data);
+  const {error} = await sb.from('opening_balances').upsert(data, { onConflict: 'user_id' });
   if (error) { showToast('Error: '+error.message,'var(--red)'); return; }
   showToast('✅ Opening balances saved','var(--green)');
   const badge = document.getElementById('openingBadge');
@@ -5952,7 +5953,9 @@ function fmtPayroll(v) {
 }
 
 // Pure calculation — no DOM access. Called by calcPayslip() and confirmRunPayroll().
-function calcEmployeePayslip(emp) {
+// annualPayrollTotal: total of all employees' monthly gross × 12 (company-wide).
+// If not provided, estimates from this employee's own annual gross (single-employee preview).
+function calcEmployeePayslip(emp, annualPayrollTotal) {
   const gross    = parseFloat(emp.gross)   || 0;
   const travel   = parseFloat(emp.travel)  || 0;
   const housing  = parseFloat(emp.housing) || 0;
@@ -5964,10 +5967,13 @@ function calcEmployeePayslip(emp) {
 
   const totalGross    = gross + travel + housing + bonus;
   const taxableIncome = gross + housing + bonus + (travel * 0.8);
-  const paye    = calcPAYE(taxableIncome * 12); // monthly — note: calcPAYE(annualIncome) at line ~5155
-  const uifEmp  = uifApplicable ? Math.min(gross * 0.01, 177.12) : 0;
-  const uifEr   = uifApplicable ? Math.min(gross * 0.01, 177.12) : 0;
-  const sdl     = sdlApplicable ? gross * 0.01 : 0;
+  const paye    = calcPAYE(taxableIncome * 12);
+  const uifEmp  = uifApplicable ? Math.min(gross * UIF_RATE, UIF_MONTHLY_CAP) : 0;
+  const uifEr   = uifApplicable ? Math.min(gross * UIF_RATE, UIF_MONTHLY_CAP) : 0;
+  // SDL: only applies if company annual payroll > R500,000 (SARS threshold)
+  const estAnnualPayroll = annualPayrollTotal != null ? annualPayrollTotal : gross * 12;
+  const sdlApplies = sdlApplicable && estAnnualPayroll > SDL_ANNUAL_THRESHOLD;
+  const sdl     = sdlApplies ? rnd(gross * SDL_RATE) : 0;
   const totalDed = paye + uifEmp + medical + pension;
   const netPay  = totalGross - totalDed;
   return { gross, travel, housing, bonus, totalGross, taxableIncome, paye, uifEmp, uifEr, sdl, medical, pension, totalDed, netPay };
@@ -6146,7 +6152,8 @@ function renderEmployees() {
   const list = document.getElementById('employeeList');
   if (!list) return;
 
-  const calcs = employees.map(e => calcEmployeePayslip(e));
+  const annualPayroll = employees.reduce((s,e) => s + (parseFloat(e.gross)||0) * 12, 0);
+  const calcs = employees.map(e => calcEmployeePayslip(e, annualPayroll));
   const totalGross = calcs.reduce((s,c) => s + c.totalGross, 0);
   const totalPAYE  = calcs.reduce((s,c) => s + c.paye, 0);
   const totalUIF   = calcs.reduce((s,c) => s + c.uifEmp + c.uifEr, 0);
@@ -6194,7 +6201,8 @@ function renderEMP201() {
   // Prefer the latest payroll run for the current month if one exists
   const thisMonth = new Date().toISOString().slice(0,7);
   const latestRun = payrollRuns.find(r => r.period_month === thisMonth);
-  const empData   = latestRun ? (latestRun.employee_snapshot || []) : employees.map(e => ({ ...e, ...calcEmployeePayslip(e) }));
+  const emp201AnnPayroll = employees.reduce((s,e) => s + (parseFloat(e.gross)||0) * 12, 0);
+  const empData   = latestRun ? (latestRun.employee_snapshot || []) : employees.map(e => ({ ...e, ...calcEmployeePayslip(e, emp201AnnPayroll) }));
 
   if (!empData.length) {
     prep.innerHTML = '<div style="font-size:12px;color:var(--text-3);text-align:center;padding:20px">Add employees to generate your EMP201 prep.</div>';
@@ -6379,7 +6387,8 @@ function downloadEMP201() {
   // Use payroll run snapshot for current month if available, otherwise calculate live
   const thisMonth = new Date().toISOString().slice(0,7);
   const latestRun = payrollRuns.find(r => r.period_month === thisMonth);
-  const empData   = latestRun ? (latestRun.employee_snapshot || []) : employees.map(e => ({ ...e, ...calcEmployeePayslip(e) }));
+  const pdfAnnPayroll = employees.reduce((s,e) => s + (parseFloat(e.gross)||0) * 12, 0);
+  const empData   = latestRun ? (latestRun.employee_snapshot || []) : employees.map(e => ({ ...e, ...calcEmployeePayslip(e, pdfAnnPayroll) }));
 
   const totalGross = empData.reduce((s,e)=>s+(e.totalGross||0),0);
   const totalPAYE  = empData.reduce((s,e)=>s+(e.paye||0),0);
@@ -6468,7 +6477,8 @@ function renderPayrollRunsSection() {
 function openRunPayrollModal() {
   if (!canUse('payroll')) { showUpgradePrompt('full'); return; }
   if (!employees.length) { showToast('Add at least one employee first', 'var(--amber)'); return; }
-  const snapshots = employees.map(e => ({ ...e, ...calcEmployeePayslip(e) }));
+  const annPayroll = employees.reduce((s,e) => s + (parseFloat(e.gross)||0) * 12, 0);
+  const snapshots = employees.map(e => ({ ...e, ...calcEmployeePayslip(e, annPayroll) }));
   const totalNet  = snapshots.reduce((s,e) => s + e.netPay, 0);
   const totalSARS = snapshots.reduce((s,e) => s + e.paye + e.uifEmp + e.uifEr + e.sdl, 0);
   const thisMonth = new Date().toISOString().slice(0,7);
@@ -6503,7 +6513,8 @@ async function confirmRunPayroll() {
     const paydate     = document.getElementById('run-paydate').value || new Date().toISOString().split('T')[0];
     const periodMonth = paydate.slice(0, 7);
     const periodLabel = new Date(paydate + 'T12:00:00').toLocaleDateString('en-ZA', { month: 'long', year: 'numeric' });
-    const snapshot    = employees.map(e => ({ ...e, ...calcEmployeePayslip(e) }));
+    const annPayrollTotal = employees.reduce((s,e) => s + (parseFloat(e.gross)||0) * 12, 0);
+    const snapshot    = employees.map(e => ({ ...e, ...calcEmployeePayslip(e, annPayrollTotal) }));
 
     const totalGross  = snapshot.reduce((s,e) => s + e.totalGross, 0);
     const totalNet    = snapshot.reduce((s,e) => s + e.netPay, 0);

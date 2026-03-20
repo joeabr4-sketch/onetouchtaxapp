@@ -182,14 +182,28 @@ CREATE POLICY "Users manage own doc history" ON doc_history
 CREATE TABLE IF NOT EXISTS opening_balances (
   id                    uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id               uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL UNIQUE,
+  -- Balance sheet (legacy fields kept for compatibility)
   cash_balance          numeric DEFAULT 0,
   accounts_receivable   numeric DEFAULT 0,
   accounts_payable      numeric DEFAULT 0,
+  -- App fields (used by saveOpeningBalances)
+  year_start            text,
+  verify_date           date,
+  accountant_name       text,
+  ytd_revenue           numeric DEFAULT 0,
+  ytd_expenses          numeric DEFAULT 0,
   vat_owing             numeric DEFAULT 0,
   as_at_date            date,
   notes                 text,
   created_at            timestamptz DEFAULT now()
 );
+
+-- Add columns if table already exists (safe to re-run)
+ALTER TABLE opening_balances ADD COLUMN IF NOT EXISTS year_start        text;
+ALTER TABLE opening_balances ADD COLUMN IF NOT EXISTS verify_date       date;
+ALTER TABLE opening_balances ADD COLUMN IF NOT EXISTS accountant_name   text;
+ALTER TABLE opening_balances ADD COLUMN IF NOT EXISTS ytd_revenue       numeric DEFAULT 0;
+ALTER TABLE opening_balances ADD COLUMN IF NOT EXISTS ytd_expenses      numeric DEFAULT 0;
 
 ALTER TABLE opening_balances ENABLE ROW LEVEL SECURITY;
 
