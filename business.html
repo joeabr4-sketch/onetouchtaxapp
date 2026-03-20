@@ -579,19 +579,26 @@ h1,h2,h3,.logo-text,.stat-value{font-family:'Syne',sans-serif}
 /* ── ONBOARDING WIZARD ── */
 #obWizard{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:900;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 #obWizard.ob-hidden{display:none}
-.ob-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:36px 40px;max-width:480px;width:90%;text-align:center;position:relative}
-.ob-icon{font-size:48px;margin-bottom:16px}
-.ob-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--text);margin-bottom:10px}
-.ob-desc{font-size:14px;color:var(--text-2);line-height:1.7;margin-bottom:24px}
-.ob-dots{display:flex;justify-content:center;gap:7px;margin-bottom:24px}
-.ob-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:background .2s}
-.ob-dot.active{background:var(--blue)}
+#obWizard.ob-min{inset:auto;bottom:24px;right:24px;background:none;backdrop-filter:none;display:flex;align-items:flex-end;justify-content:flex-end}
+.ob-wiz-full{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px 28px;max-width:480px;width:90%;position:relative}
+.ob-wiz-pill{background:var(--surface);border:1px solid rgba(79,142,247,.4);border-radius:40px;padding:10px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 28px rgba(0,0,0,.5);max-width:340px}
+.ob-pill-text{font-size:12px;color:var(--text-2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ob-pill-text strong{color:var(--text)}
+.ob-pill-expand{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--text-3);cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0}
+.ob-pill-next{background:var(--blue);color:#0f1520;border:none;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;flex-shrink:0}
+.ob-dots{display:flex;justify-content:center;gap:7px;margin-bottom:20px}
+.ob-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .25s}
+.ob-dot.on{background:var(--blue);width:22px;border-radius:4px}
 .ob-dot.done{background:var(--green)}
-.ob-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.ob-primary{background:var(--blue);color:#0f1520;border:none;padding:11px 28px;border-radius:10px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer}
-.ob-secondary{background:transparent;border:1px solid var(--border);color:var(--text-3);padding:11px 20px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer}
-.ob-skip{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--text-3);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif}
-.ob-step-label{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.ob-primary{background:var(--blue);color:#0f1520;border:none;padding:11px 24px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .15s}
+.ob-primary:hover{background:#3a7ae0}
+.ob-step-label{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;text-align:center}
+.ob-why{background:rgba(79,142,247,.06);border:1px solid rgba(79,142,247,.12);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12.5px;color:var(--text-2);line-height:1.65}
+.ob-why strong{color:var(--blue);display:block;margin-bottom:3px;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.ob-act-btn{display:flex;flex-direction:column;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;cursor:pointer;text-align:left;transition:all .15s;width:100%}
+.ob-act-btn:hover{border-color:var(--blue);background:rgba(79,142,247,.06)}
+.ob-act-label{font-size:13px;font-weight:600;color:var(--text)}
+.ob-act-desc{font-size:11px;color:var(--text-3)}
 
 /* ── ONBOARDING CHECKLIST (dashboard) ── */
 #obChecklist{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:16px}
@@ -7753,31 +7760,55 @@ function setLanguage(lang) {
 const OB_STEPS = [
   {
     icon: '🧾',
-    title: 'Add your first invoice',
-    desc: 'Log every sale as an income invoice and every business cost as an expense. This is the foundation of your tax records.',
-    action: 'Add Invoice →',
-    go: () => { skipObWizard(false); showSection('invoices', document.querySelector('.s-btn[onclick*=invoices]')); setTimeout(openInvForm, 300); }
+    title: 'Step 1 — Log your invoices & expenses',
+    why: 'Every rand you earn or spend needs to be recorded here. Your invoices feed your VAT return, P&L and bank reconciliation automatically. No records = no accurate tax picture and no audit defence.',
+    actions: [
+      {
+        label: '📥 Import from CSV',
+        desc: 'Already have records in a spreadsheet or another app? Import them all at once.',
+        fn: () => { _goObSection('invoices'); setTimeout(openImportModal, 300); }
+      },
+      {
+        label: '✏️ Capture invoice manually',
+        desc: 'Add an income invoice or business expense one at a time.',
+        fn: () => { _goObSection('invoices'); setTimeout(openInvForm, 300); }
+      }
+    ],
+    nextLabel: "I've added my invoices →"
   },
   {
     icon: '🏦',
-    title: 'Upload a bank statement',
-    desc: 'Download your bank statement as a CSV and upload it here. OneTouch reads the transactions and prepares them for matching.',
-    action: 'Go to Bank Analysis →',
-    go: () => { skipObWizard(false); showSection('bankanalysis', document.querySelector('.s-btn[onclick*=bankanalysis]')); }
+    title: 'Step 2 — Upload your bank statement',
+    why: "Your bank statement is the source of truth. Uploading it lets OneTouch automatically match payments to invoices and flag anything that doesn't add up — catching errors before SARS does.",
+    actions: [
+      {
+        label: '🏦 Go to Bank Analysis',
+        desc: 'Download a CSV from your internet banking, then drag it into the upload zone.',
+        fn: () => _goObSection('bankanalysis')
+      }
+    ],
+    nextLabel: "I've uploaded my statement →"
   },
   {
     icon: '🔗',
-    title: 'Reconcile your transactions',
-    desc: 'Match bank transactions to invoices. The higher your match rate, the stronger your audit trail — and the easier tax season becomes.',
-    action: 'Start Reconciling →',
-    go: () => { skipObWizard(false); showSection('reconcile', document.querySelector('.s-btn[onclick*=reconcile]')); }
+    title: 'Step 3 — Reconcile your transactions',
+    why: 'Reconciliation matches what is in your bank to what is in your books. Each matched transaction builds your audit trail. Aim for 80%+ then close the month — this locks your records and generates your bookkeeper pack.',
+    actions: [
+      {
+        label: '🔗 Open Reconciliation',
+        desc: 'Match transactions to invoices. Unmatched items can be classified or ignored with a reason.',
+        fn: () => _goObSection('reconcile')
+      }
+    ],
+    nextLabel: "I've started reconciling →"
   },
   {
-    icon: '📊',
-    title: "You're all set!",
-    desc: "Your dashboard tracks compliance, upcoming deadlines, and financial health in real time. Turn on Guidance Mode anytime for tips.",
-    action: 'Go to Dashboard →',
-    go: () => { skipObWizard(true); showSection('dashboard', document.querySelector('.s-btn[onclick*=dashboard]')); }
+    icon: '✅',
+    title: "You're set up — here's the monthly routine",
+    why: 'Every month repeat this cycle: log invoices → upload bank statement → reconcile → close the month. Your compliance score, VAT liability, payroll and bookkeeper pack all update automatically. You never need to start from scratch.',
+    actions: [],
+    nextLabel: 'Go to my dashboard →',
+    last: true
   }
 ];
 
@@ -7793,18 +7824,13 @@ function setObState(updates) {
 }
 
 function initOnboarding() {
-  // Restore help mode
   const s = getObState();
   if (s.helpMode) document.body.classList.add('help-mode');
   const btn = document.getElementById('helpModeToggle');
   if (btn) btn.classList.toggle('active', !!s.helpMode);
-
-  // Show wizard only on first ever login (no wizard seen yet)
   if (!s.wizardDone && !s.wizardSkipped) {
     setTimeout(() => showObWizard(0), 800);
   }
-
-  // Always render checklist
   renderObChecklist();
 }
 
@@ -7812,39 +7838,77 @@ function showObWizard(step) {
   _obStep = step;
   const el = document.getElementById('obWizard');
   if (!el) return;
-  el.classList.remove('ob-hidden');
+  el.classList.remove('ob-hidden', 'ob-min');
+  document.getElementById('obWizFull').style.display = 'block';
+  document.getElementById('obWizPill').style.display = 'none';
 
   const s = OB_STEPS[step];
   document.getElementById('obWizIcon').textContent = s.icon;
   document.getElementById('obWizTitle').textContent = s.title;
-  document.getElementById('obWizDesc').textContent = s.desc;
-  document.getElementById('obWizAction').textContent = s.action;
-  document.getElementById('obWizStepLabel').textContent = 'Step ' + (step + 1) + ' of ' + OB_STEPS.length;
+  document.getElementById('obWizWhy').textContent = s.why;
+  document.getElementById('obWizNextBtn').textContent = s.nextLabel || 'Next →';
+  document.getElementById('obWizStepLabel').textContent = s.last ? 'Setup Complete 🎉' : 'Step ' + (step + 1) + ' of ' + (OB_STEPS.length - 1);
 
-  // Update dots
+  // Render action buttons
+  const actionsEl = document.getElementById('obWizActions');
+  if (actionsEl) {
+    actionsEl.innerHTML = s.actions.map((a, i) =>
+      `<button class="ob-act-btn" onclick="_obAct(${i})">
+        <div class="ob-act-label">${a.label}</div>
+        ${a.desc ? `<div class="ob-act-desc">${a.desc}</div>` : ''}
+      </button>`
+    ).join('');
+  }
+
+  // Update dots (only count non-last steps)
   for (let i = 0; i < OB_STEPS.length; i++) {
     const d = document.getElementById('owd' + i);
-    if (d) d.className = 'ob-dot' + (i === step ? ' on' : '');
+    if (d) d.className = 'ob-dot' + (i === step ? ' on' : i < step ? ' done' : '');
   }
 }
 
+function _obAct(i) {
+  const s = OB_STEPS[_obStep];
+  if (s.actions[i]) s.actions[i].fn();
+}
+
+// Navigate to section and minimise wizard to floating pill
+function _goObSection(name) {
+  showSection(name, document.querySelector('.s-btn[onclick*=' + name + ']'));
+  const el = document.getElementById('obWizard');
+  if (!el) return;
+  el.classList.add('ob-min');
+  document.getElementById('obWizFull').style.display = 'none';
+  const pill = document.getElementById('obWizPill');
+  pill.style.display = 'flex';
+  const s = OB_STEPS[_obStep];
+  document.getElementById('obPillIcon').textContent = s.icon;
+  document.getElementById('obPillTitle').textContent = s.title.replace(/^Step \d+ — /, '');
+  document.getElementById('obPillSub').textContent = 'When done, tap the button →';
+  document.getElementById('obPillNext').textContent = s.nextLabel || 'Done →';
+}
+
+function expandObWizard() {
+  showObWizard(_obStep);
+}
+
 function advanceObWizard() {
-  const step = OB_STEPS[_obStep];
-  if (step && step.go) {
-    step.go(); // go() calls skipObWizard itself for last step, navigates, etc.
-  } else {
+  if (_obStep >= OB_STEPS.length - 1) {
     skipObWizard(true);
+    showSection('dashboard', document.querySelector('.s-btn[onclick*=dashboard]'));
+  } else {
+    showObWizard(_obStep + 1);
   }
+}
+
+function skipObStep() {
+  advanceObWizard();
 }
 
 function skipObWizard(completed) {
   const el = document.getElementById('obWizard');
   if (el) el.classList.add('ob-hidden');
-  if (completed) {
-    setObState({ wizardDone: true });
-  } else {
-    setObState({ wizardSkipped: true });
-  }
+  setObState(completed ? { wizardDone: true } : { wizardSkipped: true });
 }
 
 // ── ONBOARDING CHECKLIST ──────────────────────────────────────────
@@ -7941,22 +8005,34 @@ document.addEventListener('click', function(e) {
 
 <!-- GUIDED TOUR WIZARD -->
 <div id="obWizard" class="ob-hidden" role="dialog" aria-modal="true">
-  <div class="ob-wiz-card" style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px 32px;max-width:460px;width:90%;position:relative">
+
+  <!-- FULL VIEW -->
+  <div class="ob-wiz-full" id="obWizFull">
     <div class="ob-step-label" id="obWizStepLabel">Step 1 of 4</div>
-    <div class="ob-dots" id="obWizDots" style="display:flex;justify-content:center;gap:7px;margin-bottom:22px">
+    <div class="ob-dots">
       <div class="ob-dot on" id="owd0"></div>
       <div class="ob-dot" id="owd1"></div>
       <div class="ob-dot" id="owd2"></div>
       <div class="ob-dot" id="owd3"></div>
     </div>
-    <div id="obWizIcon" style="font-size:44px;text-align:center;margin-bottom:14px">📋</div>
-    <div id="obWizTitle" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;text-align:center;margin-bottom:10px;color:var(--text)"></div>
-    <div id="obWizDesc" style="font-size:13.5px;color:var(--text-2);text-align:center;line-height:1.65;margin-bottom:26px;max-width:340px;margin-left:auto;margin-right:auto"></div>
-    <div style="display:flex;gap:10px;justify-content:center">
-      <button onclick="skipObWizard()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text-3);padding:10px 20px;border-radius:9px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif">Skip Tour</button>
-      <button id="obWizAction" class="ob-primary" onclick="advanceObWizard()">Next →</button>
+    <div id="obWizIcon" style="font-size:42px;text-align:center;margin-bottom:12px"></div>
+    <div id="obWizTitle" style="font-size:19px;font-weight:700;text-align:center;margin-bottom:14px;color:var(--text);font-family:'Helvetica Neue',Helvetica,Arial,sans-serif"></div>
+    <div class="ob-why"><strong>Why this matters</strong><span id="obWizWhy"></span></div>
+    <div id="obWizActions" style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <button onclick="skipObStep()" style="background:none;border:none;color:var(--text-3);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;padding:4px">Skip this step</button>
+      <button id="obWizNextBtn" class="ob-primary" onclick="advanceObWizard()">Done, next step →</button>
     </div>
   </div>
+
+  <!-- PILL VIEW (minimized while user does the action) -->
+  <div class="ob-wiz-pill" id="obWizPill" style="display:none">
+    <div style="font-size:18px" id="obPillIcon"></div>
+    <div class="ob-pill-text"><strong id="obPillTitle"></strong><br><span id="obPillSub"></span></div>
+    <button class="ob-pill-expand" onclick="expandObWizard()">↑ Guide</button>
+    <button class="ob-pill-next" onclick="advanceObWizard()" id="obPillNext">Done →</button>
+  </div>
+
 </div>
 </body>
 </html>
