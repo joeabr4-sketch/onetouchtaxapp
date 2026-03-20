@@ -809,7 +809,7 @@ h1,h2,h3,.logo-text,.stat-value{font-family:'Syne',sans-serif}
                 <div class="dp-field"><label>PAYE Reference</label><input id="e-ref" placeholder="7XXXXXXXXX" /></div>
                 <div class="dp-field"><label>Month</label><input id="e-month" placeholder="February 2025" /></div>
                 <div class="dp-field"><label>No. of Employees</label><input id="e-emp" type="number" placeholder="3" /></div>
-                <div class="dp-field"><label>Gross Salaries R</label><input id="e-gross" type="number" onchange="calcPAYE()" /></div>
+                <div class="dp-field"><label>Gross Salaries R</label><input id="e-gross" type="number" onchange="autofillEMP201()" /></div>
                 <div class="dp-field"><label>PAYE Deducted R</label><input id="e-paye" type="number" /></div>
                 <div class="dp-field"><label>UIF R</label><input id="e-uif" type="number" /></div>
                 <div class="dp-field"><label>SDL R</label><input id="e-sdl" type="number" /></div>
@@ -2449,7 +2449,7 @@ function updateInvStats() {
   const income = invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0);
   const exp = invoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0);
   const vatOut = invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.vat||0),0);
-  const outstanding = invoices.filter(i=>i.type==='income'&&(i.status||'unpaid')==='unpaid').reduce((s,i)=>s+Number(i.total||i.amount||0),0);
+  const outstanding = invoices.filter(i=>i.type==='income'&&(i.status||'unpaid')==='unpaid').reduce((s,i)=>s+Number(i.amount||0),0);
   document.getElementById('inv-total-income').textContent = fmtR(income);
   document.getElementById('inv-total-exp').textContent = fmtR(exp);
   document.getElementById('inv-vat-out').textContent = fmtR(vatOut);
@@ -2604,6 +2604,20 @@ async function saveInvoice(exportPDF) {
   if (!client) {
     showToast('Please enter a client name', 'var(--amber)'); return;
   }
+  // Validate line items — no negative amounts
+  for (const li of lineItems) {
+    if ((li.price || 0) < 0) {
+      showToast('Line item amounts cannot be negative', 'var(--amber)'); return;
+    }
+  }
+  if (subtotal <= 0) {
+    showToast('Invoice total must be greater than zero', 'var(--amber)'); return;
+  }
+  // Validate date
+  const rawDate = document.getElementById('inv-date').value;
+  if (rawDate && isNaN(Date.parse(rawDate))) {
+    showToast('Invalid invoice date', 'var(--amber)'); return;
+  }
   const invData = {
     user_id: currentUser.id,
     invoice_number: document.getElementById('inv-number').value.trim() || genInvNumber(),
@@ -2636,6 +2650,13 @@ async function saveInvoice(exportPDF) {
     if (lockedSession) {
       showToast(`⛔ ${formatPeriodLabel(invPeriod)} is locked — unlock it in Financial History first`, 'var(--red)');
       return;
+    }
+  }
+  // Warn on duplicate invoice number (income only, not editing the same record)
+  if (!editingInvId && invData.type === 'income' && invData.invoice_number) {
+    const dup = invoices.find(i => i.type === 'income' && i.invoice_number === invData.invoice_number);
+    if (dup) {
+      showToast(`⚠️ Invoice number ${invData.invoice_number} already exists — saved anyway`, 'var(--amber)');
     }
   }
   // Clear quote flag
@@ -3068,22 +3089,36 @@ function renderComplianceScore() {
   const today = new Date();
   const deadlines = getDeadlines(today, userProfile);
   const overdue = deadlines.filter(d => Math.ceil((d.date-today)/86400000) < 0).length;
-  const total = deadlines.filter(d => d.date <= new Date(today.getFullYear(),today.getMonth()+3,0)).length || 1;
-  const score = Math.max(0, Math.min(100, Math.round((1-(overdue/total))*100)));
+  const totalDeadlines = deadlines.filter(d => d.date <= new Date(today.getFullYear(),today.getMonth()+3,0)).length;
   const el = document.getElementById('complianceScore');
   const mPct = document.getElementById('meterPct');
-  if (el) el.textContent = score + '%';
-  if (mPct) mPct.textContent = score + '%';
   const circ = 2 * Math.PI * 54;
   const fill = document.getElementById('meterFill');
+  const badge = document.getElementById('complianceBadge');
+  const note = document.getElementById('complianceNote');
+  const sub = document.getElementById('complianceSub');
+  const welcomeSub = document.getElementById('welcomeSub');
+
+  // No deadlines configured — new/incomplete profile
+  if (totalDeadlines === 0) {
+    if (el) el.textContent = '—';
+    if (mPct) mPct.textContent = '—';
+    if (fill) { fill.style.strokeDasharray = circ; fill.style.strokeDashoffset = circ; fill.style.stroke = 'var(--border)'; }
+    if (badge) { badge.className='badge'; badge.textContent='Not Configured'; }
+    if (note) note.textContent = 'Complete your profile to track compliance.';
+    if (sub) sub.textContent = '— No submissions configured';
+    if (welcomeSub) welcomeSub.textContent = 'Complete your business profile to enable compliance tracking.';
+    return;
+  }
+
+  const score = Math.max(0, Math.min(100, Math.round((1-(overdue/totalDeadlines))*100)));
+  if (el) el.textContent = score + '%';
+  if (mPct) mPct.textContent = score + '%';
   if (fill) {
     fill.style.strokeDasharray = circ;
     fill.style.strokeDashoffset = circ - (score/100)*circ;
     fill.style.stroke = score>=80 ? 'var(--green)' : score>=60 ? 'var(--amber)' : 'var(--red)';
   }
-  const badge = document.getElementById('complianceBadge');
-  const note = document.getElementById('complianceNote');
-  const sub = document.getElementById('complianceSub');
   if (score >= 80) {
     if (badge) { badge.className='badge b-green'; badge.textContent='Good Standing'; }
     if (note) note.textContent = 'Strong compliance — keep it up!';
@@ -3097,7 +3132,6 @@ function renderComplianceScore() {
     if (note) note.textContent = 'Multiple overdue submissions. SARS penalties possible.';
     if (sub) sub.textContent = '⚠ At risk';
   }
-  const welcomeSub = document.getElementById('welcomeSub');
   if (welcomeSub) welcomeSub.textContent = score>=80 ? 'Your compliance is in good shape — keep it up!' : 'You have '+overdue+' overdue submission(s) — check deadlines.';
 }
 
@@ -3216,22 +3250,24 @@ function genVAT201() {
 
 // Auto-calculate UIF and SDL from gross salaries
 // ── SARS 2025/26 CONSTANTS ─────────────────────────────────────────────────
-const UIF_MONTHLY_CAP   = 1476;    // R17,712/year ÷ 12 — update when SARS revises
+const UIF_MONTHLY_CAP   = 177.12;  // 1% × R17,712 monthly earnings ceiling (SARS 2025/26)
 const UIF_RATE          = 0.01;    // Employee 1% + Employer 1% (each)
 const SDL_RATE          = 0.01;    // 1% of leviable amount
 const SDL_ANNUAL_THRESHOLD = 500000; // SDL only applies if annual payroll > R500,000
 const CORP_TAX_RATE     = 0.27;    // Corporate income tax 2025/26
 
-function calcPAYE() {
-  const gross = parseFloat(document.getElementById('e-gross')?.value) || 0;
-  const uifEl = document.getElementById('e-uif');
-  const sdlEl = document.getElementById('e-sdl');
-  // UIF: 1% employee + 1% employer, each capped at UIF_MONTHLY_CAP
-  if (uifEl && !uifEl.value) uifEl.value = Math.min(gross * UIF_RATE, UIF_MONTHLY_CAP).toFixed(2);
-  // SDL: 1% — only if annual payroll exceeds R500,000 (assume monthly * 12 for estimate)
+// EMP201 form auto-fill helper — named differently from payroll calcPAYE(annualIncome)
+function autofillEMP201() {
+  const gross    = parseFloat(document.getElementById('e-gross')?.value) || 0;
+  const empCount = parseInt(document.getElementById('e-emp')?.value) || 1;
+  const uifEl    = document.getElementById('e-uif');
+  const sdlEl    = document.getElementById('e-sdl');
+  // UIF per employee: 1% capped at UIF_MONTHLY_CAP; employer + employee both here
+  if (uifEl && !uifEl.value) uifEl.value = Math.min(gross * UIF_RATE, empCount * UIF_MONTHLY_CAP).toFixed(2);
+  // SDL: only if estimated annual payroll exceeds threshold
   if (sdlEl && !sdlEl.value) {
-    const annualEstimate = gross * 12;
-    sdlEl.value = annualEstimate > SDL_ANNUAL_THRESHOLD ? (gross * SDL_RATE).toFixed(2) : '0.00';
+    const annualEst = gross * 12;
+    sdlEl.value = annualEst > SDL_ANNUAL_THRESHOLD ? rnd(gross * SDL_RATE).toFixed(2) : '0.00';
   }
 }
 
@@ -3248,16 +3284,17 @@ function genEMP201() {
   y = makePDFRow(doc,'Number of Employees', document.getElementById('e-emp')?.value||'—', y, false);
   y+=8; doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(15,21,32);
   doc.text('Payroll Figures', M, y); y+=10;
-  const gross = parseFloat(document.getElementById('e-gross')?.value)||0;
-  const paye = parseFloat(document.getElementById('e-paye')?.value)||0;
-  const uif = Math.min(parseFloat(document.getElementById('e-uif')?.value)||rnd(gross*UIF_RATE), UIF_MONTHLY_CAP);
+  const gross    = parseFloat(document.getElementById('e-gross')?.value)||0;
+  const empCount = parseInt(document.getElementById('e-emp')?.value)||1;
+  const paye     = parseFloat(document.getElementById('e-paye')?.value)||0;
+  const uif      = Math.min(parseFloat(document.getElementById('e-uif')?.value)||rnd(gross*UIF_RATE), empCount * UIF_MONTHLY_CAP);
   const annualEst = gross * 12;
   const sdlApplies = annualEst > SDL_ANNUAL_THRESHOLD;
   const sdl = sdlApplies ? (parseFloat(document.getElementById('e-sdl')?.value)||rnd(gross*SDL_RATE)) : 0;
   y = makePDFRow(doc,'Gross Salaries', 'R '+gross.toLocaleString('en-ZA',{minimumFractionDigits:2}), y, true);
   y = makePDFRow(doc,'PAYE Deducted', 'R '+paye.toLocaleString('en-ZA',{minimumFractionDigits:2}), y, false);
-  y = makePDFRow(doc,'UIF — Employee (capped R'+UIF_MONTHLY_CAP+'/mo)', 'R '+uif.toLocaleString('en-ZA',{minimumFractionDigits:2}), y, true);
-  y = makePDFRow(doc,'UIF — Employer (capped R'+UIF_MONTHLY_CAP+'/mo)', 'R '+uif.toLocaleString('en-ZA',{minimumFractionDigits:2}), y, false);
+  y = makePDFRow(doc,'UIF — Employee (R'+UIF_MONTHLY_CAP+'/emp/mo cap)', 'R '+uif.toLocaleString('en-ZA',{minimumFractionDigits:2}), y, true);
+  y = makePDFRow(doc,'UIF — Employer (R'+UIF_MONTHLY_CAP+'/emp/mo cap)', 'R '+uif.toLocaleString('en-ZA',{minimumFractionDigits:2}), y, false);
   y = makePDFRow(doc,'SDL (1% — '+(sdlApplies?'applicable':'exempt, payroll < R500k/yr')+')', 'R '+sdl.toLocaleString('en-ZA',{minimumFractionDigits:2}), y, true);
   y+=10;
   const total = paye + uif + uif + sdl; // PAYE + employee UIF + employer UIF + SDL
@@ -4093,6 +4130,52 @@ async function runReconciliationEngine() {
       }
     }
 
+    // ── DEBIT PASS: match debits against expense invoices ──
+    const PAYROLL_KEYWORDS = ['salary','salaries','payroll','wages','wage','paye','uif','emp201','remuneration'];
+    const debits = reconTransactions.filter(t => t.type === 'debit' && !t.ignored && t.match_status === 'unmatched');
+    const expInvoices = invoices.filter(i => i.type === 'expense' && i.doc_type !== 'quote');
+    const usedExpIds = new Set(reconTransactions.filter(t => t.match_status === 'matched').map(t => t.matched_invoice_id).filter(Boolean));
+    let debitCount = 0;
+
+    for (const tx of debits) {
+      const txAmt = Math.abs(parseFloat(tx.amount));
+      const txRef = (tx.reference || tx.description || '').toLowerCase();
+      const txDate = tx.date ? new Date(tx.date) : null;
+      const availableExp = expInvoices.filter(i => !usedExpIds.has(String(i.id)));
+
+      // Exact amount match against expense invoice
+      let expMatch = availableExp.find(inv => {
+        const invAmt = parseFloat(inv.total || inv.amount || 0);
+        return Math.abs(txAmt - invAmt) < 0.01 &&
+          (!txDate || !inv.date || Math.abs((txDate - new Date(inv.date)) / 86400000) <= 7);
+      });
+      let debitMatchType = 'exact_exp';
+
+      // Payroll-keyword match: amount within 2% + payroll keyword in tx description or expense category
+      if (!expMatch) {
+        const isPayrollTx = PAYROLL_KEYWORDS.some(kw => txRef.includes(kw));
+        if (isPayrollTx) {
+          expMatch = availableExp.find(inv => {
+            const invAmt = parseFloat(inv.total || inv.amount || 0);
+            const pct = Math.abs(txAmt - invAmt) / Math.max(invAmt, 1);
+            if (pct > 0.02) return false;
+            const cat = (inv.category || '').toLowerCase();
+            const isPayrollInv = PAYROLL_KEYWORDS.some(kw => cat.includes(kw) || (inv.description||'').toLowerCase().includes(kw));
+            return isPayrollInv && (!txDate || !inv.date || Math.abs((txDate - new Date(inv.date)) / 86400000) <= 7);
+          });
+          debitMatchType = 'payroll_keyword';
+        }
+      }
+
+      if (expMatch) {
+        await sb.from('bank_transactions').update({ match_status: 'matched', matched_invoice_id: expMatch.id, match_type: debitMatchType }).eq('id', tx.id);
+        tx.match_status = 'matched'; tx.matched_invoice_id = expMatch.id; tx.match_type = debitMatchType;
+        usedExpIds.add(String(expMatch.id));
+        addReconAudit('auto', `Auto-matched debit (${debitMatchType}): ${tx.description} ↔ ${expMatch.invoice_number||'EXP'} — ${fmtR(txAmt)}`);
+        debitCount++;
+      }
+    }
+
     await loadInvoices();
     updateReconUI();
     renderTxTable();
@@ -4101,7 +4184,7 @@ async function runReconciliationEngine() {
     detectConflicts();
     await saveConfidence();
     if (btn) { btn.disabled = false; btn.textContent = '⚡ Auto-Match'; }
-    showToast(`✅ ${exactCount} matched · 🟡 ${fuzzyCount} suggested`, 'var(--green)');
+    showToast(`✅ ${exactCount + debitCount} matched · 🟡 ${fuzzyCount} suggested`, 'var(--green)');
   } catch(e) {
     if (btn) { btn.disabled = false; btn.textContent = '⚡ Auto-Match'; }
     showToast('Auto-match error: ' + e.message, 'var(--red)');
@@ -4654,8 +4737,8 @@ async function downloadFullPack() {
     const reconConf = reconSession?.confidence || 0;
     const reconStatus = reconConf === 100 ? 'Fully Reconciled' : reconConf > 0 ? `Partially Reconciled (${reconConf}%)` : 'Not Reconciled';
 
-    const income    = invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.total||i.amount||0),0);
-    const exp       = invoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.total||i.amount||0),0);
+    const income    = invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0);
+    const exp       = invoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0);
     const profit    = income - exp;
     const vatOut    = invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.vat||0),0);
     const vatIn     = invoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.vat||0),0);
@@ -4670,7 +4753,7 @@ async function downloadFullPack() {
     const incomeInvs = invoices.filter(i=>i.type==='income');
     const categories = [...new Set(incomeInvs.map(i=>i.category||'Sales'))];
     categories.forEach(cat => {
-      const catTotal = incomeInvs.filter(i=>(i.category||'Sales')===cat).reduce((s,i)=>s+Number(i.total||i.amount||0),0);
+      const catTotal = incomeInvs.filter(i=>(i.category||'Sales')===cat).reduce((s,i)=>s+Number(i.amount||0),0);
       y = makePDFRow(plDoc, `  ${cat}`, fmtR(catTotal), y, false);
       if (y > 255) { plDoc.addPage(); y = 20; }
     });
@@ -4679,7 +4762,7 @@ async function downloadFullPack() {
     const expInvs = invoices.filter(i=>i.type==='expense');
     const expCats = [...new Set(expInvs.map(i=>i.category||'Other Expense'))];
     expCats.forEach(cat => {
-      const catTotal = expInvs.filter(i=>(i.category||'Other Expense')===cat).reduce((s,i)=>s+Number(i.total||i.amount||0),0);
+      const catTotal = expInvs.filter(i=>(i.category||'Other Expense')===cat).reduce((s,i)=>s+Number(i.amount||0),0);
       y = makePDFRow(plDoc, `  ${cat}`, fmtR(catTotal), y, false);
       if (y > 255) { plDoc.addPage(); y = 20; }
     });
@@ -4736,7 +4819,7 @@ async function downloadFullPack() {
     y += 4;
     y = makePDFRow(taxDoc, 'Net VAT Payable', fmtR(vatNet), y, false);
     if (userProfile?.has_paye) {
-      const payrollTotal = invoices.filter(i=>i.category==='Salaries & Wages').reduce((s,i)=>s+Number(i.total||i.amount||0),0);
+      const payrollTotal = invoices.filter(i=>i.category==='Salaries & Wages').reduce((s,i)=>s+Number(i.amount||0),0);
       y = makePDFRow(taxDoc, 'Payroll / PAYE Base', fmtR(payrollTotal), y, false);
     }
     if (userProfile?.is_provisional) {
