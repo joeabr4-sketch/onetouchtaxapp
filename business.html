@@ -909,10 +909,10 @@ body.help-mode .main{padding-top:34px}
                 <div class="dp-field"><label>VAT Reg Number</label><input id="v-reg" placeholder="4XXXXXXXXX" /></div>
                 <div class="dp-field"><label>Tax Period</label><input id="v-period" placeholder="Jan–Feb 2025" /></div>
                 <div class="dp-field"><label data-i18n="inv_due">Due Date</label><input id="v-due" placeholder="25 Mar 2025" /></div>
-                <div class="dp-field"><label>Sales (excl. VAT) R</label><input id="v-sales" type="number" /></div>
-                <div class="dp-field"><label>Output VAT R</label><input id="v-output" type="number" /></div>
-                <div class="dp-field"><label>Purchases (excl. VAT) R</label><input id="v-purch" type="number" /></div>
-                <div class="dp-field"><label>Input VAT R</label><input id="v-input" type="number" /></div>
+                <div class="dp-field"><label>Sales (excl. VAT) R</label><input id="v-sales" type="number" min="0" step="0.01" /></div>
+                <div class="dp-field"><label>Output VAT R</label><input id="v-output" type="number" min="0" step="0.01" /></div>
+                <div class="dp-field"><label>Purchases (excl. VAT) R</label><input id="v-purch" type="number" min="0" step="0.01" /></div>
+                <div class="dp-field"><label>Input VAT R</label><input id="v-input" type="number" min="0" step="0.01" /></div>
               </div>
               <div style="display:flex;gap:10px;flex-wrap:wrap">
                 <button class="dp-btn" onclick="autoFillVAT201()">⚡ Auto-fill from Invoices</button>
@@ -929,11 +929,11 @@ body.help-mode .main{padding-top:34px}
                 <div class="dp-field"><label>Business Name</label><input id="e-biz" /></div>
                 <div class="dp-field"><label>PAYE Reference</label><input id="e-ref" placeholder="7XXXXXXXXX" /></div>
                 <div class="dp-field"><label>Month</label><input id="e-month" placeholder="February 2025" /></div>
-                <div class="dp-field"><label>No. of Employees</label><input id="e-emp" type="number" placeholder="3" /></div>
-                <div class="dp-field"><label>Gross Salaries R</label><input id="e-gross" type="number" onchange="autofillEMP201()" /></div>
-                <div class="dp-field"><label>PAYE Deducted R</label><input id="e-paye" type="number" /></div>
-                <div class="dp-field"><label>UIF R</label><input id="e-uif" type="number" /></div>
-                <div class="dp-field"><label>SDL R</label><input id="e-sdl" type="number" /></div>
+                <div class="dp-field"><label>No. of Employees</label><input id="e-emp" type="number" min="0" placeholder="3" /></div>
+                <div class="dp-field"><label>Gross Salaries R</label><input id="e-gross" type="number" min="0" step="0.01" onchange="autofillEMP201()" /></div>
+                <div class="dp-field"><label>PAYE Deducted R</label><input id="e-paye" type="number" min="0" step="0.01" /></div>
+                <div class="dp-field"><label>UIF R</label><input id="e-uif" type="number" min="0" step="0.01" /></div>
+                <div class="dp-field"><label>SDL R</label><input id="e-sdl" type="number" min="0" step="0.01" /></div>
               </div>
               <button class="dp-btn" onclick="showSarsDisclaimer('genEMP201')">📄 Download EMP201 PDF</button>
             </div>
@@ -953,10 +953,10 @@ body.help-mode .main{padding-top:34px}
                 <div class="dp-field"><label>Age</label>
                   <select id="p-age"><option value="under65">Under 65</option><option value="65to75">65–75</option><option value="over75">Over 75</option></select>
                 </div>
-                <div class="dp-field"><label>Estimated Annual Income R</label><input id="p-income" type="number" /></div>
-                <div class="dp-field"><label>Allowable Deductions R</label><input id="p-ded" type="number" /></div>
-                <div class="dp-field"><label>PAYE Already Paid R</label><input id="p-paye" type="number" /></div>
-                <div class="dp-field"><label>Prior Provisional Tax R</label><input id="p-prev" type="number" /></div>
+                <div class="dp-field"><label>Estimated Annual Income R</label><input id="p-income" type="number" min="0" step="0.01" /></div>
+                <div class="dp-field"><label>Allowable Deductions R</label><input id="p-ded" type="number" min="0" step="0.01" /></div>
+                <div class="dp-field"><label>PAYE Already Paid R</label><input id="p-paye" type="number" min="0" step="0.01" /></div>
+                <div class="dp-field"><label>Prior Provisional Tax R</label><input id="p-prev" type="number" min="0" step="0.01" /></div>
               </div>
               <button class="dp-btn" onclick="showSarsDisclaimer('genIRP6')">📄 Download IRP6 Estimate</button>
             </div>
@@ -973,8 +973,8 @@ body.help-mode .main{padding-top:34px}
                 <div class="dp-field"><label>Financial Year End</label><input id="i-year" placeholder="28 Feb 2025" /></div>
                 <div class="dp-field"><label>Directors / Members</label><input id="i-dir" placeholder="J. Smith, T. Dlamini" /></div>
                 <div class="dp-field"><label>Tax Practitioner</label><input id="i-acc" placeholder="Smith & Associates" /></div>
-                <div class="dp-field"><label>Total Annual Turnover R</label><input id="i-turn" type="number" /></div>
-                <div class="dp-field"><label>Total Annual Expenses R</label><input id="i-exp" type="number" /></div>
+                <div class="dp-field"><label>Total Annual Turnover R</label><input id="i-turn" type="number" min="0" step="0.01" /></div>
+                <div class="dp-field"><label>Total Annual Expenses R</label><input id="i-exp" type="number" min="0" step="0.01" /></div>
               </div>
               <button class="dp-btn" onclick="showSarsDisclaimer('genITR14')">📄 Download ITR14 Prep Pack</button>
             </div>
@@ -1143,9 +1143,9 @@ body.help-mode .main{padding-top:34px}
               <div class="dp-field"><label>Financial Year Start</label><input type="month" id="ob-yearstart" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%"/></div>
               <div class="dp-field"><label>Date Verified By Accountant</label><input type="date" id="ob-verifydate" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%"/></div>
               <div class="dp-field"><label>Accountant Name</label><input id="ob-accountant" placeholder="Smith & Associates" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%"/></div>
-              <div class="dp-field"><label>YTD Revenue (R)</label><input type="number" id="ob-revenue" placeholder="e.g. 450000" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%"/></div>
-              <div class="dp-field"><label>YTD Expenses (R)</label><input type="number" id="ob-expenses" placeholder="e.g. 180000" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%"/></div>
-              <div class="dp-field"><label>VAT Owing (R)</label><input type="number" id="ob-vat" placeholder="e.g. 12500" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%"/></div>
+              <div class="dp-field"><label>YTD Revenue (R)</label><input type="number" id="ob-revenue" min="0" step="0.01" placeholder="e.g. 450000" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%"/></div>
+              <div class="dp-field"><label>YTD Expenses (R)</label><input type="number" id="ob-expenses" min="0" step="0.01" placeholder="e.g. 180000" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%"/></div>
+              <div class="dp-field"><label>VAT Owing (R)</label><input type="number" id="ob-vat" min="0" step="0.01" placeholder="e.g. 12500" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100%"/></div>
             </div>
             <button onclick="saveOpeningBalances()" style="background:var(--blue);color:#0f1520;border:none;padding:11px 22px;border-radius:9px;font-family:'Syne',sans-serif;font-size:13.5px;font-weight:700;cursor:pointer">Save Opening Balances</button>
           </div>
@@ -1554,7 +1554,7 @@ body.help-mode .main{padding-top:34px}
           <!-- Salary & Period -->
           <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.07)">Salary & Period</div>
           <div class="pr-grid" style="margin-bottom:16px">
-            <div class="pr-field"><label>Gross Monthly Salary (R)</label><input id="pr-gross" type="number" placeholder="e.g. 20000" oninput="calcPayslip()" /></div>
+            <div class="pr-field"><label>Gross Monthly Salary (R)</label><input id="pr-gross" type="number" min="0" step="0.01" placeholder="e.g. 20000" oninput="calcPayslip()" /></div>
             <div class="pr-field"><label>Pay Period</label>
               <select id="pr-period">
                 <option value="monthly">Monthly</option>
@@ -1563,15 +1563,15 @@ body.help-mode .main{padding-top:34px}
               </select>
             </div>
             <div class="pr-field"><label>Pay Date</label><input id="pr-paydate" type="date" /></div>
-            <div class="pr-field"><label>Medical Aid Contribution (R)</label><input id="pr-medical" type="number" placeholder="0" oninput="calcPayslip()" /></div>
+            <div class="pr-field"><label>Medical Aid Contribution (R)</label><input id="pr-medical" type="number" min="0" step="0.01" placeholder="0" oninput="calcPayslip()" /></div>
           </div>
           <!-- Allowances -->
           <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.07)">Allowances (optional)</div>
           <div class="pr-grid" style="margin-bottom:20px">
-            <div class="pr-field"><label>Travel Allowance (R)</label><input id="pr-travel" type="number" placeholder="0" oninput="calcPayslip()" /></div>
-            <div class="pr-field"><label>Housing Allowance (R)</label><input id="pr-housing" type="number" placeholder="0" oninput="calcPayslip()" /></div>
-            <div class="pr-field"><label>Bonus / Commission (R)</label><input id="pr-bonus" type="number" placeholder="0" oninput="calcPayslip()" /></div>
-            <div class="pr-field"><label>Pension Fund Contribution (R)</label><input id="pr-pension" type="number" placeholder="0" oninput="calcPayslip()" /></div>
+            <div class="pr-field"><label>Travel Allowance (R)</label><input id="pr-travel" type="number" min="0" step="0.01" placeholder="0" oninput="calcPayslip()" /></div>
+            <div class="pr-field"><label>Housing Allowance (R)</label><input id="pr-housing" type="number" min="0" step="0.01" placeholder="0" oninput="calcPayslip()" /></div>
+            <div class="pr-field"><label>Bonus / Commission (R)</label><input id="pr-bonus" type="number" min="0" step="0.01" placeholder="0" oninput="calcPayslip()" /></div>
+            <div class="pr-field"><label>Pension Fund Contribution (R)</label><input id="pr-pension" type="number" min="0" step="0.01" placeholder="0" oninput="calcPayslip()" /></div>
           </div>
           <!-- Live Payslip Preview -->
           <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.07)">Live Payslip Preview</div>
@@ -1947,7 +1947,7 @@ body.help-mode .main{padding-top:34px}
               <option value="paid">✅ Paid in Full</option>
             </select>
           </div>
-          <div class="inv-field"><label>Deposit Amount Received (R)</label><input type="number" id="inv-deposit" placeholder="0.00" oninput="updateDepositBalance()" /></div>
+          <div class="inv-field"><label>Deposit Amount Received (R)</label><input type="number" id="inv-deposit" min="0" step="0.01" placeholder="0.00" oninput="updateDepositBalance()" /></div>
           <div class="inv-field full"><label>Deposit Note (e.g. "50% deposit — wedding 14 June")</label><input id="inv-deposit-note" placeholder="Add a note about this payment..." /></div>
           <div class="inv-field full" id="balanceRow" style="display:none">
             <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
@@ -2515,6 +2515,11 @@ function updateUserUI() {
   if (planFreeMsg) planFreeMsg.style.display = plan === 'free' ? 'block' : 'none';
   const proUpgradeBtn = document.getElementById('proUpgradeBtn');
   if (proUpgradeBtn) proUpgradeBtn.style.display = plan === 'pro' ? 'block' : 'none';
+  // Panel visibility based on VAT and PAYE registration
+  const vatPanel = document.getElementById('panel-vat');
+  if (vatPanel) vatPanel.style.display = isVatRegistered() ? 'block' : 'none';
+  const empPanel = document.getElementById('panel-emp');
+  if (empPanel) empPanel.style.display = userProfile?.has_paye ? 'block' : 'none';
   // Dim WhatsApp buttons for Free and Pro users
   const waIsLocked = !canUse('whatsapp');
   const waFormBtn = document.getElementById('waFormBtn');
@@ -2825,6 +2830,12 @@ async function saveInvoice(exportPDF) {
   }
   if (subtotal <= 0) {
     showToast('Invoice total must be greater than zero', 'var(--amber)'); return;
+  }
+  // Validate deposit does not exceed total
+  const deposit = parseFloat(document.getElementById('inv-deposit').value) || 0;
+  if (deposit > total) {
+    showToast('Deposit cannot exceed the invoice total', 'var(--amber)');
+    return;
   }
   // Validate date
   const rawDate = document.getElementById('inv-date').value;
@@ -3615,8 +3626,9 @@ function renderFinancials() {
   const months = currentPeriod==='12m'?12:currentPeriod==='6m'?6:3;
   const cutoff = new Date(); cutoff.setMonth(cutoff.getMonth()-months);
   const filtered = invoices.filter(i => new Date(i.date||0) >= cutoff);
+  // i.amount is always stored excl-VAT per the schema (see supabase/schema.sql)
   const income = filtered.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0);
-  const exp = filtered.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0);
+  const exp    = filtered.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0);
   const profit = income-exp;
   const finRev = document.getElementById('fin-rev');
   const finExp = document.getElementById('fin-exp');
@@ -7037,6 +7049,13 @@ function openExpenseForm() {
     const typeEl = document.getElementById('inv-type');
     if (typeEl) { typeEl.value = 'expense'; updateInvFormType(); }
     document.getElementById('invFormTitle').textContent = '💸 Add Expense';
+    // Expenses: only allow VAT input-claim toggle if user is VAT registered
+    if (!isVatRegistered()) {
+      invVATEnabled = false;
+      setInvVAT(false);
+      const vatRow = document.getElementById('vatRow');
+      if (vatRow) { vatRow.style.opacity = '0.3'; vatRow.style.pointerEvents = 'none'; }
+    }
   }, 50);
 }
 
