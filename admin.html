@@ -343,10 +343,6 @@ tbody tr:hover .row-actions{opacity:1}
     <!-- CONTENT -->
     <div class="content">
 
-      <!-- SETUP NOTICE -->
-      <div class="setup-notice" id="setupNotice">
-        <strong>⚠ Supabase admin policies required.</strong> To view all users, run the SQL policies from the HTML comment at the top of this file in your Supabase SQL Editor. Without them, RLS will only return your own profile.
-      </div>
 
       <!-- ── OVERVIEW SECTION ── -->
       <div class="section active" id="section-overview">
@@ -644,12 +640,6 @@ async function loadUsers() {
 
   allUsers = (profiles || []).map(p => ({ ...p, invoiceCount: invMap[p.id] || 0 }));
 
-  // Check if RLS is blocking: only show warning if the sole returned user is the admin themselves
-  const { data: { session } } = await sb.auth.getSession();
-  const onlyOwnProfile = allUsers.length === 1 && session?.user && allUsers[0].id === session.user.id;
-  if (onlyOwnProfile) {
-    document.getElementById('setupNotice').style.display = 'block';
-  }
 
   document.getElementById('sb-user-count').textContent = allUsers.length;
   document.getElementById('usersLoading').style.display = 'none';
