@@ -904,6 +904,7 @@ body.help-mode .main{padding-top:34px}
             <div class="dp-wrap">
               <div class="dp-title">VAT201 Preparation</div>
               <div class="dp-desc">Auto-filled from your invoices. Verify before submitting to SARS eFiling.</div>
+              <div style="margin:8px 0 12px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:9px 12px;font-size:11.5px;color:rgba(245,158,11,.85);line-height:1.55">⚠ Preparation aid only. These figures are derived from your invoice data and must be verified before submission. OneTouch is not a registered tax practitioner and accepts no liability for VAT penalties or assessments.</div>
               <div class="dp-grid">
                 <div class="dp-field"><label>Business Name</label><input id="v-biz" placeholder="Your business name" /></div>
                 <div class="dp-field"><label>VAT Reg Number</label><input id="v-reg" placeholder="4XXXXXXXXX" /></div>
@@ -925,6 +926,7 @@ body.help-mode .main{padding-top:34px}
             <div class="dp-wrap">
               <div class="dp-title">EMP201 Payroll Summary</div>
               <div class="dp-desc">Monthly payroll submission to SARS. UIF capped at R17,712/year (R1,476/month).</div>
+              <div style="margin:8px 0 12px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:9px 12px;font-size:11.5px;color:rgba(245,158,11,.85);line-height:1.55">⚠ Preparation aid only. Verify all PAYE, UIF, and SDL figures before submitting your EMP201 on SARS eFiling. OneTouch accepts no liability for penalties or interest arising from incorrect submissions.</div>
               <div class="dp-grid">
                 <div class="dp-field"><label>Business Name</label><input id="e-biz" /></div>
                 <div class="dp-field"><label>PAYE Reference</label><input id="e-ref" placeholder="7XXXXXXXXX" /></div>
@@ -942,7 +944,8 @@ body.help-mode .main{padding-top:34px}
           <div class="doc-panel" id="panel-irp6">
             <div class="dp-wrap">
               <div class="dp-title">IRP6 Provisional Tax Estimate</div>
-              <div class="dp-desc">Estimate your provisional tax liability using 2024/25 SARS tax brackets.</div>
+              <div class="dp-desc">Estimate your provisional tax liability using 2025/26 SARS tax brackets.</div>
+              <div style="margin:8px 0 12px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:9px 12px;font-size:11.5px;color:rgba(245,158,11,.85);line-height:1.55">⚠ Estimate only. This calculation uses standard SARS 2025/26 brackets and does not account for all taxpayer-specific circumstances. Verify with a registered tax practitioner before submitting your IRP6 on eFiling.</div>
               <div class="dp-grid">
                 <div class="dp-field"><label>Full Name / Company</label><input id="p-name" /></div>
                 <div class="dp-field"><label>Tax Reference</label><input id="p-ref" placeholder="9XXXXXXXXX" /></div>
@@ -1423,6 +1426,7 @@ body.help-mode .main{padding-top:34px}
         <div style="padding:18px 20px">
           <p style="font-size:13px;color:var(--text-2);margin-bottom:14px;line-height:1.65">Send your accountant a secure read-only link. They can review your P&L, invoices, VAT summary and download the full bookkeeper pack — no login required.</p>
           <div id="accLinkForm">
+            <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.18);border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:11.5px;color:var(--text-2);line-height:1.55">🔒 This link grants <strong>read-only access</strong> to your financial data for <strong>7 days</strong>. Anyone with this link can view your business financials — share only with your accountant. OneTouch accepts no responsibility for unauthorised access resulting from improper sharing.</div>
             <label style="font-size:10px;color:var(--text-3);display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">Accountant's Email</label>
             <div style="display:flex;gap:8px">
               <input type="email" id="acc-email" placeholder="accountant@firm.co.za" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13.5px;outline:none">
@@ -1458,6 +1462,7 @@ body.help-mode .main{padding-top:34px}
           <div class="ot-tip-wrap"><h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px">👥 Payroll</h2><button class="ot-tip-btn" onclick="showTip(this,'payroll')">?</button></div>
           <div class="ot-tip-popup" id="tip-payroll" style="display:none"><button class="ot-close" onclick="hideTip('payroll')">✕</button><strong>Payroll</strong>Add each employee once with their gross salary. OneTouch calculates PAYE (tax tables), UIF (1% capped at R177/mo) and SDL (1% if payroll &gt; R500k/yr). Run payroll to post salary expenses automatically and generate your EMP201 for SARS.</div>
           <p style="font-size:13px;color:var(--text-2)">Generate payslips, calculate PAYE/UIF/SDL and produce EMP201 prep documents.</p>
+          <div style="margin-top:10px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:9px 12px;font-size:11.5px;color:rgba(245,158,11,.85);line-height:1.55">⚠ PAYE, UIF, and SDL figures are estimates based on SARS 2025/26 tables. OneTouch is not a registered payroll service provider. The employer remains solely responsible for verifying figures and submitting EMP201 returns to SARS.</div>
         </div>
         <button onclick="openPayslipForm()" style="background:linear-gradient(135deg,#c0c8d8,#8a9ab8);border:none;color:#0f1520;padding:10px 20px;border-radius:9px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px">+ Add Employee</button>
       </div>
@@ -1546,6 +1551,13 @@ body.help-mode .main{padding-top:34px}
                 <option value="fulltime">Full-time</option>
                 <option value="parttime">Part-time</option>
                 <option value="contract">Contract</option>
+              </select>
+            </div>
+            <div class="pr-field"><label>Age Bracket (PAYE Rebates)</label>
+              <select id="pr-age" onchange="calcPayslip()">
+                <option value="under65">Under 65 — Primary rebate only</option>
+                <option value="65to74">65–74 — Primary + Secondary rebate</option>
+                <option value="over75">75+ — Primary + Secondary + Tertiary rebate</option>
               </select>
             </div>
             <div class="pr-field"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding-top:6px"><input type="checkbox" id="pr-uif" checked onchange="calcPayslip()" style="accent-color:var(--blue);width:15px;height:15px;flex-shrink:0"> UIF Applicable</label></div>
@@ -1682,6 +1694,10 @@ body.help-mode .main{padding-top:34px}
               <div style="font-size:13px;color:var(--text-2);margin-bottom:14px">You're on the <strong style="color:var(--text)">⭐ Pro plan</strong>. Upgrade to Full to unlock WhatsApp delivery, payroll, EMP201, AI saving tips and accountant access link.</div>
               <button onclick="window.open('https://onetouch.net.za/#pricing','_blank')" style="background:var(--gold);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬆ Upgrade to Full — R499/mo</button>
             </div>
+            <div id="cancelSubLink" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+              <a href="mailto:support@onetouch.net.za?subject=Cancel%20My%20Subscription&body=Please%20cancel%20my%20OneTouch%20TaxApp%20subscription.%20My%20account%20email%20is%3A%20" style="font-size:12px;color:var(--text-3);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-3)'">Cancel subscription →</a>
+              <div style="font-size:11px;color:var(--text-3);margin-top:4px">Your plan reverts to Free at the end of the current billing period. Data is retained.</div>
+            </div>
           </div>
         </div>
         <!-- BUSINESS PROFILE -->
@@ -1705,14 +1721,38 @@ body.help-mode .main{padding-top:34px}
                 <select id="set-acctype"><option>Current / Cheque</option><option>Savings</option><option>Business</option></select>
               </div>
             </div>
-            <div class="set-section-title">Invoice Logo</div>
-            <div class="logo-upload-wrap" id="logoUploadWrap">
-              <input type="file" accept="image/*" onchange="handleLogoUpload(event)" />
-              <img id="logoPreview" src="" alt="Logo" style="display:none" />
-              <div id="logoUploadText">
-                <div style="font-size:24px;margin-bottom:8px">🖼</div>
-                <div style="font-size:13px;color:var(--text-2);margin-bottom:4px">Click to upload your company logo</div>
-                <div style="font-size:11px;color:var(--text-3)">PNG, JPG — Shown on all PDF invoices</div>
+          </div>
+        </div>
+        <!-- INVOICE BRANDING -->
+        <div class="card" style="margin-bottom:16px" id="brandingCard">
+          <div class="card-head"><div class="card-title">🎨 Invoice Branding</div><span class="badge b-gold">Full Plan</span></div>
+          <div style="padding:16px 20px">
+            <!-- Locked state for Free/Pro -->
+            <div id="brandingLocked" style="display:none;text-align:center;padding:20px 0">
+              <div style="font-size:32px;margin-bottom:10px">🔒</div>
+              <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">Custom Invoice Branding</div>
+              <div style="font-size:13px;color:var(--text-2);margin-bottom:16px;line-height:1.6">Display your logo and business name on invoices. Remove OneTouch from your client-facing documents. <strong style="color:var(--gold)">Full Plan only.</strong></div>
+              <button onclick="payWithPayFast('full')" style="background:linear-gradient(135deg,var(--gold),#b8872e);color:#fff;border:none;padding:10px 22px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬆ Upgrade to Full — R499/mo</button>
+            </div>
+            <!-- Active state for Full plan -->
+            <div id="brandingActive" style="display:none">
+              <p style="font-size:13px;color:var(--text-2);margin-bottom:16px;line-height:1.6">Your logo and business name appear prominently on all PDF invoices. OneTouch branding is reduced to a subtle footer note.</p>
+              <div class="set-section-title">Company Logo</div>
+              <div class="logo-upload-wrap" id="logoUploadWrap" style="margin-bottom:12px">
+                <input type="file" accept="image/*" onchange="handleLogoUpload(event)" />
+                <img id="logoPreview" src="" alt="Logo" style="display:none;max-height:60px;object-fit:contain" />
+                <div id="logoUploadText">
+                  <div style="font-size:24px;margin-bottom:8px">🖼</div>
+                  <div style="font-size:13px;color:var(--text-2);margin-bottom:4px">Click to upload your company logo</div>
+                  <div style="font-size:11px;color:var(--text-3)">PNG, JPG — Recommended: transparent background, min 200×80px</div>
+                </div>
+              </div>
+              <button id="removeLogoBtn" onclick="removeLogo()" style="display:none;background:transparent;border:1px solid var(--border);color:var(--text-3);padding:6px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:16px">✕ Remove logo</button>
+              <div style="background:rgba(212,168,67,.06);border:1px solid rgba(212,168,67,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--text-2)">
+                <strong style="color:var(--gold)">What changes on Full plan:</strong><br>
+                ✓ Logo displayed prominently in invoice header<br>
+                ✓ Business name as primary identity<br>
+                ✓ "Generated with OneTouch" appears as a small footer note only
               </div>
             </div>
           </div>
@@ -1743,7 +1783,10 @@ body.help-mode .main{padding-top:34px}
 
     <!-- ── APP FOOTER ── -->
     <div id="appFooter" style="border-top:1px solid var(--border);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;background:var(--surface)">
-      <div style="font-size:11.5px;color:var(--text-3)">© 2025 justadopeboy (Pty) Ltd t/a <strong style="color:var(--text-2)">OneTouch TaxApp</strong> · Not a registered tax practitioner</div>
+      <div style="font-size:11px;color:var(--text-3);line-height:1.6">
+        © 2025 justadopeboy (Pty) Ltd t/a <strong style="color:var(--text-2)">OneTouch TaxApp</strong><br>
+        <span style="opacity:.65">OneTouch is a financial tool designed to assist with bookkeeping and tax preparation. It is not a registered accountant or tax practitioner. All figures must be reviewed before submission to SARS.</span>
+      </div>
       <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
         <a href="/legal.html#tos" target="_blank" style="font-size:11.5px;color:var(--text-3);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--text-2)'" onmouseout="this.style.color='var(--text-3)'">Terms</a>
         <a href="/legal.html#privacy" target="_blank" style="font-size:11.5px;color:var(--text-3);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--text-2)'" onmouseout="this.style.color='var(--text-3)'">Privacy</a>
@@ -1757,6 +1800,36 @@ body.help-mode .main{padding-top:34px}
   </div><!-- end .main -->
 
 </div><!-- end #mainWrapper -->
+
+<!-- ═══ TERMS OF SERVICE ACCEPTANCE MODAL ═══ -->
+<div id="tosModal" style="position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(10px);z-index:1100;display:none;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#1a1d24;border:1px solid rgba(79,142,247,.2);border-radius:20px;width:100%;max-width:520px;padding:32px;box-shadow:0 32px 80px rgba(0,0,0,.7);animation:fadeUp .3s ease">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+      <div style="width:48px;height:48px;background:rgba(79,142,247,.12);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">📋</div>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--text)">Terms of Service</div>
+        <div style="font-size:12px;color:var(--text-3);margin-top:2px">Please read and accept before continuing</div>
+      </div>
+    </div>
+    <div style="background:rgba(0,0,0,.25);border-radius:12px;padding:16px;margin-bottom:20px;max-height:200px;overflow-y:auto;font-size:12.5px;color:var(--text-2);line-height:1.7">
+      <p style="margin:0 0 10px"><strong style="color:var(--text)">OneTouch TaxApp is a financial preparation tool.</strong> It is not a registered accountant or tax practitioner. All figures generated must be reviewed before submission to SARS.</p>
+      <p style="margin:0 0 8px;color:var(--text-3)">By using OneTouch you confirm that:</p>
+      <ul style="margin:0 0 10px;padding-left:18px;color:var(--text-2)">
+        <li style="margin-bottom:5px">You are responsible for the accuracy of data you enter.</li>
+        <li style="margin-bottom:5px">Tax outputs (VAT201, IRP6, EMP201) are preparation aids only — not official SARS submissions.</li>
+        <li style="margin-bottom:5px">OneTouch accepts no liability for SARS penalties, interest, or assessments.</li>
+        <li style="margin-bottom:5px">Your data is stored securely via Supabase and processed in accordance with POPIA.</li>
+        <li style="margin-bottom:5px">Subscriptions are non-refundable except as outlined in our Refund Policy.</li>
+      </ul>
+      <p style="margin:0;font-size:11.5px;color:var(--text-3)">Full details: <a href="/legal.html#tos" target="_blank" style="color:var(--blue)">Terms of Service</a> · <a href="/legal.html#privacy" target="_blank" style="color:var(--blue)">Privacy Policy</a> · <a href="/legal.html#disclaimer" target="_blank" style="color:var(--blue)">Tax Disclaimer</a></p>
+    </div>
+    <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin-bottom:20px">
+      <input type="checkbox" id="tosCheckbox" style="accent-color:var(--blue);width:15px;height:15px;flex-shrink:0;margin-top:2px" onchange="document.getElementById('tosAcceptBtn').disabled=!this.checked;document.getElementById('tosAcceptBtn').style.opacity=this.checked?'1':'.4'">
+      <span style="font-size:12.5px;color:var(--text-2);line-height:1.5">I have read and agree to the <a href="/legal.html#tos" target="_blank" style="color:var(--blue)">Terms of Service</a> and <a href="/legal.html#privacy" target="_blank" style="color:var(--blue)">Privacy Policy</a></span>
+    </label>
+    <button id="tosAcceptBtn" disabled onclick="acceptTos()" style="width:100%;background:var(--blue);color:#0f1520;border:none;padding:13px;border-radius:10px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;opacity:.4;transition:opacity .2s">Continue to OneTouch →</button>
+  </div>
+</div>
 
 <!-- ── AI WELCOME POPUP ── -->
 <div id="welcomePopup" style="position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);z-index:7000;display:none;align-items:flex-end;justify-content:flex-end;padding:24px">
@@ -2222,6 +2295,28 @@ async function signOut() {
   window.location.reload();
 }
 
+// ── TERMS ACCEPTANCE ──
+async function acceptTos() {
+  const btn = document.getElementById('tosAcceptBtn');
+  btn.textContent = 'Saving…'; btn.disabled = true;
+  const { error } = await sb.from('profiles').upsert({ id: currentUser.id, tos_accepted: true }, { onConflict: 'id' });
+  if (error) {
+    console.error('ToS save error:', error);
+    btn.textContent = 'Continue to OneTouch →';
+    btn.disabled = false;
+    document.getElementById('tosCheckbox').checked = false;
+    btn.style.opacity = '.4';
+    return;
+  }
+  if (userProfile) userProfile.tos_accepted = true;
+  document.getElementById('tosModal').style.display = 'none';
+  if (!userProfile?.biz_name) {
+    document.getElementById('onboardingModal').style.display = 'flex';
+  } else {
+    await initDashboard();
+  }
+}
+
 // ── PROFILE ──
 async function loadUserProfile() {
   applyLanguage(localStorage.getItem('ot_lang') || 'en');
@@ -2230,8 +2325,11 @@ async function loadUserProfile() {
     const { data, error } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
     if (error && error.code !== 'PGRST116') throw error;
     userProfile = data;
-    if (!userProfile || !userProfile.biz_name) {
-      document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('loadingScreen').style.display = 'none';
+    if (!userProfile?.tos_accepted) {
+      // New user or existing user who hasn't accepted ToS — show blocking modal
+      document.getElementById('tosModal').style.display = 'flex';
+    } else if (!userProfile?.biz_name) {
       document.getElementById('onboardingModal').style.display = 'flex';
     } else {
       await initDashboard();
@@ -2244,7 +2342,11 @@ async function loadUserProfile() {
   }
 }
 
-function isVatRegistered() { return userProfile?.vat_registered === true || userProfile?.vat_registered === 'true'; }
+function isVatRegistered() {
+  // Normalize to lowercase string before evaluating — handles: true, false, 1, 0, "true", "false", "1", "0", null, undefined
+  const v = String(userProfile?.vat_registered ?? '').trim().toLowerCase();
+  return ['true', '1'].includes(v);
+}
 function isPlan(p) {
   const plan = userProfile?.plan || 'free';
   if (p === 'free') return true;
@@ -2256,8 +2358,8 @@ function isPlan(p) {
 function canUse(feature) {
   // Pro: reconciliation, bank analysis, VAT/IRP6/ITR14 docs, handoff, AI calls, unlimited invoices
   const proFeatures = ['invoices','reconcile','vat201','handoff','bankanalysis','irp6','itr14'];
-  // Full: payroll, EMP201, WhatsApp, accountant link, AI tips
-  const fullFeatures = ['accountant','payroll','emp201','tips','whatsapp'];
+  // Full: payroll, EMP201, WhatsApp, accountant link, AI tips, white-label branding
+  const fullFeatures = ['accountant','payroll','emp201','tips','whatsapp','branding'];
   // exportpdf is FREE — all users can export PDFs for their invoices
   if (fullFeatures.includes(feature)) return isPlan('full');
   if (proFeatures.includes(feature)) return isPlan('pro');
@@ -2300,6 +2402,16 @@ async function payWithPayFast(plan) {
     showToast('❌ ' + e.message, 'var(--red)');
   }
 }
+
+// Preserve plan intent from landing page URL before OAuth redirect wipes query params
+(function preservePlanIntent() {
+  const params = new URLSearchParams(window.location.search);
+  const plan = params.get('plan');
+  if (plan === 'pro' || plan === 'full') {
+    localStorage.setItem('ot_pending_plan', plan);
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+})();
 
 // Handle return from PayFast
 (function checkPaymentReturn() {
@@ -2405,6 +2517,14 @@ async function initDashboard() {
   document.getElementById('calYear').textContent = new Date().getFullYear();
   updateUserUI();
   window._appReady = true; // flag: profile is loaded, upgrade prompts allowed
+
+  // If user arrived from a pricing card (plan=pro/full), trigger PayFast after dashboard loads
+  const pendingPlan = localStorage.getItem('ot_pending_plan');
+  if (pendingPlan && userProfile?.plan === 'free') {
+    localStorage.removeItem('ot_pending_plan');
+    setTimeout(() => payWithPayFast(pendingPlan), 1200);
+  }
+
   await loadInvoices();
   await loadEmployees();
   await loadPayrollRuns();
@@ -2418,8 +2538,9 @@ async function initDashboard() {
   startClock();
   updateTipsState();
   loadReconStatusBar();
+  // Logo is a Full-plan feature — only load if user qualifies
   const savedLogo = localStorage.getItem('ot_logo_' + currentUser.id);
-  if (savedLogo) { logoDataUrl = savedLogo; showLogoPreview(savedLogo); }
+  if (savedLogo && canUse('branding')) { logoDataUrl = savedLogo; showLogoPreview(savedLogo); }
   showWelcomePopup();
   initOnboarding();
 }
@@ -2515,6 +2636,12 @@ function updateUserUI() {
   if (planFreeMsg) planFreeMsg.style.display = plan === 'free' ? 'block' : 'none';
   const proUpgradeBtn = document.getElementById('proUpgradeBtn');
   if (proUpgradeBtn) proUpgradeBtn.style.display = plan === 'pro' ? 'block' : 'none';
+  const cancelSubLink = document.getElementById('cancelSubLink');
+  if (cancelSubLink) cancelSubLink.style.display = (plan === 'pro' || plan === 'full') ? 'block' : 'none';
+  const brandingLocked = document.getElementById('brandingLocked');
+  const brandingActive = document.getElementById('brandingActive');
+  if (brandingLocked) brandingLocked.style.display = plan === 'full' ? 'none' : 'block';
+  if (brandingActive) brandingActive.style.display = plan === 'full' ? 'block' : 'none';
   // Panel visibility based on VAT and PAYE registration
   const vatPanel = document.getElementById('panel-vat');
   if (vatPanel) vatPanel.style.display = isVatRegistered() ? 'block' : 'none';
@@ -2795,6 +2922,11 @@ function updateInvTotals() {
 }
 
 function setInvVAT(enabled) {
+  // Non-VAT-registered businesses cannot enable VAT on any invoice or expense
+  if (enabled && !isVatRegistered()) {
+    showToast('VAT not applicable — you are not VAT registered', 'var(--amber)');
+    return;
+  }
   invVATEnabled = enabled;
   document.getElementById('inv-vat-y').className = 'toggle-opt' + (enabled?' on':'');
   document.getElementById('inv-vat-n').className = 'toggle-opt' + (!enabled?' on':'');
@@ -2968,9 +3100,23 @@ function exportInvoicePDF(inv) {
   doc.setFillColor(15,21,32);
   doc.rect(0,0,W,42,'F');
 
-  // Logo or business name
-  if (logoDataUrl) {
-    try { doc.addImage(logoDataUrl, 'PNG', M, 8, 40, 20); } catch(e) {}
+  // White-label branding — Full plan only
+  const isWhiteLabel = canUse('branding');
+  const bizName = userProfile?.biz_name || 'Your Business';
+  if (isWhiteLabel) {
+    // Logo (Full plan, if uploaded)
+    if (logoDataUrl) {
+      try { doc.addImage(logoDataUrl, 'PNG', M, 6, 36, 26); } catch(e) {}
+      // Business name under logo
+      doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(180,196,220);
+      doc.text(bizName, M, 38);
+    } else {
+      // No logo — business name as wordmark in header
+      doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(255,255,255);
+      doc.text(bizName, M, 22);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(130,155,190);
+      doc.text('Tax Invoice', M, 31);
+    }
   }
 
   // INVOICE label
@@ -2997,7 +3143,6 @@ function exportInvoicePDF(inv) {
   doc.setFont('helvetica','bold');
   doc.setFontSize(11);
   doc.setTextColor(15,21,32);
-  const bizName = userProfile?.biz_name || 'Your Business';
   doc.text(bizName, M, y);
   doc.text(inv.client_name||'Client Name', W/2+4, y);
 
@@ -3123,12 +3268,19 @@ function exportInvoicePDF(inv) {
   }
 
   y = 275;
-  // Footer
+  // Footer — branding depends on plan
   doc.setFillColor(15,21,32);
   doc.rect(0, y, W, 22, 'F');
   doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(100,120,150);
-  doc.text('Generated by OneTouch TaxApp · ' + bizName + ' · Not an official SARS document', W/2, y+8, {align:'center'});
-  doc.text('Thank you for your business!', W/2, y+15, {align:'center'});
+  if (isWhiteLabel) {
+    // White-label: business takes centre stage, OneTouch is subtle
+    doc.text('Thank you for your business!', W/2, y+8, {align:'center'});
+    doc.setFontSize(7); doc.setTextColor(60,80,110);
+    doc.text('Generated with OneTouch · Not an official SARS document', W/2, y+15, {align:'center'});
+  } else {
+    doc.text('Generated by OneTouch TaxApp · ' + bizName + ' · Not an official SARS document', W/2, y+8, {align:'center'});
+    doc.text('Thank you for your business!', W/2, y+15, {align:'center'});
+  }
 
   const filename = 'Invoice_' + (inv.invoice_number||'001') + '_' + (inv.client_name||'Client').replace(/\s/g,'_') + '.pdf';
   const pdfData = doc.output('datauristring');
@@ -3172,6 +3324,11 @@ async function saveSettings() {
 }
 
 function handleLogoUpload(e) {
+  if (!canUse('branding')) {
+    showToast('Custom invoice branding is a Full Plan feature — upgrade at onetouch.net.za/#pricing', 'var(--gold)');
+    e.target.value = '';
+    return;
+  }
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
@@ -3179,16 +3336,28 @@ function handleLogoUpload(e) {
     logoDataUrl = ev.target.result;
     localStorage.setItem('ot_logo_' + currentUser.id, logoDataUrl);
     showLogoPreview(logoDataUrl);
-    showToast('✅ Logo uploaded — will appear on PDF invoices', 'var(--green)');
+    showToast('✅ Logo uploaded — will appear on your branded invoices', 'var(--green)');
   };
   reader.readAsDataURL(file);
+}
+
+function removeLogo() {
+  logoDataUrl = null;
+  if (currentUser) localStorage.removeItem('ot_logo_' + currentUser.id);
+  const img = document.getElementById('logoPreview');
+  const txt = document.getElementById('logoUploadText');
+  if (img) { img.src = ''; img.style.display = 'none'; }
+  if (txt) txt.style.display = '';
+  showToast('Logo removed', 'var(--amber)');
 }
 
 function showLogoPreview(src) {
   const img = document.getElementById('logoPreview');
   const txt = document.getElementById('logoUploadText');
+  const removeBtn = document.getElementById('removeLogoBtn');
   if (img) { img.src = src; img.style.display = 'block'; }
   if (txt) txt.style.display = 'none';
+  if (removeBtn) removeBtn.style.display = '';
 }
 
 async function updatePassword() {
@@ -3374,10 +3543,18 @@ function toggleCL(box) {
 
 // ── VAT201 AUTO-FILL ──
 function autoFillVAT201() {
-  const income = invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0);
-  const vatOut = invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.vat||0),0);
-  const exp = invoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0);
-  const vatIn = invoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.vat||0),0);
+  // Only include invoices where VAT was applied AND (if vat_registration_date is set) date >= registration date
+  // Fallback: if vat_registration_date is missing, filter by has_vat only
+  const regDate = userProfile?.vat_registration_date ? new Date(userProfile.vat_registration_date) : null;
+  const vatInvoices = invoices.filter(i => {
+    if (!i.has_vat) return false;
+    if (regDate && i.date) return new Date(i.date) >= regDate;
+    return !regDate; // if regDate is set but invoice has no date, exclude — cannot confirm post-registration
+  });
+  const income = vatInvoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0);
+  const vatOut = vatInvoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.vat||0),0);
+  const exp    = vatInvoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0);
+  const vatIn  = vatInvoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.vat||0),0);
   const f = id => document.getElementById(id);
   if (f('v-biz') && !f('v-biz').value) f('v-biz').value = userProfile?.biz_name||'';
   if (f('v-reg') && !f('v-reg').value) f('v-reg').value = userProfile?.vat_number||'';
@@ -3430,10 +3607,13 @@ function makePDFRow(doc, label, value, y, shade) {
 }
 function makePDFFooter(doc) {
   const W=210;
-  doc.setFillColor(15,21,32); doc.rect(0,275,W,22,'F');
-  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(100,120,150);
-  doc.text('OneTouch TaxApp · '+(userProfile?.biz_name||'')+' · Preparation document only — not an official SARS submission', W/2, 283, {align:'center'});
-  doc.text('Verify all figures with a registered tax practitioner before submitting to SARS', W/2, 289, {align:'center'});
+  doc.setFillColor(15,21,32); doc.rect(0,268,W,29,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(180,100,100);
+  doc.text('PREPARATION AID ONLY — NOT AN OFFICIAL SARS SUBMISSION', W/2, 275, {align:'center'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(100,120,150);
+  doc.text('This document was generated by OneTouch TaxApp and has not been prepared by a registered tax practitioner (Tax Administration Act 28 of 2011).', W/2, 281, {align:'center'});
+  doc.text('The business owner or accountant is solely responsible for verifying all figures. OneTouch accepts no liability for SARS penalties, interest, or assessments.', W/2, 287, {align:'center'});
+  doc.text('OneTouch TaxApp · '+(userProfile?.biz_name||'')+'  ·  onetouch.net.za', W/2, 293, {align:'center'});
 }
 
 // ── PDF GENERATORS ──
@@ -6253,7 +6433,8 @@ let payrollRuns = [];
 let editingEmpIdx = null;
 
 // ── SA PAYE TAX TABLES 2025/2026 ──
-function calcPAYE(annualIncome) {
+// ageBracket: 'under65' | '65to74' | 'over75'  (SARS 2025/26 rebate thresholds)
+function calcPAYE(annualIncome, ageBracket = 'under65') {
   // 2025/26 tax brackets
   const brackets = [
     { limit: 237100,  base: 0,      rate: 0.18 },
@@ -6273,9 +6454,11 @@ function calcPAYE(annualIncome) {
       break;
     }
   }
-  // Primary rebate 2025/26
-  const primaryRebate = 17235;
-  tax = Math.max(0, tax - primaryRebate);
+  // 2025/26 SARS rebates — all three tiers as applicable
+  const primary   = 17235;
+  const secondary = (ageBracket === '65to74' || ageBracket === 'over75') ? 9444 : 0;
+  const tertiary  = ageBracket === 'over75' ? 3145 : 0;
+  tax = Math.max(0, tax - primary - secondary - tertiary);
   return tax / 12; // monthly PAYE
 }
 
@@ -6298,7 +6481,7 @@ function calcEmployeePayslip(emp, annualPayrollTotal) {
 
   const totalGross    = gross + travel + housing + bonus;
   const taxableIncome = gross + housing + bonus + (travel * 0.8);
-  const paye    = calcPAYE(taxableIncome * 12);
+  const paye    = calcPAYE(taxableIncome * 12, emp.age_bracket || 'under65');
   const uifEmp  = uifApplicable ? Math.min(gross * UIF_RATE, UIF_MONTHLY_CAP) : 0;
   const uifEr   = uifApplicable ? Math.min(gross * UIF_RATE, UIF_MONTHLY_CAP) : 0;
   // SDL: only applies if company annual payroll > R500,000 (SARS threshold)
@@ -6320,6 +6503,7 @@ function calcPayslip() {
     pension:        parseFloat(document.getElementById('pr-pension')?.value) || 0,
     uif_applicable: document.getElementById('pr-uif')?.checked ?? true,
     sdl_applicable: document.getElementById('pr-sdl')?.checked ?? true,
+    age_bracket:    document.getElementById('pr-age')?.value || 'under65',
   };
   const name    = document.getElementById('pr-name')?.value || '—';
   const role    = document.getElementById('pr-role')?.value || '—';
@@ -6377,6 +6561,7 @@ function openPayslipForm(idx = null) {
     document.getElementById('pr-pension').value = e.pension || '';
     const uifEl = document.getElementById('pr-uif'); if (uifEl) uifEl.checked = e.uif_applicable !== false;
     const sdlEl = document.getElementById('pr-sdl'); if (sdlEl) sdlEl.checked = e.sdl_applicable !== false;
+    const ageEl = document.getElementById('pr-age'); if (ageEl) ageEl.value = e.age_bracket || 'under65';
     calcPayslip();
   } else {
     ['pr-name','pr-id','pr-role','pr-gross','pr-medical','pr-travel','pr-housing','pr-bonus','pr-pension'].forEach(id => {
@@ -6413,6 +6598,7 @@ async function saveEmployee() {
     period:         document.getElementById('pr-period').value,
     uif_applicable: document.getElementById('pr-uif')?.checked ?? true,
     sdl_applicable: document.getElementById('pr-sdl')?.checked ?? true,
+    age_bracket:    document.getElementById('pr-age')?.value || 'under65',
     updated_at:     new Date().toISOString(),
   };
 
@@ -7473,7 +7659,9 @@ async function confirmImport() {
       date: row.date,
       due_date: row.date,
       amount: parseFloat(row.amount) || 0,
+      vat: 0,
       total: parseFloat(row.amount) || 0,
+      has_vat: false,   // CSV imports carry no VAT data — VAT must be edited manually if applicable
       status: 'paid',
       reconciled: false,
       category: row.type === 'expense' ? 'Other Expense' : 'Sales',

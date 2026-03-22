@@ -15,9 +15,11 @@ CREATE TABLE IF NOT EXISTS profiles (
   entity_type         text DEFAULT 'sole_prop',
   vat_registered      boolean DEFAULT false,
   vat_number          text,
+  vat_registration_date date,                        -- SARS effective registration date — used to exclude pre-registration invoices from VAT201
   has_paye            boolean DEFAULT false,
   is_provisional      boolean DEFAULT false,
   year_end            text DEFAULT 'February',
+  tos_accepted        boolean DEFAULT false,        -- true once user explicitly accepts Terms of Service
   plan                text DEFAULT 'free',         -- 'free' | 'pro' | 'full'
   ai_calls            integer DEFAULT 0,
   ai_calls_month      text,                        -- 'YYYY-MM' — resets counter when month changes
@@ -40,13 +42,13 @@ CREATE POLICY "Users manage own profile" ON profiles
 CREATE TABLE IF NOT EXISTS invoices (
   id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id       uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  type          text NOT NULL,                     -- 'income' | 'expense'
+  type          text NOT NULL CHECK (type IN ('income', 'expense')),
   date          date,
   description   text,
   category      text,
-  amount        numeric DEFAULT 0,                 -- excl VAT
-  vat           numeric DEFAULT 0,
-  total         numeric DEFAULT 0,                 -- incl VAT
+  amount        numeric DEFAULT 0 CHECK (amount > 0),    -- excl VAT, must be positive
+  vat           numeric DEFAULT 0 CHECK (vat >= 0),      -- zero is valid (non-VAT invoice)
+  total         numeric DEFAULT 0 CHECK (total > 0 AND total >= amount),  -- incl VAT; must be >= excl-VAT amount
   has_vat       boolean DEFAULT false,
   reconciled    boolean DEFAULT false,
   status        text DEFAULT 'outstanding',        -- 'outstanding' | 'paid' | 'partial'
@@ -115,9 +117,9 @@ CREATE TABLE IF NOT EXISTS bank_transactions (
   session_id          uuid REFERENCES reconciliation_sessions(id) ON DELETE CASCADE,
   date                date,
   description         text,
-  amount              numeric DEFAULT 0,
+  amount              numeric DEFAULT 0 CHECK (amount > 0),   -- always positive; direction is in type field
   reference           text,
-  type                text,                        -- 'credit' | 'debit'
+  type                text CHECK (type IN ('credit', 'debit')),  -- direction of transaction
   match_status        text DEFAULT 'unmatched',   -- 'unmatched' | 'suggested' | 'matched'
   matched_invoice_id  uuid REFERENCES invoices(id) ON DELETE SET NULL,
   match_type          text,                        -- 'auto' | 'fuzzy' | 'manual' | 'confirmed'
@@ -143,12 +145,12 @@ CREATE TABLE IF NOT EXISTS monthly_snapshots (
   month_key                 text,                  -- 'YYYY-MM'
   month_label               text,                  -- e.g. 'March 2026'
   year                      integer,
-  revenue                   numeric DEFAULT 0,
-  expenses                  numeric DEFAULT 0,
-  profit                    numeric DEFAULT 0,
-  vat_owing                 numeric DEFAULT 0,
-  invoice_count             integer DEFAULT 0,
-  reconciliation_confidence integer DEFAULT 0,
+  revenue                   numeric DEFAULT 0 CHECK (revenue >= 0),
+  expenses                  numeric DEFAULT 0 CHECK (expenses >= 0),
+  profit                    numeric DEFAULT 0,          -- can be negative (loss)
+  vat_owing                 numeric DEFAULT 0,          -- can be negative (VAT refund owed)
+  invoice_count             integer DEFAULT 0 CHECK (invoice_count >= 0),
+  reconciliation_confidence integer DEFAULT 0 CHECK (reconciliation_confidence >= 0),
   saved_at                  timestamptz DEFAULT now()
 );
 
@@ -191,9 +193,9 @@ CREATE TABLE IF NOT EXISTS opening_balances (
   year_start            text,
   verify_date           date,
   accountant_name       text,
-  ytd_revenue           numeric DEFAULT 0,
-  ytd_expenses          numeric DEFAULT 0,
-  vat_owing             numeric DEFAULT 0,
+  ytd_revenue           numeric DEFAULT 0 CHECK (ytd_revenue >= 0),
+  ytd_expenses          numeric DEFAULT 0 CHECK (ytd_expenses >= 0),
+  vat_owing             numeric DEFAULT 0,          -- can be negative (VAT refund owed to business)
   as_at_date            date,
   notes                 text,
   created_at            timestamptz DEFAULT now()
@@ -235,6 +237,7 @@ CREATE TABLE IF NOT EXISTS employees (
   period          text DEFAULT 'monthly',          -- 'monthly' | 'weekly' | 'fortnightly'
   uif_applicable  boolean DEFAULT true,
   sdl_applicable  boolean DEFAULT true,
+  age_bracket     text    DEFAULT 'under65',   -- 'under65' | '65to74' | 'over75' — determines PAYE rebate tier
   active          boolean DEFAULT true,
   updated_at      timestamptz DEFAULT now(),
   created_at      timestamptz DEFAULT now()
@@ -257,14 +260,14 @@ CREATE TABLE IF NOT EXISTS payroll_runs (
   period_label        text,                        -- e.g. 'March 2026'
   run_date            date,
   status              text DEFAULT 'calculated',  -- 'calculated' | 'posted' | 'paid' | 'verified'
-  total_gross         numeric DEFAULT 0,
-  total_net           numeric DEFAULT 0,
-  total_paye          numeric DEFAULT 0,
-  total_uif_emp       numeric DEFAULT 0,
-  total_uif_er        numeric DEFAULT 0,
-  total_sdl           numeric DEFAULT 0,
-  total_deductions    numeric DEFAULT 0,
-  employee_count      integer DEFAULT 0,
+  total_gross         numeric DEFAULT 0 CHECK (total_gross >= 0),
+  total_net           numeric DEFAULT 0 CHECK (total_net >= 0),
+  total_paye          numeric DEFAULT 0 CHECK (total_paye >= 0),
+  total_uif_emp       numeric DEFAULT 0 CHECK (total_uif_emp >= 0),
+  total_uif_er        numeric DEFAULT 0 CHECK (total_uif_er >= 0),
+  total_sdl           numeric DEFAULT 0 CHECK (total_sdl >= 0),
+  total_deductions    numeric DEFAULT 0 CHECK (total_deductions >= 0),
+  employee_count      integer DEFAULT 0 CHECK (employee_count >= 0),
   employee_snapshot   jsonb,
   salary_invoice_id   uuid REFERENCES invoices(id) ON DELETE SET NULL,
   paye_invoice_id     uuid REFERENCES invoices(id) ON DELETE SET NULL,
@@ -301,3 +304,72 @@ CREATE POLICY "Users read own audit log" ON recon_audit
 DROP POLICY IF EXISTS "Users insert own audit log" ON recon_audit;
 CREATE POLICY "Users insert own audit log" ON recon_audit
   FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+
+-- ── MIGRATIONS ───────────────────────────────────────────────
+-- Run these once against the existing live database.
+-- (The CREATE TABLE blocks above use IF NOT EXISTS so they won't
+--  add new columns to an existing table automatically.)
+
+-- M1: Add age_bracket to employees (PAYE secondary/tertiary rebates)
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS age_bracket text DEFAULT 'under65';
+
+-- M2: Add vat_registration_date to profiles (VAT201 pre-registration invoice filter)
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS vat_registration_date date;
+
+-- M3: Invoices — positive amount/total, non-negative VAT
+ALTER TABLE invoices DROP CONSTRAINT IF EXISTS invoices_amount_nonneg;
+ALTER TABLE invoices DROP CONSTRAINT IF EXISTS invoices_vat_nonneg;
+ALTER TABLE invoices DROP CONSTRAINT IF EXISTS invoices_total_nonneg;
+ALTER TABLE invoices ADD CONSTRAINT invoices_amount_pos  CHECK (amount > 0);
+ALTER TABLE invoices ADD CONSTRAINT invoices_vat_nonneg  CHECK (vat    >= 0);
+ALTER TABLE invoices ADD CONSTRAINT invoices_total_pos   CHECK (total  > 0);
+
+-- M4: Payroll runs — all aggregates non-negative
+ALTER TABLE payroll_runs DROP CONSTRAINT IF EXISTS payroll_total_gross_nonneg;
+ALTER TABLE payroll_runs DROP CONSTRAINT IF EXISTS payroll_total_net_nonneg;
+ALTER TABLE payroll_runs DROP CONSTRAINT IF EXISTS payroll_paye_nonneg;
+ALTER TABLE payroll_runs DROP CONSTRAINT IF EXISTS payroll_uif_emp_nonneg;
+ALTER TABLE payroll_runs DROP CONSTRAINT IF EXISTS payroll_uif_er_nonneg;
+ALTER TABLE payroll_runs DROP CONSTRAINT IF EXISTS payroll_sdl_nonneg;
+ALTER TABLE payroll_runs DROP CONSTRAINT IF EXISTS payroll_deductions_nonneg;
+ALTER TABLE payroll_runs ADD CONSTRAINT payroll_total_gross_nonneg  CHECK (total_gross     >= 0);
+ALTER TABLE payroll_runs ADD CONSTRAINT payroll_total_net_nonneg    CHECK (total_net       >= 0);
+ALTER TABLE payroll_runs ADD CONSTRAINT payroll_paye_nonneg         CHECK (total_paye      >= 0);
+ALTER TABLE payroll_runs ADD CONSTRAINT payroll_uif_emp_nonneg      CHECK (total_uif_emp   >= 0);
+ALTER TABLE payroll_runs ADD CONSTRAINT payroll_uif_er_nonneg       CHECK (total_uif_er    >= 0);
+ALTER TABLE payroll_runs ADD CONSTRAINT payroll_sdl_nonneg          CHECK (total_sdl       >= 0);
+ALTER TABLE payroll_runs ADD CONSTRAINT payroll_deductions_nonneg   CHECK (total_deductions >= 0);
+
+-- M5: Bank transactions — amount > 0 (always positive; direction in type field) + type constraint
+ALTER TABLE bank_transactions DROP CONSTRAINT IF EXISTS bank_tx_amount_nonneg;
+ALTER TABLE bank_transactions DROP CONSTRAINT IF EXISTS bank_tx_amount_pos;
+ALTER TABLE bank_transactions DROP CONSTRAINT IF EXISTS bank_tx_type_valid;
+ALTER TABLE bank_transactions ADD CONSTRAINT bank_tx_amount_pos  CHECK (amount > 0);
+ALTER TABLE bank_transactions ADD CONSTRAINT bank_tx_type_valid  CHECK (type IN ('credit', 'debit'));
+
+-- M5a: Invoices — unique invoice number per user (income invoices only, excludes quotes and NULL numbers)
+CREATE UNIQUE INDEX IF NOT EXISTS invoices_unique_invoice_number
+  ON invoices (user_id, invoice_number)
+  WHERE invoice_number IS NOT NULL AND type = 'income' AND doc_type = 'invoice';
+
+-- M5b: Invoices — type constraint + total >= amount integrity check
+ALTER TABLE invoices DROP CONSTRAINT IF EXISTS invoices_type_valid;
+ALTER TABLE invoices DROP CONSTRAINT IF EXISTS invoices_total_gte_amount;
+ALTER TABLE invoices ADD CONSTRAINT invoices_type_valid       CHECK (type IN ('income', 'expense'));
+ALTER TABLE invoices ADD CONSTRAINT invoices_total_gte_amount CHECK (total >= amount);
+
+-- M6: Monthly snapshots — revenue and expenses non-negative
+ALTER TABLE monthly_snapshots DROP CONSTRAINT IF EXISTS snapshots_revenue_nonneg;
+ALTER TABLE monthly_snapshots DROP CONSTRAINT IF EXISTS snapshots_expenses_nonneg;
+ALTER TABLE monthly_snapshots ADD CONSTRAINT snapshots_revenue_nonneg  CHECK (revenue  >= 0);
+ALTER TABLE monthly_snapshots ADD CONSTRAINT snapshots_expenses_nonneg CHECK (expenses >= 0);
+
+-- M8: Add tos_accepted to profiles (forced Terms acceptance on first login)
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS tos_accepted boolean DEFAULT false;
+
+-- M7: Opening balances — ytd figures non-negative
+ALTER TABLE opening_balances DROP CONSTRAINT IF EXISTS ob_ytd_revenue_nonneg;
+ALTER TABLE opening_balances DROP CONSTRAINT IF EXISTS ob_ytd_expenses_nonneg;
+ALTER TABLE opening_balances ADD CONSTRAINT ob_ytd_revenue_nonneg  CHECK (ytd_revenue  >= 0);
+ALTER TABLE opening_balances ADD CONSTRAINT ob_ytd_expenses_nonneg CHECK (ytd_expenses >= 0);
