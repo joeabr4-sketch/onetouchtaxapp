@@ -1701,6 +1701,25 @@ body.help-mode .main{padding-top:34px}
             </div>
           </div>
         </div>
+        <!-- USAGE THIS MONTH -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-head"><div class="card-title">📊 Usage This Month</div></div>
+          <div style="padding:16px 20px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+            <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:14px;text-align:center">
+              <div style="font-size:11px;color:var(--text-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">AI Calls</div>
+              <div id="usageAI" style="font-size:18px;font-weight:700;color:var(--text)">—</div>
+            </div>
+            <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:14px;text-align:center">
+              <div style="font-size:11px;color:var(--text-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">WhatsApp</div>
+              <div id="usageWA" style="font-size:18px;font-weight:700;color:var(--text)">—</div>
+            </div>
+            <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:14px;text-align:center">
+              <div style="font-size:11px;color:var(--text-3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Emails</div>
+              <div id="usageEM" style="font-size:18px;font-weight:700;color:var(--text)">—</div>
+            </div>
+          </div>
+          <div style="padding:0 20px 14px;font-size:11px;color:var(--text-3)">Resets on the 1st of each month. WhatsApp &amp; Email tracking available on Full plan.</div>
+        </div>
         <!-- BUSINESS PROFILE -->
         <div class="card" style="margin-bottom:16px">
           <div class="card-head"><div class="card-title">🏢 Business Profile</div></div>
@@ -2672,6 +2691,7 @@ function updateUserUI() {
     emailFormBtn.style.cursor = emailIsLocked ? 'not-allowed' : 'pointer';
     emailFormBtn.title = emailIsLocked ? 'Full Plan feature — upgrade at onetouch.net.za/#pricing' : 'Send via Email';
   }
+  updateUsageBadges();
 }
 
 // ── NAVIGATION ──
@@ -3899,6 +3919,26 @@ async function generateSavingTips() {
 // ── AI ASSISTANT ──
 const AI_ENDPOINT = '/api/claude';
 
+const USAGE_LIMITS = {
+  whatsapp: { soft: 50, warn: 100, hard: null },
+  ai:       { pro: 10, fullSoft: 200, fullHard: null },
+  email:    { soft: null, hard: null }
+};
+
+// Resets all usage counters when the calendar month rolls over.
+// Returns the current month key ('YYYY-MM').
+async function ensureMonthlyReset() {
+  if (!currentUser || !userProfile) return new Date().toISOString().slice(0,7);
+  const monthKey = new Date().toISOString().slice(0,7);
+  if ((userProfile.ai_calls_month||'') !== monthKey) {
+    const updates = { ai_calls: 0, ai_calls_month: monthKey, whatsapp_sent: 0, email_sent: 0 };
+    await sb.from('profiles').update(updates).eq('id', currentUser.id);
+    Object.assign(userProfile, updates);
+    updateUsageBadges();
+  }
+  return monthKey;
+}
+
 async function aiCall(payload) {
   const resp = await fetch(AI_ENDPOINT, {
     method: 'POST',
@@ -3915,25 +3955,71 @@ async function aiCall(payload) {
 async function checkAICalls() {
   const plan = userProfile?.plan||'free';
   if (plan==='free') { showUpgradePrompt('pro'); return false; }
-  if (plan==='full') return true;
-  // Monthly reset — compare stored month to current month
-  const monthKey = new Date().toISOString().slice(0,7); // 'YYYY-MM'
-  if ((userProfile.ai_calls_month||'') !== monthKey) {
-    await sb.from('profiles').update({ai_calls:0, ai_calls_month:monthKey}).eq('id',currentUser.id);
-    userProfile.ai_calls = 0;
-    userProfile.ai_calls_month = monthKey;
-    updateUserUI();
-  }
+  const monthKey = await ensureMonthlyReset();
   const calls = userProfile.ai_calls||0;
-  if (calls>=10) {
-    showToast('You\'ve used all 10 AI calls this month. Resets on the 1st. Upgrade to Full for unlimited.','var(--amber)');
-    return false;
+  if (plan==='pro') {
+    if (calls >= USAGE_LIMITS.ai.pro) {
+      showToast('You\'ve used all 10 AI calls this month. Resets on the 1st. Upgrade to Full for unlimited.','var(--amber)');
+      return false;
+    }
+  } else {
+    // Full plan: soft warning at 200
+    if (calls === USAGE_LIMITS.ai.fullSoft) {
+      showToast('You\'ve made 200 AI calls this month — heavy usage! We\'ll keep going, but consider if you need all of these.','var(--amber)');
+    }
   }
-  await sb.from('profiles').update({ai_calls:calls+1, ai_calls_month:monthKey}).eq('id',currentUser.id);
+  await sb.from('profiles').update({ai_calls: calls+1, ai_calls_month: monthKey}).eq('id', currentUser.id);
   userProfile.ai_calls = calls+1;
-  userProfile.ai_calls_month = monthKey;
-  updateUserUI();
+  updateUsageBadges();
   return true;
+}
+
+async function trackWhatsAppSent() {
+  if (!currentUser || !userProfile) return;
+  await ensureMonthlyReset();
+  const count = (userProfile.whatsapp_sent||0) + 1;
+  await sb.from('profiles').update({ whatsapp_sent: count }).eq('id', currentUser.id);
+  userProfile.whatsapp_sent = count;
+  if (count === USAGE_LIMITS.whatsapp.soft) {
+    showToast(`📲 You've sent ${count} WhatsApp messages this month. Usage is healthy — heads up for your records.`, 'var(--amber)');
+  } else if (count === USAGE_LIMITS.whatsapp.warn) {
+    showToast(`📲 ${count} WhatsApp messages this month. High volume — please review if all are needed.`, 'var(--amber)');
+  }
+  updateUsageBadges();
+}
+
+async function trackEmailSent() {
+  if (!currentUser || !userProfile) return;
+  await ensureMonthlyReset();
+  const count = (userProfile.email_sent||0) + 1;
+  await sb.from('profiles').update({ email_sent: count }).eq('id', currentUser.id);
+  userProfile.email_sent = count;
+  updateUsageBadges();
+}
+
+function updateUsageBadges() {
+  const plan = userProfile?.plan || 'free';
+  const aiCalls  = userProfile?.ai_calls       || 0;
+  const waCount  = userProfile?.whatsapp_sent   || 0;
+  const emCount  = userProfile?.email_sent      || 0;
+
+  // Sidebar AI badge (already exists)
+  const aiLeft = plan === 'free' ? 0 : plan === 'pro' ? Math.max(0, USAGE_LIMITS.ai.pro - aiCalls) : '∞';
+  const aiLabel = plan === 'full' ? '∞ AI calls' : plan === 'pro' ? `${aiLeft}/10 AI calls` : '0 AI calls';
+  const aiCallsBadge = document.getElementById('aiCallsBadge');
+  if (aiCallsBadge) aiCallsBadge.textContent = aiLabel;
+
+  // Usage card counters
+  const usageAI = document.getElementById('usageAI');
+  const usageWA = document.getElementById('usageWA');
+  const usageEM = document.getElementById('usageEM');
+  if (usageAI) {
+    if (plan === 'free') usageAI.textContent = '0 / 0';
+    else if (plan === 'pro') usageAI.textContent = `${aiCalls} / ${USAGE_LIMITS.ai.pro}`;
+    else usageAI.textContent = `${aiCalls} (unlimited)`;
+  }
+  if (usageWA) usageWA.textContent = plan === 'full' ? `${waCount}` : '—';
+  if (usageEM) usageEM.textContent = plan === 'full' ? `${emCount}` : '—';
 }
 
 async function sendChat() {
@@ -6514,6 +6600,7 @@ async function sendInvoiceWhatsApp(inv) {
     const data = await res.json();
     if (data.success) {
       showToast('✅ Sent via WhatsApp!', 'var(--green)');
+      await trackWhatsAppSent();
     } else {
       showToast('WhatsApp failed: ' + (data.error || 'Unknown error'), 'var(--red)');
     }
@@ -6574,6 +6661,7 @@ async function saveAndEmail() {
   );
 
   window.open(`mailto:${clientEmail}?subject=${subject}&body=${body}`, '_blank');
+  await trackEmailSent();
 }
 
 // ════════════════════════════════════════════
