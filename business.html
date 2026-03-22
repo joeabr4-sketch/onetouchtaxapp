@@ -2072,7 +2072,7 @@ body.help-mode .main{padding-top:34px}
       <div class="inv-form-footer-actions">
         <button onclick="saveInvAndPDF()" style="background:transparent;border:1px solid rgba(255,255,255,.15);color:var(--text-2);padding:11px 18px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13.5px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='var(--text-2)'">📥 Download PDF</button>
         <button onclick="saveInvoice()" style="background:transparent;border:1px solid rgba(255,255,255,.2);color:var(--text);padding:11px 20px;border-radius:9px;font-family:'Syne',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='rgba(255,255,255,.4)'" onmouseout="this.style.borderColor='rgba(255,255,255,.2)'">💾 Save Invoice</button>
-        <button onclick="saveAndEmail()" style="background:var(--blue);color:#fff;border:none;padding:12px 20px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(79,142,247,.3)" onmouseover="this.style.background='#3a7ae0'" onmouseout="this.style.background='var(--blue)'">
+        <button id="emailFormBtn" onclick="saveAndEmail()" style="background:var(--blue);color:#fff;border:none;padding:12px 20px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(79,142,247,.3)" onmouseover="this.style.background='#3a7ae0'" onmouseout="this.style.background='var(--blue)'">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
           Send via Email
         </button>
@@ -2365,8 +2365,8 @@ function isPlan(p) {
 function canUse(feature) {
   // Pro: reconciliation, bank analysis, VAT/IRP6/ITR14 docs, handoff, AI calls, unlimited invoices
   const proFeatures = ['invoices','reconcile','vat201','handoff','bankanalysis','irp6','itr14'];
-  // Full: payroll, EMP201, WhatsApp, accountant link, AI tips, white-label branding
-  const fullFeatures = ['accountant','payroll','emp201','tips','whatsapp','branding'];
+  // Full: payroll, EMP201, WhatsApp, email delivery, accountant link, AI tips, white-label branding
+  const fullFeatures = ['accountant','payroll','emp201','tips','whatsapp','email','branding'];
   // exportpdf is FREE — all users can export PDFs for their invoices
   if (fullFeatures.includes(feature)) return isPlan('full');
   if (proFeatures.includes(feature)) return isPlan('pro');
@@ -2662,6 +2662,14 @@ function updateUserUI() {
     waFormBtn.style.filter = waIsLocked ? 'grayscale(1)' : 'none';
     waFormBtn.style.cursor = waIsLocked ? 'not-allowed' : 'pointer';
     waFormBtn.title = waIsLocked ? 'Full Plan feature — upgrade at onetouch.net.za/#pricing' : 'Send via WhatsApp';
+  }
+  const emailIsLocked = !canUse('email');
+  const emailFormBtn = document.getElementById('emailFormBtn');
+  if (emailFormBtn) {
+    emailFormBtn.style.opacity = emailIsLocked ? '0.35' : '1';
+    emailFormBtn.style.filter = emailIsLocked ? 'grayscale(1)' : 'none';
+    emailFormBtn.style.cursor = emailIsLocked ? 'not-allowed' : 'pointer';
+    emailFormBtn.title = emailIsLocked ? 'Full Plan feature — upgrade at onetouch.net.za/#pricing' : 'Send via Email';
   }
 }
 
@@ -6433,6 +6441,10 @@ async function saveAndWhatsApp() {
 
 
 async function saveAndEmail() {
+  if (!canUse('email')) {
+    showToast('✉ Email delivery is a Full Plan feature — upgrade at onetouch.net.za/#pricing', 'var(--gold)');
+    return;
+  }
   // Capture form values before saveInvoice() closes the form
   const clientEmail = document.getElementById('inv-email')?.value?.trim() || '';
   const clientName  = document.getElementById('inv-client')?.value?.trim() || 'Client';
