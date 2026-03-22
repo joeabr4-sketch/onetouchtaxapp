@@ -737,6 +737,13 @@ body.help-mode .main{padding-top:34px}
           <div class="toggle-opt" id="vat-n" onclick="setToggle('vat','no')">❌ No</div>
         </div>
       </div>
+      <div id="ob-vat-fields" class="f-group">
+        <label class="f-label">VAT Number</label>
+        <input class="f-input" id="ob-vat-num" placeholder="e.g. 4123456789" />
+        <label class="f-label" style="margin-top:10px">VAT Registration Date</label>
+        <input class="f-input" type="date" id="ob-vat-date" />
+        <div style="font-size:11px;color:var(--text-3);margin-top:4px">Your SARS effective VAT registration date — used to filter your VAT201 correctly.</div>
+      </div>
       <button class="ob-btn" onclick="obStep(2)">Continue →</button>
     </div>
     <div id="obs2" style="display:none">
@@ -1728,9 +1735,25 @@ body.help-mode .main{padding-top:34px}
             <div class="set-grid">
               <div class="set-field"><label>Business Name</label><input id="set-biz" placeholder="e.g. Nkosi Electrical (Pty) Ltd" /></div>
               <div class="set-field"><label>Owner / Director Name</label><input id="set-owner" placeholder="e.g. Themba Nkosi" /></div>
-              <div class="set-field"><label>VAT Number</label><input id="set-vat" placeholder="4XXXXXXXXX" /></div>
               <div class="set-field"><label>Phone Number</label><input id="set-phone" placeholder="+27 82 000 0000" /></div>
               <div class="set-field full"><label>Business Address</label><input id="set-address" placeholder="123 Main Street, Johannesburg, 2001" /></div>
+            </div>
+            <div class="set-section-title">Tax Registration</div>
+            <div class="set-grid" style="margin-bottom:12px">
+              <div class="set-field">
+                <label>VAT Registered</label>
+                <div class="toggle-row" style="margin-top:6px">
+                  <div class="toggle-opt" id="set-vat-y" onclick="setSettingsVAT(true)">✅ Yes</div>
+                  <div class="toggle-opt" id="set-vat-n" onclick="setSettingsVAT(false)">❌ No</div>
+                </div>
+              </div>
+            </div>
+            <div id="set-vat-fields" style="display:none">
+              <div class="set-grid" style="margin-bottom:8px">
+                <div class="set-field"><label>VAT Number</label><input id="set-vat" placeholder="4XXXXXXXXX" /></div>
+                <div class="set-field"><label>VAT Registration Date</label><input id="set-vat-date" type="date" /></div>
+              </div>
+              <div style="font-size:11px;color:var(--text-3);margin-bottom:16px">Your SARS effective VAT registration date — used to filter your VAT201 invoices correctly.</div>
             </div>
             <div class="set-section-title">Invoice Bank Details</div>
             <div class="set-grid">
@@ -2467,6 +2490,8 @@ function setToggle(key, val) {
   if (key === 'vat') {
     document.getElementById('vat-y').className = 'toggle-opt' + (val==='yes'?' on':'');
     document.getElementById('vat-n').className = 'toggle-opt' + (val==='no'?' on':'');
+    const obVatFields = document.getElementById('ob-vat-fields');
+    if (obVatFields) obVatFields.style.display = val === 'yes' ? 'block' : 'none';
   } else if (key === 'paye') {
     document.getElementById('paye-y').className = 'toggle-opt' + (val==='yes'?' on':'');
     document.getElementById('paye-n').className = 'toggle-opt' + (val==='no'?' on':'');
@@ -2491,12 +2516,22 @@ async function saveProfile() {
   const btn = document.querySelector('.ob-btn');
   if (btn) { btn.textContent = 'Setting up...'; btn.disabled = true; }
 
+  const isVat = obData.vat === 'yes';
+  if (isVat) {
+    const vatNum = document.getElementById('ob-vat-num')?.value.trim() || '';
+    const vatDate = document.getElementById('ob-vat-date')?.value || '';
+    if (!vatNum) { showToast('Please enter your VAT number', 'var(--amber)'); if (btn) { btn.textContent = 'Launch My Dashboard →'; btn.disabled = false; } return; }
+    if (!vatDate) { showToast('VAT registration date required to calculate VAT correctly', 'var(--amber)'); if (btn) { btn.textContent = 'Launch My Dashboard →'; btn.disabled = false; } return; }
+  }
+
   const data = {
     id: currentUser.id,
     biz_name: biz,
     owner_name: document.getElementById('ob-owner')?.value.trim() || '',
     entity_type: document.getElementById('ob-entity')?.value || 'sole_prop',
-    vat_registered: obData.vat === 'yes',
+    vat_registered: isVat,
+    vat_number: isVat ? (document.getElementById('ob-vat-num')?.value.trim() || '') : '',
+    vat_registration_date: isVat ? (document.getElementById('ob-vat-date')?.value || null) : null,
     has_paye: obData.paye === 'yes',
     is_provisional: obData.prov === 'yes',
     year_end: document.getElementById('ob-year')?.value || 'June',
@@ -3328,25 +3363,45 @@ function exportInvoicePDF(inv) {
 }
 
 // ── SETTINGS ──
+function setSettingsVAT(isVat) {
+  const y = document.getElementById('set-vat-y');
+  const n = document.getElementById('set-vat-n');
+  const fields = document.getElementById('set-vat-fields');
+  if (y) y.className = 'toggle-opt' + (isVat ? ' on' : '');
+  if (n) n.className = 'toggle-opt' + (!isVat ? ' on' : '');
+  if (fields) fields.style.display = isVat ? 'block' : 'none';
+}
+
 function loadSettings() {
   if (!userProfile) return;
   const f = id => { const el=document.getElementById(id); if(el) return el; };
   if(f('set-biz')) f('set-biz').value = userProfile.biz_name||'';
   if(f('set-owner')) f('set-owner').value = userProfile.owner_name||'';
-  if(f('set-vat')) f('set-vat').value = userProfile.vat_number||'';
   if(f('set-phone')) f('set-phone').value = userProfile.company_phone||'';
   if(f('set-address')) f('set-address').value = userProfile.company_address||'';
   if(f('set-bank')) f('set-bank').value = userProfile.bank_name||'';
   if(f('set-acc')) f('set-acc').value = userProfile.bank_account||'';
   if(f('set-branch')) f('set-branch').value = userProfile.bank_branch||'';
   if(f('set-acctype')) f('set-acctype').value = userProfile.bank_type||'Current / Cheque';
+  // VAT registration section
+  setSettingsVAT(isVatRegistered());
+  if(f('set-vat')) f('set-vat').value = userProfile.vat_number||'';
+  if(f('set-vat-date')) f('set-vat-date').value = userProfile.vat_registration_date||'';
 }
 
 async function saveSettings() {
+  const isVat = document.getElementById('set-vat-y')?.classList.contains('on') || false;
+  const vatNum = document.getElementById('set-vat')?.value.trim() || '';
+  const vatDate = document.getElementById('set-vat-date')?.value || '';
+  if (isVat && !vatNum) { showToast('Please enter your VAT number', 'var(--amber)'); return; }
+  if (isVat && !vatDate) { showToast('VAT registration date required to calculate VAT correctly', 'var(--amber)'); return; }
+
   const updates = {
     biz_name: document.getElementById('set-biz')?.value.trim()||userProfile.biz_name,
     owner_name: document.getElementById('set-owner')?.value.trim()||'',
-    vat_number: document.getElementById('set-vat')?.value.trim()||'',
+    vat_registered: isVat,
+    vat_number: isVat ? vatNum : '',
+    vat_registration_date: isVat ? (vatDate || null) : null,
     company_phone: document.getElementById('set-phone')?.value.trim()||'',
     company_address: document.getElementById('set-address')?.value.trim()||'',
     bank_name: document.getElementById('set-bank')?.value.trim()||'',
@@ -3581,13 +3636,15 @@ function toggleCL(box) {
 
 // ── VAT201 AUTO-FILL ──
 function autoFillVAT201() {
-  // Only include invoices where VAT was applied AND (if vat_registration_date is set) date >= registration date
-  // Fallback: if vat_registration_date is missing, filter by has_vat only
-  const regDate = userProfile?.vat_registration_date ? new Date(userProfile.vat_registration_date) : null;
+  if (!userProfile?.vat_registration_date) {
+    showToast('⚠ VAT registration date required to calculate VAT correctly. Please set it in Settings → Tax Registration.', 'var(--amber)');
+    return;
+  }
+  const regDate = new Date(userProfile.vat_registration_date);
   const vatInvoices = invoices.filter(i => {
     if (!i.has_vat) return false;
-    if (regDate && i.date) return new Date(i.date) >= regDate;
-    return !regDate; // if regDate is set but invoice has no date, exclude — cannot confirm post-registration
+    if (!i.date) return false; // undated invoices excluded — cannot confirm post-registration
+    return new Date(i.date) >= regDate;
   });
   const income = vatInvoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0);
   const vatOut = vatInvoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.vat||0),0);
@@ -3656,6 +3713,10 @@ function makePDFFooter(doc) {
 
 // ── PDF GENERATORS ──
 function genVAT201() {
+  if (!userProfile?.vat_registration_date) {
+    showToast('⚠ VAT registration date required. Please set it in Settings → Tax Registration.', 'var(--amber)');
+    return;
+  }
   if (!window.jspdf) { showToast('PDF loading...','var(--amber)'); return; }
   const {jsPDF} = window.jspdf; const doc = new jsPDF();
   let y = makePDFHeader(doc,'VAT201 Return Summary','Value Added Tax — Bi-monthly Submission');
