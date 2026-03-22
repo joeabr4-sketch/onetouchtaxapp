@@ -1636,11 +1636,11 @@ body.help-mode .main{padding-top:34px}
         <div class="chat-msgs" id="chatMsgs">
           <div class="msg ai">
             <div class="msg-av ai">🤖</div>
-            <div><div class="msg-bub">Hi there! I'm your South African business tax assistant. Ask me anything about VAT, PAYE, provisional tax, eFiling, SARS deadlines, or how to use OneTouch. How can I help you today?</div><div class="msg-time">Now</div></div>
+            <div><div class="msg-bub" id="aiWelcomeBub">Hi there! I'm your South African business tax assistant. Ask me anything about VAT, PAYE, provisional tax, eFiling, SARS deadlines, or how to use OneTouch. How can I help you today?</div><div class="msg-time">Now</div></div>
           </div>
         </div>
         <div class="chat-foot">
-          <div class="qq">
+          <div class="qq" id="chatChips">
             <div class="q-chip" onclick="sendQ(this)">When is my VAT due?</div>
             <div class="q-chip" onclick="sendQ(this)">How do I calculate PAYE?</div>
             <div class="q-chip" onclick="sendQ(this)">What is provisional tax?</div>
@@ -2183,6 +2183,7 @@ let invVATEnabled = true;
 let editingInvId = null;
 let pendingDocFn = null;
 let logoDataUrl = null;
+let currentSection = 'dashboard';
 
 // ── HELPERS ──
 function fmtR(v) { return 'R ' + (parseFloat(v)||0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2}); }
@@ -2688,6 +2689,8 @@ function showSection(name, btn) {
   if (name === 'reconcile') renderReconciliation();
   if (name === 'handoff') { updatePackStatus(); updateHandoffReconBanner(); }
   if (name === 'history') autoSaveMonthlySnapshot();
+  if (name === 'assistant') refreshAIContext();
+  else currentSection = name;
   document.getElementById('notifDropdown').classList.remove('open');
 }
 
@@ -3942,9 +3945,9 @@ async function sendChat() {
   document.getElementById('sendBtn').disabled = true;
   addMsg('ai', null, true);
   try {
-    const ctx = `Business: ${userProfile?.biz_name||'Unknown'}, VAT: ${isVatRegistered()}, PAYE: ${userProfile?.has_paye||false}, Provisional: ${userProfile?.is_provisional||false}`;
+    const screenCtx = buildScreenContext(currentSection);
     const data = await aiCall({model:'claude-sonnet-4-20250514',max_tokens:800,
-      system:`You are a South African business tax assistant for OneTouch TaxApp. Specialise in SARS, VAT, PAYE, provisional tax and eFiling. User context: ${ctx}. Be concise and practical.`,
+      system:`You are a South African business tax assistant for OneTouch TaxApp. Specialise in SARS, VAT, PAYE, provisional tax and eFiling. Be concise, practical and guide the user — do not make decisions for them.\n\nCurrent user context:\n${screenCtx}\n\nRULES: Never guarantee correctness of figures. Never instruct the user to submit to SARS without reviewing first. Treat all outputs as estimates for review.`,
       messages: getChatHistory().concat([{role:'user',content:msg}])});
     removeTyping();
     addMsg('ai', data.content?.[0]?.text||'Sorry, please try again.');
@@ -3962,6 +3965,106 @@ function getChatHistory() {
     else if (!m.querySelector('.typing-indicator')) history.push({role:'assistant',content:m.querySelector('.msg-bub')?.textContent||''});
   });
   return history.slice(-8);
+}
+
+// ── AI CONTEXT ENGINE ──
+
+const AI_SCREEN_LABELS = {
+  dashboard:  'Dashboard (VAT & Compliance)',
+  invoices:   'Invoices',
+  reconcile:  'Bank Reconciliation',
+  payroll:    'Payroll & EMP201',
+  financials: 'Financials & P&L',
+  calendar:   'Compliance Calendar',
+  handoff:    'Bookkeeper Pack',
+  history:    'Financial History',
+  settings:   'Settings',
+  checklist:  'Checklists'
+};
+
+const AI_SCREEN_CHIPS = {
+  invoices:  ['How do I record a partial payment?', 'What must a valid VAT invoice include?', 'How do I handle a credit note?', 'When can I write off a bad debt?'],
+  reconcile: ["Why won't my transaction match?", 'What do I do with unmatched items?', 'When should I close a period?', 'How does reconciliation affect my VAT?'],
+  payroll:   ['How is PAYE calculated on this payroll?', 'When is EMP201 due?', 'What is the SDL threshold?', 'How do I handle a bonus payment?'],
+  dashboard: ['When is my VAT201 due?', 'What is input vs output VAT?', 'Can I claim VAT on this expense?', 'How do I handle a late VAT submission?'],
+  financials:['How is my P&L calculated?', 'What expenses are tax deductible?', 'How do provisional tax estimates work?', 'What is a good profit margin for my sector?'],
+  default:   ['When is my VAT due?', 'How do I calculate PAYE?', 'What is provisional tax?', 'How do I register for VAT?']
+};
+
+function buildScreenContext(screen) {
+  const lines = [];
+  lines.push(`Current screen: ${AI_SCREEN_LABELS[screen] || screen}`);
+  lines.push(`Business: ${userProfile?.biz_name || 'Unknown'}`);
+  lines.push(`VAT registered: ${isVatRegistered()}`);
+  lines.push(`PAYE registered: ${userProfile?.has_paye || false}`);
+  lines.push(`Provisional tax: ${userProfile?.is_provisional || false}`);
+  lines.push(`Plan: ${userProfile?.plan || 'free'}`);
+
+  if (screen === 'invoices') {
+    const inc = invoices.filter(i => i.type === 'income');
+    const outstanding = inc.filter(i => i.status === 'outstanding');
+    const paid = inc.filter(i => i.status === 'paid');
+    const outstandingTotal = outstanding.reduce((s,i) => s + Number(i.total||i.amount||0), 0);
+    lines.push(`\nInvoice summary:`);
+    lines.push(`  Total income invoices: ${inc.length}`);
+    lines.push(`  Outstanding: ${outstanding.length} invoices totalling ${fmtR(outstandingTotal)}`);
+    lines.push(`  Paid: ${paid.length} invoices`);
+  }
+
+  if (screen === 'reconcile') {
+    const matched = reconTransactions.filter(t => t.matched || t.inv_id);
+    const unmatched = reconTransactions.filter(t => !t.matched && !t.inv_id);
+    const rate = reconTransactions.length ? Math.round(matched.length / reconTransactions.length * 100) : 0;
+    lines.push(`\nReconciliation summary:`);
+    lines.push(`  Transactions loaded: ${reconTransactions.length}`);
+    lines.push(`  Matched: ${matched.length} (${rate}%)`);
+    lines.push(`  Unmatched: ${unmatched.length}`);
+  }
+
+  if (screen === 'payroll') {
+    lines.push(`\nPayroll summary:`);
+    lines.push(`  Employees: ${employees.length}`);
+    if (payrollRuns.length) {
+      const r = payrollRuns[0];
+      lines.push(`  Latest run: gross ${fmtR(r.gross_total||0)}, PAYE ${fmtR(r.paye_total||0)}, UIF ${fmtR(r.uif_total||0)}`);
+    }
+  }
+
+  if (screen === 'dashboard' || screen === 'financials') {
+    const income = invoices.filter(i => i.type === 'income').reduce((s,i) => s + Number(i.amount||0), 0);
+    const expenses = invoices.filter(i => i.type === 'expense').reduce((s,i) => s + Number(i.amount||0), 0);
+    lines.push(`\nFinancials summary:`);
+    lines.push(`  Total income: ${fmtR(income)}`);
+    lines.push(`  Total expenses: ${fmtR(expenses)}`);
+    lines.push(`  Net profit: ${fmtR(income - expenses)}`);
+    if (isVatRegistered()) {
+      const vatOut = invoices.filter(i => i.has_vat && i.type === 'income').reduce((s,i) => s + Number(i.vat||0), 0);
+      const vatIn  = invoices.filter(i => i.has_vat && i.type === 'expense').reduce((s,i) => s + Number(i.vat||0), 0);
+      lines.push(`  Output VAT: ${fmtR(vatOut)}, Input VAT: ${fmtR(vatIn)}, Net payable: ${fmtR(Math.max(0, vatOut - vatIn))}`);
+    }
+  }
+
+  return lines.join('\n');
+}
+
+function refreshAIContext() {
+  const screen = currentSection;
+  const label = AI_SCREEN_LABELS[screen] || 'your work';
+
+  // Update welcome bubble without wiping the chat history
+  const bub = document.getElementById('aiWelcomeBub');
+  if (bub) {
+    bub.textContent = screen === 'dashboard' || screen === 'financials' || !AI_SCREEN_LABELS[screen]
+      ? "Hi there! I'm your South African business tax assistant. Ask me anything about VAT, PAYE, provisional tax, eFiling, SARS deadlines, or how to use OneTouch. How can I help you today?"
+      : `I see you're working on ${label} — how can I help? I have your current data loaded and can answer questions specific to what you're doing.`;
+  }
+
+  // Update quick chips
+  const chips = document.getElementById('chatChips');
+  if (chips) {
+    const questions = AI_SCREEN_CHIPS[screen] || AI_SCREEN_CHIPS.default;
+    chips.innerHTML = questions.map(q => `<div class="q-chip" onclick="sendQ(this)">${q}</div>`).join('');
+  }
 }
 
 function addMsg(role, text, typing) {
