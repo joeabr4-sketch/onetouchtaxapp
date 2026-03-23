@@ -4682,7 +4682,12 @@ function splitCSVLine(line) {
 }
 
 async function processReconFile(file) {
-  if (!file || !reconSession) return;
+  console.log('[CSV DEBUG] processReconFile called, file:', file?.name, 'reconSession:', reconSession);
+  if (!file || !reconSession) {
+    console.log('[CSV DEBUG] EARLY RETURN — file:', !!file, 'reconSession:', !!reconSession);
+    return;
+  }
+  console.log('[CSV DEBUG] file ext:', file.name.split('.').pop().toLowerCase());
   const dz = document.getElementById('reconDropZone');
   if (dz) dz.innerHTML = `<div style="font-size:22px;margin-bottom:8px">⏳</div><div style="font-size:13px;color:var(--text-2)">Reading ${file.name}...</div><input type="file" id="reconFileInput" accept=".csv,.xlsx,.xls,.ofx,.qfx" style="display:none" onchange="handleReconFile(event)">`;
 
