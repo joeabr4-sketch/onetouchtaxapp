@@ -14,9 +14,17 @@ const PLANS = {
   full: { name: 'OneTouch Full Plan', amount: '599.00' }
 };
 
-// URL-encode a value per PayFast spec: encodeURIComponent with spaces as +
+// URL-encode matching PHP urlencode() — PayFast verifies using PHP on their end.
+// encodeURIComponent leaves ! ~ * ' ( ) unencoded; PHP urlencode encodes them.
 function pfEncode(val) {
-  return encodeURIComponent(String(val).trim()).replace(/%20/g, '+');
+  return encodeURIComponent(String(val).trim())
+    .replace(/!/g,  '%21')
+    .replace(/~/g,  '%7E')
+    .replace(/\*/g, '%2A')
+    .replace(/'/g,  '%27')
+    .replace(/\(/g, '%28')
+    .replace(/\)/g, '%29')
+    .replace(/%20/g, '+');
 }
 
 // Build signature string: sort keys alphabetically, encode values, append passphrase
