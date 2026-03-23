@@ -2778,8 +2778,8 @@ function showSection(name, btn) {
   if (name === 'reconcile') renderReconciliation();
   if (name === 'handoff') { updatePackStatus(); updateHandoffReconBanner(); }
   if (name === 'history') autoSaveMonthlySnapshot();
+  currentSection = name;
   if (name === 'assistant') refreshAIContext();
-  else currentSection = name;
   document.getElementById('notifDropdown').classList.remove('open');
 }
 
@@ -3053,7 +3053,11 @@ function updateDepositBalance() {
   }
 }
 
+let _savingInvoice = false;
 async function saveInvoice(exportPDF) {
+  if (_savingInvoice) return;
+  _savingInvoice = true;
+  try {
   const subtotal = rnd(lineItems.reduce((s,li)=>s+(li.qty||1)*(li.price||0),0));
   const vatAmt = invVATEnabled ? vatOn(subtotal) : 0;
   const total = rnd(subtotal + vatAmt);
@@ -3142,6 +3146,7 @@ async function saveInvoice(exportPDF) {
   } else {
     closeInvForm();
   }
+  } finally { _savingInvoice = false; }
 }
 
 async function saveInvAndPDF() { await saveInvoice(true); }
@@ -4035,10 +4040,12 @@ async function ensureMonthlyReset() {
 }
 
 async function aiCall(payload) {
+  const { data: { session: _aiSess } } = await sb.auth.getSession();
   const resp = await fetch(AI_ENDPOINT, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${_aiSess?.access_token || ''}`,
       'x-user-id': currentUser?.id || 'anon'
     },
     body: JSON.stringify(payload)
@@ -4482,7 +4489,7 @@ function calcAmountPaid(invoiceId) {
 }
 
 // ── UPDATE INVOICE STATUS AFTER MATCH ──
-async function updateInvoiceStatus(invoiceId) {
+async function updateInvoiceStatusFromRecon(invoiceId) {
   const inv = invoices.find(i => String(i.id) === String(invoiceId));
   if (!inv) return;
   const total = parseFloat(inv.total || inv.amount || 0);
@@ -4976,7 +4983,7 @@ async function runReconciliationEngine() {
         await sb.from('bank_transactions').update({ match_status: 'matched', matched_invoice_id: match.id, match_type: matchType }).eq('id', tx.id);
         tx.match_status = 'matched'; tx.matched_invoice_id = match.id; tx.match_type = matchType;
         usedInvIds.add(String(match.id));
-        await updateInvoiceStatus(match.id);
+        await updateInvoiceStatusFromRecon(match.id);
         addReconAudit('auto', `Auto-matched (${matchType}): ${tx.description} ↔ ${match.invoice_number||'INV'} — ${fmtR(txAmt)}`);
         exactCount++;
         continue;
@@ -5271,7 +5278,7 @@ async function manualMatchTx(txId, invId) {
   await sb.from('bank_transactions').update({ match_status: 'matched', matched_invoice_id: invId, match_type: 'manual' }).eq('id', txId);
   const tx = reconTransactions.find(t => t.id === txId);
   if (tx) { tx.match_status = 'matched'; tx.matched_invoice_id = invId; tx.match_type = 'manual'; }
-  await updateInvoiceStatus(invId);
+  await updateInvoiceStatusFromRecon(invId);
   await loadInvoices();
   addReconAudit('manual', `Manual match: ${tx?.description||txId} → Invoice ${invId}`);
   updateReconUI(); renderTxTable(); renderInvoiceReconTable(); renderUnrecorded(); detectConflicts();
@@ -5283,7 +5290,7 @@ async function confirmSuggestedMatch(txId) {
   if (!tx?.matched_invoice_id) return;
   await sb.from('bank_transactions').update({ match_status: 'matched', match_type: 'confirmed' }).eq('id', txId);
   tx.match_status = 'matched'; tx.match_type = 'confirmed';
-  await updateInvoiceStatus(tx.matched_invoice_id);
+  await updateInvoiceStatusFromRecon(tx.matched_invoice_id);
   await loadInvoices();
   addReconAudit('manual', `Confirmed suggestion: ${tx.description}`);
   updateReconUI(); renderTxTable(); renderInvoiceReconTable(); renderUnrecorded(); detectConflicts();
@@ -5303,7 +5310,7 @@ async function unmatchTx(txId) {
   const invId = tx?.matched_invoice_id;
   await sb.from('bank_transactions').update({ match_status: 'unmatched', matched_invoice_id: null, match_type: null }).eq('id', txId);
   if (tx) { tx.match_status = 'unmatched'; tx.matched_invoice_id = null; }
-  if (invId) { await updateInvoiceStatus(invId); await loadInvoices(); }
+  if (invId) { await updateInvoiceStatusFromRecon(invId); await loadInvoices(); }
   addReconAudit('manual', `Unmatched: ${tx?.description||txId}`);
   updateReconUI(); renderTxTable(); renderInvoiceReconTable(); renderUnrecorded(); detectConflicts();
 }
@@ -5843,9 +5850,10 @@ async function sendAccountantLink() {
 
   // Send via Resend proxy
   try {
+    const { data: { session: _emailSession } } = await sb.auth.getSession();
     const emailResp = await fetch('/api/send-email', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${_emailSession?.access_token||''}` },
       body: JSON.stringify({
         to: email,
         subject: `${bizName} has shared their financial summary with you — OneTouch TaxApp`,
@@ -6561,9 +6569,9 @@ RULES:
   try {
     const resp = await fetch(AI_ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-user-id': userId },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${(await sb.auth.getSession()).data.session?.access_token||''}`, 'x-user-id': userId },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5-20251001',
         max_tokens: 500,
         system: systemPrompt,
         messages: supportConvHistory
@@ -6616,9 +6624,10 @@ async function escalateSupportIssue(lastMsg, userEmail, userPlan, bizName, userI
   </div>`;
 
   try {
+    const { data: { session: _suppSession } } = await sb.auth.getSession();
     await fetch('/api/send-email', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${_suppSession?.access_token||''}` },
       body: JSON.stringify({
         to: 'support@onetouch.net.za',
         subject: `🚨 Support Escalation — ${bizName} (${userPlan.toUpperCase()}) — ${new Date().toLocaleDateString('en-ZA')}`,

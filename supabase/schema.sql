@@ -42,20 +42,33 @@ CREATE POLICY "Users manage own profile" ON profiles
 -- Income and expense entries. Core financial data.
 
 CREATE TABLE IF NOT EXISTS invoices (
-  id            uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id       uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  type          text NOT NULL CHECK (type IN ('income', 'expense')),
-  date          date,
-  description   text,
-  category      text,
-  amount        numeric DEFAULT 0 CHECK (amount > 0),    -- excl VAT, must be positive
-  vat           numeric DEFAULT 0 CHECK (vat >= 0),      -- zero is valid (non-VAT invoice)
-  total         numeric DEFAULT 0 CHECK (total > 0 AND total >= amount),  -- incl VAT; must be >= excl-VAT amount
-  has_vat       boolean DEFAULT false,
-  reconciled    boolean DEFAULT false,
-  status        text DEFAULT 'outstanding',        -- 'outstanding' | 'paid' | 'partial'
-  status_log    text,
-  created_at    timestamptz DEFAULT now()
+  id                uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id           uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  type              text NOT NULL CHECK (type IN ('income', 'expense')),
+  doc_type          text DEFAULT 'invoice',              -- 'invoice' | 'quote' | 'VAT201' | 'EMP201' | 'IRP6' | etc.
+  date              date,
+  due_date          date,
+  invoice_number    text,
+  client_name       text,
+  client_email      text,
+  client_address    text,
+  client_whatsapp   text,
+  description       text,
+  notes             text,
+  category          text,
+  payment_terms     text,
+  line_items        jsonb,                               -- JSON array of {desc, qty, price}
+  amount            numeric DEFAULT 0 CHECK (amount > 0),    -- excl VAT, must be positive
+  vat               numeric DEFAULT 0 CHECK (vat >= 0),      -- zero is valid (non-VAT invoice)
+  total             numeric DEFAULT 0 CHECK (total > 0 AND total >= amount),  -- incl VAT; must be >= excl-VAT amount
+  has_vat           boolean DEFAULT false,
+  deposit_paid      numeric DEFAULT 0,                   -- deposit amount received at time of invoicing
+  deposit_note      text,
+  reconciled        boolean DEFAULT false,
+  recon_match_type  text,                               -- 'exact' | 'fuzzy' | 'manual' | 'confirmed'
+  status            text DEFAULT 'outstanding',         -- 'outstanding' | 'paid' | 'partial'
+  status_log        text,
+  created_at        timestamptz DEFAULT now()
 );
 
 ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
@@ -379,3 +392,19 @@ ALTER TABLE opening_balances DROP CONSTRAINT IF EXISTS ob_ytd_revenue_nonneg;
 ALTER TABLE opening_balances DROP CONSTRAINT IF EXISTS ob_ytd_expenses_nonneg;
 ALTER TABLE opening_balances ADD CONSTRAINT ob_ytd_revenue_nonneg  CHECK (ytd_revenue  >= 0);
 ALTER TABLE opening_balances ADD CONSTRAINT ob_ytd_expenses_nonneg CHECK (ytd_expenses >= 0);
+
+-- M10: Invoices — add all missing columns so schema.sql matches live DB
+-- Safe to re-run: ADD COLUMN IF NOT EXISTS is idempotent
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS doc_type         text DEFAULT 'invoice';
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS due_date         date;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS invoice_number   text;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS client_name      text;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS client_email     text;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS client_address   text;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS client_whatsapp  text;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS notes            text;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS payment_terms    text;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS line_items       jsonb;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS deposit_paid     numeric DEFAULT 0;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS deposit_note     text;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS recon_match_type text;

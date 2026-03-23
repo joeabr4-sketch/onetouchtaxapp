@@ -4,11 +4,31 @@
 export default async function handler(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
+
+  // ── AUTH CHECK ──
+  // Verify the caller is an authenticated Supabase user by checking their JWT
+  const authHeader = req.headers['authorization'] || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+  if (!token) {
+    return res.status(401).json({ error: 'Unauthorised' });
+  }
+  const supabaseUrl = process.env.SUPABASE_URL || 'https://stcxldjcagyxjfwfforx.supabase.co';
+  const supabaseAnon = process.env.SUPABASE_ANON_KEY;
+  if (supabaseAnon) {
+    try {
+      const authRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+        headers: { 'Authorization': `Bearer ${token}`, 'apikey': supabaseAnon }
+      });
+      if (!authRes.ok) return res.status(401).json({ error: 'Unauthorised' });
+    } catch {
+      return res.status(401).json({ error: 'Unauthorised' });
+    }
+  }
 
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'Email service not configured' });
