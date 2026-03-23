@@ -6,19 +6,33 @@ import crypto from 'crypto';
 const MERCHANT_ID  = process.env.PAYFAST_MERCHANT_ID;
 const MERCHANT_KEY = process.env.PAYFAST_MERCHANT_KEY;
 const PASSPHRASE   = process.env.PAYFAST_PASSPHRASE || '';
-const SITE_URL     = 'https://onetouchtaxapp.vercel.app';
+const SANDBOX      = process.env.PAYFAST_SANDBOX === 'true'; // set to 'true' for testing
+const SITE_URL     = process.env.SITE_URL || 'https://onetouchtaxapp.vercel.app';
 
 const PLANS = {
   pro:  { name: 'OneTouch Pro Plan',  amount: '299.00' },
-  full: { name: 'OneTouch Full Plan', amount: '499.00' }
+  full: { name: 'OneTouch Full Plan', amount: '599.00' }
 };
+
+// Matches PHP urlencode() exactly — required for PayFast signature compatibility.
+// encodeURIComponent leaves ! ~ ' ( ) * unencoded; PHP urlencode encodes them.
+function pfEncode(val) {
+  return encodeURIComponent(String(val).trim())
+    .replace(/!/g,  '%21')
+    .replace(/'/g,  '%27')
+    .replace(/\(/g, '%28')
+    .replace(/\)/g, '%29')
+    .replace(/\*/g, '%2A')
+    .replace(/~/g,  '%7E')
+    .replace(/%20/g, '+');
+}
 
 function generateSignature(data, passphrase) {
   let str = Object.keys(data)
-    .filter(k => data[k] !== '')
-    .map(k => `${k}=${encodeURIComponent(String(data[k]).trim()).replace(/%20/g, '+')}`)
+    .filter(k => data[k] != null && data[k] !== '') // exclude null, undefined, empty
+    .map(k => `${k}=${pfEncode(data[k])}`)
     .join('&');
-  if (passphrase) str += `&passphrase=${encodeURIComponent(passphrase.trim()).replace(/%20/g, '+')}`;
+  if (passphrase) str += `&passphrase=${pfEncode(passphrase)}`;
   return crypto.createHash('md5').update(str).digest('hex');
 }
 
@@ -63,8 +77,12 @@ export default async function handler(req, res) {
 
   data.signature = generateSignature(data, PASSPHRASE);
 
+  const pfUrl = SANDBOX
+    ? 'https://sandbox.payfast.co.za/eng/process'
+    : 'https://www.payfast.co.za/eng/process';
+
   return res.status(200).json({
-    action: 'https://www.payfast.co.za/eng/process',
+    action: pfUrl,
     fields: data
   });
 }
