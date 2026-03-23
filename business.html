@@ -6090,6 +6090,7 @@ async function clearAllFinancialHistory() {
     loadReconStatusBar();
     updateReconUI();
     renderPayrollRunsSection();
+    renderEMP201();
     showToast('✅ Financial history cleared', 'var(--green)');
   } catch(e) {
     showToast('Error clearing history: ' + e.message, 'var(--red)');
