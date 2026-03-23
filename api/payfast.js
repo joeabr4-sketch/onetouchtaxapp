@@ -89,6 +89,10 @@ export default async function handler(req, res) {
   // Generate signature — data has no signature key yet, so it is correctly excluded
   data.signature = generateSignature(data, PASSPHRASE);
 
+  // TEMP TEST: remove signature field — PayFast "require signature" is OFF so it should
+  // accept the payment without one. Remove this line once confirmed working.
+  delete data.signature;
+
   const pfUrl = SANDBOX
     ? 'https://sandbox.payfast.co.za/eng/process'
     : 'https://www.payfast.co.za/eng/process';
