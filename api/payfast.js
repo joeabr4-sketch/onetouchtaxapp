@@ -28,6 +28,7 @@ function pfEncode(val) {
 
 function generateSignature(data, passphrase) {
   const str = Object.keys(data)
+    .sort()
     .filter(k => data[k] != null && data[k] !== '')
     .map(k => `${k}=${pfEncode(data[k])}`)
     .join('&');
@@ -75,9 +76,13 @@ export default async function handler(req, res) {
     custom_str2:       plan,
   };
 
-  console.log('[PayFast] merchant_id:', MERCHANT_ID);
-  console.log('[PayFast] passphrase set:', !!PASSPHRASE);
-  console.log('[PayFast] fields:', JSON.stringify(data));
+  // Build signature input string for debug (passphrase value hidden)
+  const sigFields = Object.keys(data)
+    .sort()
+    .filter(k => data[k] != null && data[k] !== '')
+    .map(k => `${k}=${pfEncode(data[k])}`)
+    .join('&');
+  const sigDebug = PASSPHRASE ? `${sigFields}&passphrase=[SET]` : sigFields;
 
   data.signature = generateSignature(data, PASSPHRASE);
 
@@ -87,6 +92,13 @@ export default async function handler(req, res) {
 
   return res.status(200).json({
     action: pfUrl,
-    fields: data
+    fields: data,
+    _debug: {
+      merchant_id_set: !!MERCHANT_ID,
+      merchant_key_set: !!MERCHANT_KEY,
+      passphrase_set: !!PASSPHRASE,
+      signature_input: sigDebug,
+      signature: data.signature
+    }
   });
 }
