@@ -1310,9 +1310,6 @@ body.help-mode .main{padding-top:34px}
             <div style="font-size:11px;color:var(--amber);opacity:.8">Tip: If you downloaded a PDF, go back and export from transaction history instead.</div>
             <input type="file" id="reconFileInput" accept=".csv,.xlsx,.xls,.ofx,.qfx" style="display:none" onchange="handleReconFile(event)">
           </div>
-          <div style="text-align:center;margin-top:12px">
-            <button onclick="document.getElementById('csvHelpModal').classList.add('open')" style="background:rgba(184,196,216,.08);border:1px solid rgba(184,196,216,.18);color:var(--text-2);font-size:12.5px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;padding:7px 16px;border-radius:8px;transition:all .2s" onmouseover="this.style.background='rgba(184,196,216,.15)';this.style.color='var(--text)'" onmouseout="this.style.background='rgba(184,196,216,.08)';this.style.color='var(--text-2)'">📋 How to export your bank statement (CSV)</button>
-          </div>
           <div id="reconStatementInfo" style="display:none;margin-top:12px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:8px;padding:12px 16px;align-items:center;justify-content:space-between">
             <div>
               <div style="font-size:13px;font-weight:600;color:var(--green)" id="reconFileName">statement.csv</div>
@@ -2132,87 +2129,6 @@ body.help-mode .main{padding-top:34px}
 </div>
 
 <!-- upgrade modal removed -->
-
-<!-- CSV HELP MODAL -->
-<div class="sars-modal" id="csvHelpModal" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="sars-modal-card" style="max-width:560px;max-height:88vh;overflow-y:auto">
-    <div style="background:rgba(184,196,216,.05);border-bottom:1px solid rgba(184,196,216,.12);padding:18px 22px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:sticky;top:0;background:#0f1520;z-index:1">
-      <div>
-        <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:3px">Export your bank statement (CSV)</div>
-        <div style="font-size:12.5px;color:var(--text-2);line-height:1.5">Most banks download PDF by default. For best results, export CSV — it takes less than a minute.</div>
-      </div>
-      <button onclick="document.getElementById('csvHelpModal').classList.remove('open')" style="background:rgba(255,255,255,.06);border:none;color:var(--text-2);width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center">✕</button>
-    </div>
-    <div style="padding:20px 22px;display:flex;flex-direction:column;gap:18px">
-
-      <!-- TRUST MESSAGE -->
-      <div style="background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:10px;padding:12px 16px;font-size:12.5px;color:var(--text-2);line-height:1.5">
-        <strong style="color:var(--green)">✓ Why CSV?</strong> CSV ensures the most accurate reconciliation and tax calculations. OneTouch reads every transaction automatically — no manual entry needed.
-      </div>
-
-      <!-- FNB -->
-      <div>
-        <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="background:rgba(34,71,197,.15);color:#4a90e2;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">FNB</span> First National Bank</div>
-        <ol style="margin:0;padding-left:18px;font-size:12.5px;color:var(--text-2);line-height:2">
-          <li>Log in at <strong style="color:var(--text)">fnb.co.za</strong> → My Bank Accounts</li>
-          <li>Select your account → <strong style="color:var(--text)">View Statements</strong></li>
-          <li>Choose your date range (e.g. last 3 months)</li>
-          <li>Click <strong style="color:var(--text)">Download</strong> → select <strong style="color:var(--text)">CSV</strong></li>
-        </ol>
-      </div>
-
-      <!-- CAPITEC -->
-      <div>
-        <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="background:rgba(0,150,136,.15);color:#4db6ac;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">CAPITEC</span> Capitec Bank</div>
-        <ol style="margin:0;padding-left:18px;font-size:12.5px;color:var(--text-2);line-height:2">
-          <li>Log in at <strong style="color:var(--text)">capitecbank.co.za</strong> → Transact</li>
-          <li>Select your account → <strong style="color:var(--text)">Statements</strong></li>
-          <li>Set your date range and click <strong style="color:var(--text)">Get Statement</strong></li>
-          <li>Choose <strong style="color:var(--text)">CSV</strong> as the format and download</li>
-        </ol>
-      </div>
-
-      <!-- ABSA -->
-      <div>
-        <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="background:rgba(220,38,38,.12);color:#f87171;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">ABSA</span> Absa Bank</div>
-        <ol style="margin:0;padding-left:18px;font-size:12.5px;color:var(--text-2);line-height:2">
-          <li>Log in at <strong style="color:var(--text)">absa.co.za</strong> → My Accounts</li>
-          <li>Click your account → <strong style="color:var(--text)">Statements & Documents</strong></li>
-          <li>Select date range and click <strong style="color:var(--text)">Download Statement</strong></li>
-          <li>Select <strong style="color:var(--text)">CSV</strong> from the format dropdown</li>
-        </ol>
-      </div>
-
-      <!-- STANDARD BANK -->
-      <div>
-        <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="background:rgba(22,163,74,.12);color:#4ade80;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">STD BANK</span> Standard Bank</div>
-        <ol style="margin:0;padding-left:18px;font-size:12.5px;color:var(--text-2);line-height:2">
-          <li>Log in at <strong style="color:var(--text)">standardbank.co.za</strong> → Accounts</li>
-          <li>Select your account → <strong style="color:var(--text)">Transaction History</strong></li>
-          <li>Set your date range → click <strong style="color:var(--text)">Download</strong></li>
-          <li>Choose <strong style="color:var(--text)">CSV</strong> as the file format</li>
-        </ol>
-      </div>
-
-      <!-- NEDBANK -->
-      <div>
-        <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="background:rgba(22,101,52,.2);color:#86efac;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">NEDBANK</span> Nedbank</div>
-        <ol style="margin:0;padding-left:18px;font-size:12.5px;color:var(--text-2);line-height:2">
-          <li>Log in at <strong style="color:var(--text)">nedbank.co.za</strong> → My Financial World</li>
-          <li>Select your account → <strong style="color:var(--text)">Account Activity</strong></li>
-          <li>Choose your date range and click <strong style="color:var(--text)">Download Transactions</strong></li>
-          <li>Select <strong style="color:var(--text)">CSV</strong> format and confirm</li>
-        </ol>
-      </div>
-
-      <!-- MOBILE NOTE -->
-      <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.18);border-radius:10px;padding:12px 16px;font-size:12.5px;color:var(--text-2);line-height:1.6">
-        <strong style="color:var(--amber)">📱 Using your phone?</strong> Most banking apps only allow PDF downloads. For CSV, log in on a <strong style="color:var(--text)">desktop browser</strong> — the download option is usually under Statements or Transaction History.
-      </div>
-
-    </div>
-  </div>
-</div>
 
 <!-- SARS DISCLAIMER MODAL -->
 <div class="sars-modal" id="sarsDisclaimerModal">
