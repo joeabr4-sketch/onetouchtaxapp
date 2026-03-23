@@ -4077,22 +4077,27 @@ async function ensureMonthlyReset() {
 // ── AI CONSENT (POPIA) ──
 // Returns a Promise<boolean> — resolves true if consent given/already stored, false if cancelled.
 // Call: if (!await requireAIConsent()) return;
+// Add ?testConsent=true to URL to force the modal even if consent was previously accepted.
 function requireAIConsent() {
   return new Promise(resolve => {
-    if (localStorage.getItem('ai_data_consent') === '1') { resolve(true); return; }
+    const forceTest = new URLSearchParams(window.location.search).get('testConsent') === 'true';
+    if (!forceTest && localStorage.getItem('ai_data_consent') === 'true') { resolve(true); return; }
     const modal = document.getElementById('aiConsentModal');
+    if (!modal) { resolve(true); return; } // element not yet in DOM — fail open
     modal._resolveConsent = resolve;
     modal.style.display = 'flex';
   });
 }
 function acceptAIConsent() {
-  localStorage.setItem('ai_data_consent', '1');
+  localStorage.setItem('ai_data_consent', 'true');
   const modal = document.getElementById('aiConsentModal');
+  if (!modal) return;
   modal.style.display = 'none';
   if (modal._resolveConsent) { const r = modal._resolveConsent; modal._resolveConsent = null; r(true); }
 }
 function cancelAIConsent() {
   const modal = document.getElementById('aiConsentModal');
+  if (!modal) return;
   modal.style.display = 'none';
   if (modal._resolveConsent) { const r = modal._resolveConsent; modal._resolveConsent = null; r(false); }
 }
@@ -6059,28 +6064,32 @@ async function loadPeriodHistory() {
 function loadMonthlyHistory() { return loadPeriodHistory(); }
 
 async function clearAllFinancialHistory() {
-  if (!confirm('This will permanently delete all monthly snapshots and reconciliation sessions. Your invoices and expenses are NOT deleted.\n\nThis cannot be undone. Continue?')) return;
+  if (!confirm('This will permanently delete all monthly snapshots, reconciliation sessions, and payroll runs. Your invoices and expenses are NOT deleted.\n\nThis cannot be undone. Continue?')) return;
   try {
     const uid = currentUser.id;
-    // Delete snapshots and sessions (bank_transactions cascade from sessions)
-    const [s1, s2] = await Promise.all([
+    // Delete snapshots, sessions (bank_transactions cascade), and payroll runs
+    const [s1, s2, s3] = await Promise.all([
       sb.from('monthly_snapshots').delete().eq('user_id', uid),
-      sb.from('reconciliation_sessions').delete().eq('user_id', uid)
+      sb.from('reconciliation_sessions').delete().eq('user_id', uid),
+      sb.from('payroll_runs').delete().eq('user_id', uid)
     ]);
     if (s1.error) throw s1.error;
     if (s2.error) throw s2.error;
+    if (s3.error) throw s3.error;
     // Clear localStorage caches
     try {
       localStorage.removeItem('ot_recon_audit_' + uid);
       localStorage.removeItem('ot_recon_done_' + uid);
     } catch {}
-    // Reset in-memory recon state
+    // Reset in-memory state
     reconSession = null;
     bankTransactions = [];
+    payrollRuns = [];
     // Refresh UI
     await loadPeriodHistory();
     loadReconStatusBar();
     updateReconUI();
+    renderPayrollRunsSection();
     showToast('✅ Financial history cleared', 'var(--green)');
   } catch(e) {
     showToast('Error clearing history: ' + e.message, 'var(--red)');
