@@ -2479,6 +2479,12 @@ async function payWithPayFast(plan) {
     const data = await resp.json();
     if (!resp.ok) throw new Error(data.error || 'Checkout failed');
 
+    // TEMP DEBUG — show signature string before submitting
+    if (data._debug) {
+      const msg = `PayFast Debug\n\npassphrase_set: ${data._debug.passphrase_set}\n\nsignature_input:\n${data._debug.signature_input}\n\nsignature: ${data._debug.signature}`;
+      if (!confirm(msg + '\n\nClick OK to submit to PayFast, Cancel to abort.')) return;
+    }
+
     // Build and submit form to PayFast
     const form = document.createElement('form');
     form.method = 'POST';
