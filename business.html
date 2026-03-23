@@ -4767,7 +4767,7 @@ function showImportPreview(rows, file) {
       <tr style="border-top:1px solid rgba(255,255,255,.05);${i%2===0?'':'background:rgba(255,255,255,.02)'}">
         <td style="padding:7px 14px;color:var(--text-2);white-space:nowrap">${r.date}</td>
         <td style="padding:7px 14px;color:var(--text);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.description}">${r.description}</td>
-        <td style="padding:7px 14px;text-align:right;font-weight:600;color:${r.type==='credit'?'var(--green)':'var(--red)';white-space:nowrap}">${r.type==='credit'?'+':'-'}R ${r.amount.toFixed(2)}</td>
+        <td style="padding:7px 14px;text-align:right;font-weight:600;white-space:nowrap;color:${r.type==='credit'?'var(--green)':'var(--red)'}">${r.type==='credit'?'+':'-'}R ${r.amount.toFixed(2)}</td>
         <td style="padding:7px 14px;color:var(--text-3);font-size:11px;text-transform:uppercase">${r.type}</td>
       </tr>`).join('');
     if (rows.length > 150) {
