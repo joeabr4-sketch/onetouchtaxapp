@@ -14,27 +14,27 @@ const PLANS = {
   full: { name: 'OneTouch Full Plan', amount: '599.00' }
 };
 
-// Matches PHP urlencode() — encodes ! ~ ' ( ) * which encodeURIComponent leaves unencoded
+// URL-encode a value per PayFast spec: encodeURIComponent with spaces as +
 function pfEncode(val) {
-  return encodeURIComponent(String(val).trim())
-    .replace(/!/g,  '%21')
-    .replace(/'/g,  '%27')
-    .replace(/\(/g, '%28')
-    .replace(/\)/g, '%29')
-    .replace(/\*/g, '%2A')
-    .replace(/~/g,  '%7E')
-    .replace(/%20/g, '+');
+  return encodeURIComponent(String(val).trim()).replace(/%20/g, '+');
+}
+
+// Build signature string: sort keys alphabetically, encode values, append passphrase
+function buildSignatureString(data, passphrase) {
+  const str = Object.keys(data)
+    .sort()
+    .filter(k => data[k] !== null && data[k] !== undefined && data[k] !== '')
+    .map(k => `${k}=${pfEncode(data[k])}`)
+    .join('&');
+  return passphrase ? `${str}&passphrase=${pfEncode(passphrase)}` : str;
 }
 
 function generateSignature(data, passphrase) {
-  const str = Object.keys(data)
-    .sort()
-    .filter(k => data[k] != null && data[k] !== '')
-    .map(k => `${k}=${pfEncode(data[k])}`)
-    .join('&');
-  const full = passphrase ? `${str}&passphrase=${pfEncode(passphrase)}` : str;
-  console.log('[PayFast] signature input:', full); // visible in Vercel function logs
-  return crypto.createHash('md5').update(full).digest('hex');
+  const sigString = buildSignatureString(data, passphrase);
+  console.log('[PayFast] signature string:', sigString);
+  const sig = crypto.createHash('md5').update(sigString).digest('hex');
+  console.log('[PayFast] signature:', sig);
+  return sig;
 }
 
 export default async function handler(req, res) {
@@ -55,7 +55,6 @@ export default async function handler(req, res) {
   const paymentId = `${plan.toUpperCase()}-${userId.slice(0, 8)}-${Date.now()}`;
   const today     = new Date().toISOString().split('T')[0];
 
-  // Fields must be in this exact order — PayFast validates signature using received field order
   const data = {
     merchant_id:       MERCHANT_ID,
     merchant_key:      MERCHANT_KEY,
@@ -76,14 +75,10 @@ export default async function handler(req, res) {
     custom_str2:       plan,
   };
 
-  // Build signature input string for debug (passphrase value hidden)
-  const sigFields = Object.keys(data)
-    .sort()
-    .filter(k => data[k] != null && data[k] !== '')
-    .map(k => `${k}=${pfEncode(data[k])}`)
-    .join('&');
-  const sigDebug = PASSPHRASE ? `${sigFields}&passphrase=[SET]` : sigFields;
+  // Debug: capture exact string used for signature BEFORE adding signature field
+  const debugString = buildSignatureString(data, PASSPHRASE ? '[PASSPHRASE]' : '');
 
+  // Generate signature — data has no signature key yet, so it is correctly excluded
   data.signature = generateSignature(data, PASSPHRASE);
 
   const pfUrl = SANDBOX
@@ -94,11 +89,11 @@ export default async function handler(req, res) {
     action: pfUrl,
     fields: data,
     _debug: {
-      merchant_id_set: !!MERCHANT_ID,
+      merchant_id_set:  !!MERCHANT_ID,
       merchant_key_set: !!MERCHANT_KEY,
-      passphrase_set: !!PASSPHRASE,
-      signature_input: sigDebug,
-      signature: data.signature
+      passphrase_set:   !!PASSPHRASE,
+      signature_string: debugString,
+      signature:        data.signature
     }
   });
 }
