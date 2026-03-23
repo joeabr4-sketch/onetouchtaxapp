@@ -962,7 +962,7 @@ body.help-mode .main{padding-top:34px}
                   <select id="p-period"><option>1st Period (Aug)</option><option>2nd Period (Feb)</option></select>
                 </div>
                 <div class="dp-field"><label>Age</label>
-                  <select id="p-age"><option value="under65">Under 65</option><option value="65to75">65–75</option><option value="over75">Over 75</option></select>
+                  <select id="p-age"><option value="under65">Under 65</option><option value="65to74">65–74</option><option value="over75">Over 75</option></select>
                 </div>
                 <div class="dp-field"><label>Estimated Annual Income R</label><input id="p-income" type="number" min="0" step="0.01" /></div>
                 <div class="dp-field"><label>Allowable Deductions R</label><input id="p-ded" type="number" min="0" step="0.01" /></div>
@@ -1584,7 +1584,7 @@ body.help-mode .main{padding-top:34px}
               </select>
             </div>
             <div class="pr-field"><label>Pay Date</label><input id="pr-paydate" type="date" /></div>
-            <div class="pr-field"><label>Medical Aid Contribution (R)</label><input id="pr-medical" type="number" min="0" step="0.01" placeholder="0" oninput="calcPayslip()" /></div>
+            <div class="pr-field"><label>Medical Aid Tax Credit / MATC (R) <span title="Primary member: R364/mo. First dependant: R364/mo. Each additional: R246/mo. This credit reduces PAYE — not a deduction from salary." style="cursor:help;opacity:.6;font-size:11px">ⓘ</span></label><input id="pr-medical" type="number" min="0" step="0.01" placeholder="0 (e.g. R364, R728)" oninput="calcPayslip()" /></div>
           </div>
           <!-- Allowances -->
           <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.07)">Allowances (optional)</div>
@@ -2450,8 +2450,17 @@ function canUse(feature) {
   return true;
 }
 
-function showUpgradePrompt(tier) { /* removed — no upgrade popups */ }
-function closeUpgrade() { /* removed */ }
+function showUpgradePrompt(tier) {
+  const msgs = {
+    pro: 'This feature is included in the <strong style="color:#fff">Pro plan</strong> (R299/mo). Upgrade to unlock bank reconciliation, VAT prep, AI assistant, financial history and more.',
+    full: 'This feature is included in the <strong style="color:#fff">Full plan</strong> (R599/mo). Upgrade to unlock payroll, EMP201, WhatsApp delivery, email sending and accountant handoff.'
+  };
+  document.getElementById('upgradeModalMsg').innerHTML = msgs[tier] || msgs.pro;
+  document.getElementById('upgradeModal').style.display = 'flex';
+}
+function closeUpgrade() {
+  document.getElementById('upgradeModal').style.display = 'none';
+}
 
 // ── PAYFAST CHECKOUT ──
 async function payWithPayFast(plan) {
@@ -3806,8 +3815,22 @@ function autofillEMP201() {
   const empCount = parseInt(document.getElementById('e-emp')?.value) || 1;
   const uifEl    = document.getElementById('e-uif');
   const sdlEl    = document.getElementById('e-sdl');
-  // UIF per employee: 1% capped at UIF_MONTHLY_CAP; employer + employee both here
-  if (uifEl && !uifEl.value) uifEl.value = Math.min(gross * UIF_RATE, empCount * UIF_MONTHLY_CAP).toFixed(2);
+  // UIF: sum per-employee capped values (correct SARS rule — each employee capped individually)
+  if (uifEl && !uifEl.value) {
+    let totalUif;
+    if (employees.length > 0) {
+      // Use actual employee salary data for precise per-employee caps
+      totalUif = employees.reduce((sum, e) => {
+        const sal = parseFloat(e.gross) || 0;
+        return sum + (e.uif_applicable !== false ? Math.min(sal * UIF_RATE, UIF_MONTHLY_CAP) : 0);
+      }, 0);
+    } else {
+      // Fallback: distribute total gross equally, cap each employee individually
+      const avgSalary = empCount > 0 ? gross / empCount : gross;
+      totalUif = empCount * Math.min(avgSalary * UIF_RATE, UIF_MONTHLY_CAP);
+    }
+    uifEl.value = rnd(totalUif).toFixed(2);
+  }
   // SDL: only if estimated annual payroll exceeds threshold
   if (sdlEl && !sdlEl.value) {
     const annualEst = gross * 12;
@@ -3831,7 +3854,18 @@ function genEMP201() {
   const gross    = parseFloat(document.getElementById('e-gross')?.value)||0;
   const empCount = parseInt(document.getElementById('e-emp')?.value)||1;
   const paye     = parseFloat(document.getElementById('e-paye')?.value)||0;
-  const uif      = Math.min(parseFloat(document.getElementById('e-uif')?.value)||rnd(gross*UIF_RATE), empCount * UIF_MONTHLY_CAP);
+  // Per-employee UIF cap — sum each employee's individually capped contribution
+  let uifFallback;
+  if (employees.length > 0) {
+    uifFallback = employees.reduce((sum, e) => {
+      const sal = parseFloat(e.gross) || 0;
+      return sum + (e.uif_applicable !== false ? Math.min(sal * UIF_RATE, UIF_MONTHLY_CAP) : 0);
+    }, 0);
+  } else {
+    const avgSalary = empCount > 0 ? gross / empCount : gross;
+    uifFallback = empCount * Math.min(avgSalary * UIF_RATE, UIF_MONTHLY_CAP);
+  }
+  const uif = parseFloat(document.getElementById('e-uif')?.value) || rnd(uifFallback);
   const annualEst = gross * 12;
   const sdlApplies = annualEst > SDL_ANNUAL_THRESHOLD;
   const sdl = sdlApplies ? (parseFloat(document.getElementById('e-sdl')?.value)||rnd(gross*SDL_RATE)) : 0;
@@ -3869,7 +3903,7 @@ function genIRP6() {
   else if (taxable<=857900) tax=179147+(taxable-673000)*0.39;
   else if (taxable<=1817000) tax=251258+(taxable-857900)*0.41;
   else tax=644489+(taxable-1817000)*0.45;
-  const rebate = age==='under65'?17235:age==='65to75'?17235+9444:17235+9444+3145;
+  const rebate = age==='under65'?17235:age==='65to74'?17235+9444:17235+9444+3145;
   const netTax = Math.max(0, tax-rebate);
   const payePaid = parseFloat(document.getElementById('p-paye')?.value)||0;
   const liable = Math.max(0, netTax-payePaid);
@@ -4040,6 +4074,29 @@ async function ensureMonthlyReset() {
   return monthKey;
 }
 
+// ── AI CONSENT (POPIA) ──
+// Returns a Promise<boolean> — resolves true if consent given/already stored, false if cancelled.
+// Call: if (!await requireAIConsent()) return;
+function requireAIConsent() {
+  return new Promise(resolve => {
+    if (localStorage.getItem('ai_data_consent') === '1') { resolve(true); return; }
+    const modal = document.getElementById('aiConsentModal');
+    modal._resolveConsent = resolve;
+    modal.style.display = 'flex';
+  });
+}
+function acceptAIConsent() {
+  localStorage.setItem('ai_data_consent', '1');
+  const modal = document.getElementById('aiConsentModal');
+  modal.style.display = 'none';
+  if (modal._resolveConsent) { const r = modal._resolveConsent; modal._resolveConsent = null; r(true); }
+}
+function cancelAIConsent() {
+  const modal = document.getElementById('aiConsentModal');
+  modal.style.display = 'none';
+  if (modal._resolveConsent) { const r = modal._resolveConsent; modal._resolveConsent = null; r(false); }
+}
+
 async function aiCall(payload) {
   const { data: { session: _aiSess } } = await sb.auth.getSession();
   const resp = await fetch(AI_ENDPOINT, {
@@ -4056,6 +4113,7 @@ async function aiCall(payload) {
 }
 
 async function checkAICalls() {
+  if (!await requireAIConsent()) return false;
   const plan = userProfile?.plan||'free';
   if (plan==='free') { showUpgradePrompt('pro'); return false; }
   const monthKey = await ensureMonthlyReset();
@@ -4288,6 +4346,7 @@ function handleFile(e) { const f=e.target.files[0]; if(f) processFile(f); }
 
 async function processFile(file) {
   if (!canUse('bankanalysis')) { showUpgradePrompt('pro'); return; }
+  if (!await requireAIConsent()) return;
   document.getElementById('uploadZone').style.display = 'none';
   const pw = document.getElementById('progressWrap'); pw.classList.add('show');
   const steps = ['ps1','ps2','ps3','ps4','ps5'];
@@ -6977,14 +7036,17 @@ function calcEmployeePayslip(emp, annualPayrollTotal) {
 
   const totalGross    = gross + travel + housing + bonus;
   const taxableIncome = gross + housing + bonus + (travel * 0.8);
-  const paye    = calcPAYE(taxableIncome * 12, emp.age_bracket || 'under65');
+  // PAYE is calculated first, then medical aid tax credit (MATC) is subtracted (SARS rule)
+  const payeGross = calcPAYE(taxableIncome * 12, emp.age_bracket || 'under65');
+  const paye    = Math.max(0, payeGross - medical); // MATC reduces PAYE, never below 0
   const uifEmp  = uifApplicable ? Math.min(gross * UIF_RATE, UIF_MONTHLY_CAP) : 0;
   const uifEr   = uifApplicable ? Math.min(gross * UIF_RATE, UIF_MONTHLY_CAP) : 0;
   // SDL: only applies if company annual payroll > R500,000 (SARS threshold)
   const estAnnualPayroll = annualPayrollTotal != null ? annualPayrollTotal : gross * 12;
   const sdlApplies = sdlApplicable && estAnnualPayroll > SDL_ANNUAL_THRESHOLD;
   const sdl     = sdlApplies ? rnd(gross * SDL_RATE) : 0;
-  const totalDed = paye + uifEmp + medical + pension;
+  // Medical is a tax credit (reduces PAYE above), not a separate income deduction
+  const totalDed = paye + uifEmp + pension;
   const netPay  = totalGross - totalDed;
   return { gross, travel, housing, bonus, totalGross, taxableIncome, paye, uifEmp, uifEr, sdl, medical, pension, totalDed, netPay };
 }
@@ -8994,6 +9056,30 @@ document.addEventListener('click', function(e) {
     <button class="ob-pill-next" onclick="advanceObWizard()" id="obPillNext">Done →</button>
   </div>
 
+</div>
+
+<!-- UPGRADE PROMPT MODAL -->
+<div id="upgradeModal" style="position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9500;display:none;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeUpgrade()">
+  <div style="background:#0f1520;border-radius:16px;max-width:420px;width:100%;padding:32px;box-shadow:0 24px 64px rgba(0,0,0,.8);border:1px solid rgba(255,255,255,.12);text-align:center;animation:fadeUp .3s ease">
+    <div style="font-size:38px;margin-bottom:12px">🔒</div>
+    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:10px">Upgrade Required</div>
+    <div id="upgradeModalMsg" style="font-size:13.5px;color:rgba(255,255,255,.6);line-height:1.65;margin-bottom:24px"></div>
+    <button class="upgrade-btn" onclick="closeUpgrade();showSection('billing',null)" style="display:block;width:100%;margin-bottom:10px">⚡ View Plans &amp; Upgrade</button>
+    <button class="upgrade-close" onclick="closeUpgrade()">Maybe later</button>
+  </div>
+</div>
+
+<!-- AI CONSENT MODAL -->
+<div id="aiConsentModal" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9400;display:none;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#0f1520;border-radius:16px;max-width:440px;width:100%;padding:32px;box-shadow:0 24px 64px rgba(0,0,0,.8);border:1px solid rgba(255,255,255,.12);animation:fadeUp .3s ease">
+    <div style="font-size:32px;margin-bottom:12px">🤖</div>
+    <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:#fff;margin-bottom:10px">AI Data Processing Notice</div>
+    <div style="font-size:13.5px;color:rgba(255,255,255,.65);line-height:1.65;margin-bottom:22px">We use AI to analyse your financial data to assist with reconciliation and insights. Your data is processed securely and is not stored or used to train AI models. <a href="/legal.html#privacy" target="_blank" style="color:var(--gold)">Privacy Policy</a></div>
+    <div style="display:flex;gap:12px">
+      <button onclick="acceptAIConsent()" style="flex:1;background:var(--gold);color:#0a0f1e;border:none;padding:12px 20px;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">I Understand — Continue</button>
+      <button onclick="cancelAIConsent()" style="background:transparent;color:var(--text-2);border:1px solid var(--border);padding:12px 16px;border-radius:9px;font-size:13px;cursor:pointer;font-family:inherit">Cancel</button>
+    </div>
+  </div>
 </div>
 
 <!-- ONBOARDING COMPLETION MODAL -->
