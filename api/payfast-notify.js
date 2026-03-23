@@ -20,10 +20,8 @@ function pfEncode(val) {
 }
 
 function generateSignature(data, passphrase) {
-  // PayFast sorts fields alphabetically (ksort) before hashing
   let str = Object.keys(data)
     .filter(k => k !== 'signature' && data[k] != null && data[k] !== '')
-    .sort()
     .map(k => `${k}=${pfEncode(data[k])}`)
     .join('&');
   if (passphrase) str += `&passphrase=${pfEncode(passphrase)}`;
