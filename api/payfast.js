@@ -6,7 +6,7 @@ import crypto from 'crypto';
 const MERCHANT_ID  = process.env.PAYFAST_MERCHANT_ID;
 const MERCHANT_KEY = process.env.PAYFAST_MERCHANT_KEY;
 const PASSPHRASE   = process.env.PAYFAST_PASSPHRASE || '';
-const SANDBOX      = process.env.PAYFAST_SANDBOX === 'true'; // set to 'true' for testing
+const SANDBOX      = process.env.PAYFAST_SANDBOX === 'true';
 const SITE_URL     = process.env.SITE_URL || 'https://onetouchtaxapp.vercel.app';
 
 const PLANS = {
@@ -14,8 +14,7 @@ const PLANS = {
   full: { name: 'OneTouch Full Plan', amount: '599.00' }
 };
 
-// Matches PHP urlencode() exactly — required for PayFast signature compatibility.
-// encodeURIComponent leaves ! ~ ' ( ) * unencoded; PHP urlencode encodes them.
+// Matches PHP urlencode() — encodes ! ~ ' ( ) * which encodeURIComponent leaves unencoded
 function pfEncode(val) {
   return encodeURIComponent(String(val).trim())
     .replace(/!/g,  '%21')
@@ -28,14 +27,13 @@ function pfEncode(val) {
 }
 
 function generateSignature(data, passphrase) {
-  // Use insertion order — matches PayFast's PHP reference implementation exactly.
-  // (ksort only applies to IPN verification, not payment initiation)
-  let str = Object.keys(data)
+  const str = Object.keys(data)
     .filter(k => data[k] != null && data[k] !== '')
     .map(k => `${k}=${pfEncode(data[k])}`)
     .join('&');
-  if (passphrase) str += `&passphrase=${pfEncode(passphrase)}`;
-  return crypto.createHash('md5').update(str).digest('hex');
+  const full = passphrase ? `${str}&passphrase=${pfEncode(passphrase)}` : str;
+  console.log('[PayFast] signature input:', full); // visible in Vercel function logs
+  return crypto.createHash('md5').update(full).digest('hex');
 }
 
 export default async function handler(req, res) {
@@ -56,6 +54,7 @@ export default async function handler(req, res) {
   const paymentId = `${plan.toUpperCase()}-${userId.slice(0, 8)}-${Date.now()}`;
   const today     = new Date().toISOString().split('T')[0];
 
+  // Fields must be in this exact order — PayFast validates signature using received field order
   const data = {
     merchant_id:       MERCHANT_ID,
     merchant_key:      MERCHANT_KEY,
@@ -67,7 +66,6 @@ export default async function handler(req, res) {
     m_payment_id:      paymentId,
     amount:            cfg.amount,
     item_name:         cfg.name,
-    item_description:  `Monthly recurring subscription`,
     subscription_type: '1',
     billing_date:      today,
     recurring_amount:  cfg.amount,
@@ -76,6 +74,10 @@ export default async function handler(req, res) {
     custom_str1:       userId,
     custom_str2:       plan,
   };
+
+  console.log('[PayFast] merchant_id:', MERCHANT_ID);
+  console.log('[PayFast] passphrase set:', !!PASSPHRASE);
+  console.log('[PayFast] fields:', JSON.stringify(data));
 
   data.signature = generateSignature(data, PASSPHRASE);
 
