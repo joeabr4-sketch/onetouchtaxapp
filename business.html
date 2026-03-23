@@ -4076,20 +4076,22 @@ async function ensureMonthlyReset() {
 
 // ── AI CONSENT (POPIA) ──
 // Returns a Promise<boolean> — resolves true if consent given/already stored, false if cancelled.
-// Call: if (!await requireAIConsent()) return;
-// Add ?testConsent=true to URL to force the modal even if consent was previously accepted.
+// ── AI CONSENT (POPIA) ──
+// Consent is stored in sessionStorage — required once per browser session.
+// This ensures meaningful consent each time the app is opened (POPIA-correct).
+// ?testConsent=true in URL forces modal even within the same session (for QA).
 function requireAIConsent() {
   return new Promise(resolve => {
     const forceTest = new URLSearchParams(window.location.search).get('testConsent') === 'true';
-    if (!forceTest && localStorage.getItem('ai_data_consent') === 'true') { resolve(true); return; }
+    if (!forceTest && sessionStorage.getItem('ai_data_consent') === 'true') { resolve(true); return; }
     const modal = document.getElementById('aiConsentModal');
-    if (!modal) { resolve(true); return; } // element not yet in DOM — fail open
+    if (!modal) { resolve(false); return; } // modal missing — block AI, don't silently proceed
     modal._resolveConsent = resolve;
     modal.style.display = 'flex';
   });
 }
 function acceptAIConsent() {
-  localStorage.setItem('ai_data_consent', 'true');
+  sessionStorage.setItem('ai_data_consent', 'true');
   const modal = document.getElementById('aiConsentModal');
   if (!modal) return;
   modal.style.display = 'none';
