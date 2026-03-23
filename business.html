@@ -4900,6 +4900,7 @@ async function clearReconStatement() {
   if (!reconSession || !confirm('Remove all bank transactions for this session?')) return;
   await sb.from('bank_transactions').delete().eq('session_id', reconSession.id);
   reconTransactions = [];
+  resetReconDropZone();
   // Un-reconcile invoices that were matched in this session
   await sb.from('invoices').update({ reconciled: false, status: 'outstanding', status_log: 'Statement cleared — pending re-reconciliation' })
     .eq('user_id', currentUser.id).eq('reconciled', true);
