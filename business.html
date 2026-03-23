@@ -2130,6 +2130,39 @@ body.help-mode .main{padding-top:34px}
 
 <!-- upgrade modal removed -->
 
+<!-- IMPORT PREVIEW MODAL -->
+<div class="sars-modal" id="importPreviewModal">
+  <div class="sars-modal-card" style="max-width:700px;max-height:88vh;display:flex;flex-direction:column">
+    <div style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px">Review before importing</div>
+        <div id="importPreviewMeta" style="font-size:12px;color:var(--text-3)">0 transactions found</div>
+      </div>
+      <button onclick="cancelImportPreview()" style="background:rgba(255,255,255,.06);border:none;color:var(--text-2);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:15px;flex-shrink:0;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div style="overflow-y:auto;flex:1">
+      <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+        <thead>
+          <tr style="background:rgba(255,255,255,.04);position:sticky;top:0">
+            <th style="padding:8px 14px;text-align:left;color:var(--text-3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Date</th>
+            <th style="padding:8px 14px;text-align:left;color:var(--text-3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Description</th>
+            <th style="padding:8px 14px;text-align:right;color:var(--text-3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap">Amount</th>
+            <th style="padding:8px 14px;text-align:left;color:var(--text-3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Type</th>
+          </tr>
+        </thead>
+        <tbody id="importPreviewTbody"></tbody>
+      </table>
+    </div>
+    <div style="padding:14px 20px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <div id="importPreviewWarning" style="font-size:11.5px;color:var(--text-3)"></div>
+      <div style="display:flex;gap:8px">
+        <button onclick="cancelImportPreview()" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text-2);padding:8px 18px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer">Cancel</button>
+        <button id="importPreviewConfirmBtn" onclick="confirmImportPreview()" style="background:var(--green);border:none;color:#0f1520;padding:8px 18px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">Import</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- SARS DISCLAIMER MODAL -->
 <div class="sars-modal" id="sarsDisclaimerModal">
   <div class="sars-modal-card">
@@ -4607,6 +4640,28 @@ function handleReconDrop(e) {
 }
 function handleReconFile(e) { processReconFile(e.target.files[0]); }
 
+// Pending import state for preview step
+let _pendingImportRows = null;
+let _pendingImportFile = null;
+
+function parseDateStr(raw) {
+  if (!raw) return '';
+  let d = String(raw).replace(/"/g,'').trim();
+  // YYYY/MM/DD (FNB) → YYYY-MM-DD
+  d = d.replace(/\//g, '-');
+  if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
+  const p = new Date(d);
+  if (isNaN(p)) return '';
+  return `${p.getFullYear()}-${String(p.getMonth()+1).padStart(2,'0')}-${String(p.getDate()).padStart(2,'0')}`;
+}
+
+function splitCSVLine(line) {
+  const cols = []; let cur = '', inQ = false;
+  for (const ch of line) { if (ch==='"'){inQ=!inQ;} else if(ch===','&&!inQ){cols.push(cur.trim());cur='';}else{cur+=ch;} }
+  cols.push(cur.trim());
+  return cols;
+}
+
 async function processReconFile(file) {
   if (!file || !reconSession) return;
   const dz = document.getElementById('reconDropZone');
@@ -4618,44 +4673,133 @@ async function processReconFile(file) {
   try {
     if (ext === 'csv') {
       const text = await file.text();
-      const lines = text.split('\n').filter(l => l.trim());
+      // Clean lines: strip trailing commas, trim, remove empty
+      const lines = text.split('\n')
+        .map(l => l.replace(/,+$/, '').trim())
+        .filter(l => l);
       if (!lines.length) { showToast('Empty file', 'var(--amber)'); resetReconDropZone(); return; }
-      const headers = lines[0].split(',').map(h => h.replace(/"/g,'').trim().toLowerCase());
-      const di = headers.findIndex(h => h.includes('date'));
-      const dsi = headers.findIndex(h => h.includes('desc') || h.includes('narr') || h.includes('detail') || h.includes('ref'));
-      const ai = headers.findIndex(h => h.includes('amount') || h.includes('credit') || h.includes('debit'));
-      const ri = headers.findIndex(h => h.includes('ref') || h.includes('id'));
-      const ti = headers.findIndex(h => h.includes('type'));
-      rows = lines.slice(1).map(line => {
-        const cols = []; let cur = '', inQ = false;
-        for (const ch of line) { if (ch==='"'){ inQ=!inQ; } else if(ch===','&&!inQ){cols.push(cur.trim());cur='';}else{cur+=ch;} }
-        cols.push(cur.trim());
-        const rawAmt = parseFloat(String(cols[ai]||'0').replace(/[^0-9.-]/g,'')) || 0;
-        let d = cols[di] ? cols[di].trim() : '';
-        if (d && !/^\d{4}-\d{2}-\d{2}$/.test(d)) { const p=new Date(d); d=isNaN(p)?'':`${p.getFullYear()}-${String(p.getMonth()+1).padStart(2,'0')}-${String(p.getDate()).padStart(2,'0')}`; }
-        const typeVal = ti >= 0 ? String(cols[ti]||'credit').toLowerCase() : (rawAmt < 0 ? 'debit' : 'credit');
-        return { date: d, description: cols[dsi]||'Bank transaction', amount: Math.abs(rawAmt), reference: ri>=0?cols[ri]:'', type: typeVal.includes('debit')||rawAmt<0?'debit':'credit' };
-      }).filter(r => r.amount > 0 && r.date);
+
+      // Dynamically find header row — skip FNB metadata rows
+      let headerIdx = -1;
+      for (let i = 0; i < Math.min(lines.length, 20); i++) {
+        const low = lines[i].toLowerCase();
+        if (low.includes('date') && (low.includes('amount') || low.includes('description') || low.includes('desc'))) {
+          headerIdx = i;
+          break;
+        }
+      }
+      if (headerIdx === -1) {
+        showToast('Could not find column headers (Date, Amount, Description) — check the file format', 'var(--amber)');
+        resetReconDropZone(); return;
+      }
+
+      const headers = splitCSVLine(lines[headerIdx]).map(h => h.replace(/"/g,'').trim().toLowerCase());
+      const di  = headers.findIndex(h => h === 'date' || h.startsWith('date'));
+      const dsi = headers.findIndex(h => h.includes('desc') || h.includes('narr') || h.includes('detail'));
+      const ai  = headers.findIndex(h => h.includes('amount'));
+      const ti  = headers.findIndex(h => h === 'type' || h.includes('tran type'));
+      const ri  = headers.findIndex(h => h.includes('ref') && !h.includes('desc'));
+
+      if (di === -1 || ai === -1) {
+        showToast('Missing required columns (Date, Amount) — check the file format', 'var(--amber)');
+        resetReconDropZone(); return;
+      }
+
+      rows = lines.slice(headerIdx + 1)
+        .map(line => {
+          const cols = splitCSVLine(line);
+          const rawAmt = parseFloat(String(cols[ai]||'0').replace(/[^0-9.-]/g,'')) || 0;
+          if (rawAmt === 0) return null;
+          const d = parseDateStr(cols[di]);
+          if (!d) return null;
+          const typeVal = ti >= 0 ? String(cols[ti]||'').toLowerCase() : '';
+          return {
+            date: d,
+            description: (dsi >= 0 ? cols[dsi] : '') || 'Bank transaction',
+            amount: Math.abs(rawAmt),
+            reference: ri >= 0 ? (cols[ri]||'') : '',
+            type: typeVal.includes('debit') || rawAmt < 0 ? 'debit' : 'credit'
+          };
+        })
+        .filter(Boolean);
+
     } else if (ext === 'xlsx' || ext === 'xls') {
       const buf = await file.arrayBuffer();
       const wb = XLSX.read(buf);
       const ws = wb.Sheets[wb.SheetNames[0]];
       const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
       const headers = (data[0]||[]).map(h => String(h||'').toLowerCase());
-      const di = headers.findIndex(h => h.includes('date'));
+      const di  = headers.findIndex(h => h.includes('date'));
       const dsi = headers.findIndex(h => h.includes('desc')||h.includes('narr')||h.includes('detail'));
-      const ai = headers.findIndex(h => h.includes('amount')||h.includes('credit')||h.includes('debit'));
+      const ai  = headers.findIndex(h => h.includes('amount')||h.includes('credit')||h.includes('debit'));
       rows = data.slice(1).map(r => {
         const rawAmt = parseFloat(String(r[ai]||'0').replace(/[^0-9.-]/g,'')) || 0;
-        let d = r[di] ? String(r[di]).trim() : '';
-        if (d && !/^\d{4}-\d{2}-\d{2}$/.test(d)) { const p=new Date(d); d=isNaN(p)?'':`${p.getFullYear()}-${String(p.getMonth()+1).padStart(2,'0')}-${String(p.getDate()).padStart(2,'0')}`; }
+        if (rawAmt === 0) return null;
+        const d = parseDateStr(r[di] ? String(r[di]) : '');
+        if (!d) return null;
         return { date: d, description: String(r[dsi]||'Bank transaction'), amount: Math.abs(rawAmt), reference: '', type: rawAmt < 0 ? 'debit' : 'credit' };
-      }).filter(r => r.amount > 0 && r.date);
+      }).filter(Boolean);
     }
 
     if (!rows.length) { showToast('No transactions found — check column headers', 'var(--amber)'); resetReconDropZone(); return; }
 
-    // Dedup: fetch existing transactions for this session and skip exact matches
+    // Show preview before committing
+    showImportPreview(rows, file);
+
+  } catch(e) {
+    console.error(e);
+    showToast('Could not read file — try saving as CSV', 'var(--red)');
+    resetReconDropZone();
+  }
+}
+
+function showImportPreview(rows, file) {
+  _pendingImportRows = rows;
+  _pendingImportFile = file;
+  const credits = rows.filter(r=>r.type==='credit').length;
+  const debits  = rows.filter(r=>r.type==='debit').length;
+  const meta = document.getElementById('importPreviewMeta');
+  if (meta) meta.textContent = `${rows.length} transactions from ${file.name} — ${credits} credits, ${debits} debits`;
+  const tbody = document.getElementById('importPreviewTbody');
+  if (tbody) {
+    const preview = rows.slice(0, 150);
+    tbody.innerHTML = preview.map((r,i) => `
+      <tr style="border-top:1px solid rgba(255,255,255,.05);${i%2===0?'':'background:rgba(255,255,255,.02)'}">
+        <td style="padding:7px 14px;color:var(--text-2);white-space:nowrap">${r.date}</td>
+        <td style="padding:7px 14px;color:var(--text);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.description}">${r.description}</td>
+        <td style="padding:7px 14px;text-align:right;font-weight:600;color:${r.type==='credit'?'var(--green)':'var(--red)';white-space:nowrap}">${r.type==='credit'?'+':'-'}R ${r.amount.toFixed(2)}</td>
+        <td style="padding:7px 14px;color:var(--text-3);font-size:11px;text-transform:uppercase">${r.type}</td>
+      </tr>`).join('');
+    if (rows.length > 150) {
+      tbody.innerHTML += `<tr><td colspan="4" style="padding:12px 14px;text-align:center;color:var(--text-3);font-size:12px">… and ${rows.length - 150} more transactions</td></tr>`;
+    }
+  }
+  const warn = document.getElementById('importPreviewWarning');
+  if (warn) warn.textContent = rows.length > 150 ? `Showing first 150 of ${rows.length} transactions` : '';
+  const btn = document.getElementById('importPreviewConfirmBtn');
+  if (btn) btn.textContent = `✓ Import ${rows.length} transaction${rows.length===1?'':'s'}`;
+  document.getElementById('importPreviewModal').classList.add('open');
+}
+
+function cancelImportPreview() {
+  document.getElementById('importPreviewModal').classList.remove('open');
+  _pendingImportRows = null;
+  _pendingImportFile = null;
+  resetReconDropZone();
+}
+
+async function confirmImportPreview() {
+  const rows = _pendingImportRows;
+  const file = _pendingImportFile;
+  _pendingImportRows = null;
+  _pendingImportFile = null;
+  document.getElementById('importPreviewModal').classList.remove('open');
+  await commitReconRows(rows, file);
+}
+
+async function commitReconRows(rows, file) {
+  try {
+    // Dedup: skip transactions already in this session
     const { data: existing } = await sb.from('bank_transactions')
       .select('date,amount,type,description').eq('session_id', reconSession.id);
     const existingKeys = new Set((existing||[]).map(t =>
@@ -4680,15 +4824,14 @@ async function processReconFile(file) {
     const { error } = await sb.from('bank_transactions').insert(inserts);
     if (error) { showToast('Upload failed: ' + error.message, 'var(--red)'); resetReconDropZone(); return; }
 
-    // Save to statements history so it appears in Financial History
+    // Save to statement history
     const totalCredits = rows.filter(r=>r.type==='credit').reduce((s,r)=>s+r.amount,0);
     const totalDebits  = rows.filter(r=>r.type==='debit').reduce((s,r)=>s+r.amount,0);
     const dates = rows.map(r=>r.date).filter(Boolean).sort();
     const stmtPeriod = dates.length ? dates[0] + ' – ' + dates[dates.length-1] : getCurrentPeriod();
     const { error: stmtErr } = await sb.from('statements').insert({
       user_id: currentUser.id, filename: file.name, period: stmtPeriod,
-      month: getCurrentPeriod(),
-      year: new Date().getFullYear(),
+      month: getCurrentPeriod(), year: new Date().getFullYear(),
       total_income: totalCredits, total_expenses: totalDebits,
       vat_liability: 0, flag_count: 0, created_at: new Date().toISOString()
     });
@@ -4702,18 +4845,18 @@ async function processReconFile(file) {
     updateReconUI();
     renderTxTable();
     renderUnrecorded();
-    showToast(`✅ ${rows.length} transactions loaded`, 'var(--green)');
+    showToast(`✅ ${newRows.length} transactions imported${dupeCount>0?' ('+dupeCount+' duplicates skipped)':''}`, 'var(--green)');
 
   } catch(e) {
     console.error(e);
-    showToast('Could not read file — try saving as CSV', 'var(--red)');
+    showToast('Import failed — please try again', 'var(--red)');
     resetReconDropZone();
   }
 }
 
 function resetReconDropZone() {
   const dz = document.getElementById('reconDropZone');
-  if (dz) { dz.style.display = 'block'; dz.innerHTML = `<div style="font-size:28px;margin-bottom:8px">📂</div><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">Drop your bank statement here or click to browse</div><div style="font-size:11.5px;color:var(--text-3)">CSV or Excel — FNB, Absa, Standard Bank, Nedbank</div><input type="file" id="reconFileInput" accept=".csv,.xlsx,.xls,.ofx,.qfx" style="display:none" onchange="handleReconFile(event)">`; }
+  if (dz) { dz.style.display = 'block'; dz.innerHTML = `<div style="font-size:28px;margin-bottom:8px">📂</div><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">Drop your file here or click to browse</div><div style="font-size:11.5px;color:var(--text-3);margin-bottom:6px">CSV or Excel exported from your bank's transaction history (not PDF statements)</div><div style="font-size:11px;color:var(--amber);opacity:.8">Tip: If you downloaded a PDF, go back and export from transaction history instead.</div><input type="file" id="reconFileInput" accept=".csv,.xlsx,.xls,.ofx,.qfx" style="display:none" onchange="handleReconFile(event)">`; }
   const fi = document.getElementById('reconFileInput');
   if (fi) fi.value = '';
 }
