@@ -4646,13 +4646,32 @@ let _pendingImportFile = null;
 
 function parseDateStr(raw) {
   if (!raw) return '';
-  let d = String(raw).replace(/"/g,'').trim();
-  // YYYY/MM/DD (FNB) → YYYY-MM-DD
-  d = d.replace(/\//g, '-');
+  const d = String(raw).replace(/"/g,'').trim();
+
+  // Already ISO: YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
+
+  // YYYY/MM/DD (FNB internet banking)
+  if (/^\d{4}\/\d{2}\/\d{2}$/.test(d)) return d.replace(/\//g, '-');
+
+  // DD/MM/YYYY (FNB business / Nedbank) — must detect before any generic replace
+  const dmy = d.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (dmy) return `${dmy[3]}-${dmy[2].padStart(2,'0')}-${dmy[1].padStart(2,'0')}`;
+
+  // DD-MM-YYYY
+  const dmyd = d.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if (dmyd) return `${dmyd[3]}-${dmyd[2].padStart(2,'0')}-${dmyd[1].padStart(2,'0')}`;
+
+  // "5 Jan 2024" / "05 Jan 2024" (FNB app export)
+  const MON = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+  const dmy3 = d.match(/^(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})$/);
+  if (dmy3) { const m = MON[dmy3[2].toLowerCase()]; if (m) return `${dmy3[3]}-${m}-${dmy3[1].padStart(2,'0')}`; }
+
+  // Last resort: native Date (only safe for unambiguous formats)
   const p = new Date(d);
-  if (isNaN(p)) return '';
-  return `${p.getFullYear()}-${String(p.getMonth()+1).padStart(2,'0')}-${String(p.getDate()).padStart(2,'0')}`;
+  if (!isNaN(p)) return `${p.getFullYear()}-${String(p.getMonth()+1).padStart(2,'0')}-${String(p.getDate()).padStart(2,'0')}`;
+
+  return '';
 }
 
 function splitCSVLine(line) {
@@ -4679,46 +4698,62 @@ async function processReconFile(file) {
         .filter(l => l);
       if (!lines.length) { showToast('Empty file', 'var(--amber)'); resetReconDropZone(); return; }
 
-      // Dynamically find header row — skip FNB metadata rows
+      // Dynamically find header row — skip FNB/bank metadata rows (scan up to row 25)
       let headerIdx = -1;
-      for (let i = 0; i < Math.min(lines.length, 20); i++) {
+      for (let i = 0; i < Math.min(lines.length, 25); i++) {
         const low = lines[i].toLowerCase();
-        if (low.includes('date') && (low.includes('amount') || low.includes('description') || low.includes('desc'))) {
+        // Must contain "date" AND at least one amount-like column
+        if (low.includes('date') && (low.includes('amount') || low.includes('debit') || low.includes('credit'))) {
           headerIdx = i;
           break;
         }
       }
       if (headerIdx === -1) {
-        showToast('Could not find column headers (Date, Amount, Description) — check the file format', 'var(--amber)');
+        showToast("We couldn't detect a valid transaction file. Please export from your bank's transaction history as CSV.", 'var(--amber)');
         resetReconDropZone(); return;
       }
 
       const headers = splitCSVLine(lines[headerIdx]).map(h => h.replace(/"/g,'').trim().toLowerCase());
-      const di  = headers.findIndex(h => h === 'date' || h.startsWith('date'));
-      const dsi = headers.findIndex(h => h.includes('desc') || h.includes('narr') || h.includes('detail'));
-      const ai  = headers.findIndex(h => h.includes('amount'));
-      const ti  = headers.findIndex(h => h === 'type' || h.includes('tran type'));
-      const ri  = headers.findIndex(h => h.includes('ref') && !h.includes('desc'));
+      const di      = headers.findIndex(h => h === 'date' || h.startsWith('date'));
+      const dsi     = headers.findIndex(h => h.includes('desc') || h.includes('narr') || h.includes('detail') || h.includes('ref'));
+      const ai      = headers.findIndex(h => h === 'amount');
+      const debitI  = headers.findIndex(h => h === 'debit'  || h === 'debits'  || h.includes('debit amount'));
+      const creditI = headers.findIndex(h => h === 'credit' || h === 'credits' || h.includes('credit amount'));
+      const ti      = headers.findIndex(h => h === 'type' || h.includes('tran type'));
 
-      if (di === -1 || ai === -1) {
-        showToast('Missing required columns (Date, Amount) — check the file format', 'var(--amber)');
+      if (di === -1 || (ai === -1 && debitI === -1 && creditI === -1)) {
+        showToast("We couldn't detect a valid transaction file. Please export from your bank's transaction history as CSV.", 'var(--amber)');
         resetReconDropZone(); return;
       }
 
       rows = lines.slice(headerIdx + 1)
         .map(line => {
           const cols = splitCSVLine(line);
-          const rawAmt = parseFloat(String(cols[ai]||'0').replace(/[^0-9.-]/g,'')) || 0;
-          if (rawAmt === 0) return null;
           const d = parseDateStr(cols[di]);
           if (!d) return null;
-          const typeVal = ti >= 0 ? String(cols[ti]||'').toLowerCase() : '';
+
+          let rawAmt, type;
+          if (ai !== -1) {
+            // Single amount column — negative = debit, positive = credit
+            rawAmt = parseFloat(String(cols[ai]||'0').replace(/[^0-9.-]/g,'')) || 0;
+            if (rawAmt === 0) return null;
+            const typeVal = ti >= 0 ? String(cols[ti]||'').toLowerCase() : '';
+            type = typeVal.includes('debit') || rawAmt < 0 ? 'debit' : 'credit';
+          } else {
+            // Separate Debit / Credit columns
+            const dv = debitI  >= 0 ? parseFloat(String(cols[debitI] ||'').replace(/[^0-9.]/g,'')) || 0 : 0;
+            const cv = creditI >= 0 ? parseFloat(String(cols[creditI]||'').replace(/[^0-9.]/g,'')) || 0 : 0;
+            if (dv > 0)      { rawAmt = dv; type = 'debit';  }
+            else if (cv > 0) { rawAmt = cv; type = 'credit'; }
+            else return null;
+          }
+
           return {
             date: d,
             description: (dsi >= 0 ? cols[dsi] : '') || 'Bank transaction',
             amount: Math.abs(rawAmt),
-            reference: ri >= 0 ? (cols[ri]||'') : '',
-            type: typeVal.includes('debit') || rawAmt < 0 ? 'debit' : 'credit'
+            reference: '',
+            type
           };
         })
         .filter(Boolean);
