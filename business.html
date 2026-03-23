@@ -4886,7 +4886,7 @@ function renderTxTable() {
   const tbody = document.getElementById('txTableBody');
   if (!tbody) return;
   if (!reconTransactions.length) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state" style="padding:36px 20px"><div class="es-icon">🏦</div><div class="es-title">No bank statement uploaded</div><div class="es-desc">Download your bank statement as a CSV from your internet banking, then drag it into the drop zone above. OneTouch will read the transactions and prepare them for matching.</div></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state" style="padding:36px 20px"><div class="es-icon">🏦</div><div class="es-title">No transactions uploaded</div><div class="es-desc">Export your bank transactions as CSV or Excel from your bank's transaction history, then drag the file into the drop zone above. OneTouch will read each transaction and prepare them for matching.</div></div></td></tr>`;
     return;
   }
   tbody.innerHTML = reconTransactions.map(tx => {
