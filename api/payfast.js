@@ -100,6 +100,8 @@ export default async function handler(req, res) {
       merchant_id_set:  !!MERCHANT_ID,
       merchant_key_set: !!MERCHANT_KEY,
       passphrase_set:   !!PASSPHRASE,
+      passphrase_length: PASSPHRASE.length,
+      passphrase_encoded: pfEncode(PASSPHRASE),
       signature_string: debugString,
       signature:        data.signature
     }

@@ -2489,6 +2489,8 @@ async function payWithPayFast(plan) {
             <div style="font-size:16px;font-weight:700;margin-bottom:16px;color:#d4a843">PayFast Debug — Copy this and share</div>
             <textarea readonly style="width:100%;height:200px;background:#0a0f1e;color:#7fff7f;border:1px solid #333;border-radius:6px;padding:10px;font-family:monospace;font-size:11px;resize:none" onclick="this.select()"
             >passphrase_set: ${data._debug.passphrase_set}
+passphrase_length: ${data._debug.passphrase_length}
+passphrase_encoded: ${data._debug.passphrase_encoded}
 
 signature_string:
 ${data._debug.signature_string}
