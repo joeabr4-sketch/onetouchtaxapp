@@ -4779,7 +4779,7 @@ async function processReconFile(file) {
     if (!rows.length) { showToast('No transactions found — check column headers', 'var(--amber)'); resetReconDropZone(); return; }
 
     // Show preview before committing
-    showImportPreview(rows, file);
+    showReconPreview(rows, file);
 
   } catch(e) {
     console.error(e);
@@ -4788,7 +4788,7 @@ async function processReconFile(file) {
   }
 }
 
-function showImportPreview(rows, file) {
+function showReconPreview(rows, file) {
   _pendingImportRows = rows;
   _pendingImportFile = file;
   const credits = rows.filter(r=>r.type==='credit').length;
