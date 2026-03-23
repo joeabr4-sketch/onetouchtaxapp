@@ -17,14 +17,29 @@ export default async function handler(req, res) {
   if (!token) {
     return res.status(401).json({ error: 'Unauthorised' });
   }
-  const supabaseUrl = process.env.SUPABASE_URL || 'https://stcxldjcagyxjfwfforx.supabase.co';
+  const supabaseUrl  = process.env.SUPABASE_URL || 'https://stcxldjcagyxjfwfforx.supabase.co';
   const supabaseAnon = process.env.SUPABASE_ANON_KEY;
   if (supabaseAnon) {
     try {
+      // Verify JWT and get user id
       const authRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
         headers: { 'Authorization': `Bearer ${token}`, 'apikey': supabaseAnon }
       });
       if (!authRes.ok) return res.status(401).json({ error: 'Unauthorised' });
+      const user = await authRes.json();
+
+      // Check plan — email delivery requires Full plan
+      const profRes = await fetch(
+        `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=plan`,
+        { headers: { 'Authorization': `Bearer ${token}`, 'apikey': supabaseAnon, 'Accept': 'application/json' } }
+      );
+      if (profRes.ok) {
+        const rows = await profRes.json();
+        const plan = rows[0]?.plan || 'free';
+        if (plan !== 'full') {
+          return res.status(403).json({ error: { type: 'plan_required', message: 'Email delivery requires a Full plan.' } });
+        }
+      }
     } catch {
       return res.status(401).json({ error: 'Unauthorised' });
     }
