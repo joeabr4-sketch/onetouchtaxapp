@@ -1,11 +1,11 @@
 // PayFast Payment Initiator
-// Creates signed payment data for a subscription checkout
+// Creates payment data for a subscription checkout
+// Note: PayFast "require signature" is disabled on this account — no signature field sent.
 
 import crypto from 'crypto';
 
 const MERCHANT_ID  = process.env.PAYFAST_MERCHANT_ID;
 const MERCHANT_KEY = process.env.PAYFAST_MERCHANT_KEY;
-const PASSPHRASE   = process.env.PAYFAST_PASSPHRASE || '';
 const SANDBOX      = process.env.PAYFAST_SANDBOX === 'true';
 const SITE_URL     = process.env.SITE_URL || 'https://onetouchtaxapp.vercel.app';
 
@@ -13,37 +13,6 @@ const PLANS = {
   pro:  { name: 'OneTouch Pro Plan',  amount: '299.00' },
   full: { name: 'OneTouch Full Plan', amount: '599.00' }
 };
-
-// URL-encode matching PHP urlencode() — PayFast verifies using PHP on their end.
-// encodeURIComponent leaves ! ~ * ' ( ) unencoded; PHP urlencode encodes them.
-function pfEncode(val) {
-  return encodeURIComponent(String(val).trim())
-    .replace(/!/g,  '%21')
-    .replace(/~/g,  '%7E')
-    .replace(/\*/g, '%2A')
-    .replace(/'/g,  '%27')
-    .replace(/\(/g, '%28')
-    .replace(/\)/g, '%29')
-    .replace(/%20/g, '+');
-}
-
-// Build signature string: sort keys alphabetically, encode values, append passphrase
-function buildSignatureString(data, passphrase) {
-  const str = Object.keys(data)
-    .sort()
-    .filter(k => data[k] !== null && data[k] !== undefined && data[k] !== '')
-    .map(k => `${k}=${pfEncode(data[k])}`)
-    .join('&');
-  return passphrase ? `${str}&passphrase=${pfEncode(passphrase)}` : str;
-}
-
-function generateSignature(data, passphrase) {
-  const sigString = buildSignatureString(data, passphrase);
-  console.log('[PayFast] signature string:', sigString);
-  const sig = crypto.createHash('md5').update(sigString).digest('hex');
-  console.log('[PayFast] signature:', sig);
-  return sig;
-}
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -83,31 +52,9 @@ export default async function handler(req, res) {
     custom_str2:       plan,
   };
 
-  // Debug: capture exact string used for signature BEFORE adding signature field
-  const debugString = buildSignatureString(data, PASSPHRASE ? '[PASSPHRASE]' : '');
-
-  // Generate signature — data has no signature key yet, so it is correctly excluded
-  data.signature = generateSignature(data, PASSPHRASE);
-
-  // TEMP TEST: remove signature field — PayFast "require signature" is OFF so it should
-  // accept the payment without one. Remove this line once confirmed working.
-  delete data.signature;
-
   const pfUrl = SANDBOX
     ? 'https://sandbox.payfast.co.za/eng/process'
     : 'https://www.payfast.co.za/eng/process';
 
-  return res.status(200).json({
-    action: pfUrl,
-    fields: data,
-    _debug: {
-      merchant_id_set:  !!MERCHANT_ID,
-      merchant_key_set: !!MERCHANT_KEY,
-      passphrase_set:   !!PASSPHRASE,
-      passphrase_length: PASSPHRASE.length,
-      passphrase_encoded: pfEncode(PASSPHRASE),
-      signature_string: debugString,
-      signature:        data.signature
-    }
-  });
+  return res.status(200).json({ action: pfUrl, fields: data });
 }
