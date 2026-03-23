@@ -7,12 +7,26 @@ const MERCHANT_ID  = process.env.PAYFAST_MERCHANT_ID;
 const PASSPHRASE   = process.env.PAYFAST_PASSPHRASE || '';
 const SUPABASE_URL = 'https://stcxldjcagyxjfwfforx.supabase.co';
 
+// Matches PHP urlencode() — encodes ! ~ ' ( ) * which encodeURIComponent leaves unencoded
+function pfEncode(val) {
+  return encodeURIComponent(String(val).trim())
+    .replace(/!/g,  '%21')
+    .replace(/'/g,  '%27')
+    .replace(/\(/g, '%28')
+    .replace(/\)/g, '%29')
+    .replace(/\*/g, '%2A')
+    .replace(/~/g,  '%7E')
+    .replace(/%20/g, '+');
+}
+
 function generateSignature(data, passphrase) {
+  // PayFast sorts fields alphabetically (ksort) before hashing
   let str = Object.keys(data)
-    .filter(k => k !== 'signature' && data[k] !== '')
-    .map(k => `${k}=${encodeURIComponent(String(data[k]).trim()).replace(/%20/g, '+')}`)
+    .filter(k => k !== 'signature' && data[k] != null && data[k] !== '')
+    .sort()
+    .map(k => `${k}=${pfEncode(data[k])}`)
     .join('&');
-  if (passphrase) str += `&passphrase=${encodeURIComponent(passphrase.trim()).replace(/%20/g, '+')}`;
+  if (passphrase) str += `&passphrase=${pfEncode(passphrase)}`;
   return crypto.createHash('md5').update(str).digest('hex');
 }
 
