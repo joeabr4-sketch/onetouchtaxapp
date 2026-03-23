@@ -2481,8 +2481,27 @@ async function payWithPayFast(plan) {
 
     // TEMP DEBUG — show signature string before submitting
     if (data._debug) {
-      const msg = `PayFast Debug\n\npassphrase_set: ${data._debug.passphrase_set}\n\nsignature_input:\n${data._debug.signature_input}\n\nsignature: ${data._debug.signature}`;
-      if (!confirm(msg + '\n\nClick OK to submit to PayFast, Cancel to abort.')) return;
+      await new Promise(resolve => {
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px';
+        overlay.innerHTML = `
+          <div style="background:#131929;border:1px solid #d4a843;border-radius:12px;padding:24px;max-width:700px;width:100%;color:#fff;font-family:monospace;font-size:12px">
+            <div style="font-size:16px;font-weight:700;margin-bottom:16px;color:#d4a843">PayFast Debug — Copy this and share</div>
+            <textarea readonly style="width:100%;height:200px;background:#0a0f1e;color:#7fff7f;border:1px solid #333;border-radius:6px;padding:10px;font-family:monospace;font-size:11px;resize:none" onclick="this.select()"
+            >passphrase_set: ${data._debug.passphrase_set}
+
+signature_input:
+${data._debug.signature_input}
+
+signature: ${data._debug.signature}</textarea>
+            <div style="margin-top:12px;display:flex;gap:10px">
+              <button onclick="this.closest('div[style]').parentNode.remove();window._pfResolve(true)" style="background:#d4a843;color:#0a0f1e;border:none;padding:8px 20px;border-radius:6px;font-weight:700;cursor:pointer">Submit to PayFast</button>
+              <button onclick="this.closest('div[style]').parentNode.remove();window._pfResolve(false)" style="background:#1e2535;color:#b0bcd4;border:1px solid #444;padding:8px 20px;border-radius:6px;cursor:pointer">Cancel</button>
+            </div>
+          </div>`;
+        window._pfResolve = resolve;
+        document.body.appendChild(overlay);
+      }).then(ok => { if (!ok) throw new Error('cancelled'); });
     }
 
     // Build and submit form to PayFast
