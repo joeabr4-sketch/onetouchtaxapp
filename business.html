@@ -849,7 +849,7 @@ body.help-mode .main{padding-top:34px}
         <div style="font-size:13px;color:var(--text-2);margin-bottom:16px;max-width:500px">Your dashboard is ready. Start by adding your first invoice or uploading a bank statement.</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <button onclick="showSection('invoices',document.querySelector('.s-btn[onclick*=invoices]'));setTimeout(openInvForm,200)" style="background:var(--blue);color:#0f1520;border:none;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">+ Add First Invoice</button>
-          <button onclick="showSection('bankanalysis',document.querySelector('.s-btn[onclick*=bankanalysis]'))" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">📊 Upload Bank Statement</button>
+          <button onclick="showSection('reconcile',document.querySelector('.s-btn[onclick*=reconcile]'))" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">📊 Import Bank Transactions</button>
         </div>
       </div>
       <div class="welcome">
@@ -4714,11 +4714,11 @@ async function processReconFile(file) {
       }
 
       const headers = splitCSVLine(lines[headerIdx]).map(h => h.replace(/"/g,'').trim().toLowerCase());
-      const di      = headers.findIndex(h => h === 'date' || h.startsWith('date'));
+      const di      = headers.findIndex(h => h.includes('date'));
       const dsi     = headers.findIndex(h => h.includes('desc') || h.includes('narr') || h.includes('detail') || h.includes('ref'));
-      const ai      = headers.findIndex(h => h === 'amount');
-      const debitI  = headers.findIndex(h => h === 'debit'  || h === 'debits'  || h.includes('debit amount'));
-      const creditI = headers.findIndex(h => h === 'credit' || h === 'credits' || h.includes('credit amount'));
+      const ai      = headers.findIndex(h => h.includes('amount') && !h.includes('debit') && !h.includes('credit'));
+      const debitI  = headers.findIndex(h => h.includes('debit'));
+      const creditI = headers.findIndex(h => h.includes('credit'));
       const ti      = headers.findIndex(h => h === 'type' || h.includes('tran type'));
 
       if (di === -1 || (ai === -1 && debitI === -1 && creditI === -1)) {
