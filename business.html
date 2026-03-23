@@ -2508,7 +2508,7 @@ signature: ${data._debug.signature}</textarea>
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = data.action;
-    Object.entries(data.fields).forEach(([key, val]) => {
+    Object.entries(data.fields).sort(([a], [b]) => a.localeCompare(b)).forEach(([key, val]) => {
       const input = document.createElement('input');
       input.type = 'hidden'; input.name = key; input.value = val;
       form.appendChild(input);
