@@ -4682,12 +4682,7 @@ function splitCSVLine(line) {
 }
 
 async function processReconFile(file) {
-  console.log('[CSV DEBUG] processReconFile called, file:', file?.name, 'reconSession:', reconSession);
-  if (!file || !reconSession) {
-    console.log('[CSV DEBUG] EARLY RETURN — file:', !!file, 'reconSession:', !!reconSession);
-    return;
-  }
-  console.log('[CSV DEBUG] file ext:', file.name.split('.').pop().toLowerCase());
+  if (!file || !reconSession) return;
   const dz = document.getElementById('reconDropZone');
   if (dz) dz.innerHTML = `<div style="font-size:22px;margin-bottom:8px">⏳</div><div style="font-size:13px;color:var(--text-2)">Reading ${file.name}...</div><input type="file" id="reconFileInput" accept=".csv,.xlsx,.xls,.ofx,.qfx" style="display:none" onchange="handleReconFile(event)">`;
 
@@ -4730,14 +4725,6 @@ async function processReconFile(file) {
         showToast("We couldn't detect a valid transaction file. Please export from your bank's transaction history as CSV.", 'var(--amber)');
         resetReconDropZone(); return;
       }
-
-      // DEBUG — open browser console (F12) to see this output
-      console.log('[CSV DEBUG] First 10 raw lines:', lines.slice(0,10));
-      console.log('[CSV DEBUG] Header row index:', headerIdx, '→', lines[headerIdx]);
-      console.log('[CSV DEBUG] Parsed headers:', headers);
-      console.log('[CSV DEBUG] Column indices — date:', di, 'amount:', ai, 'debit:', debitI, 'credit:', creditI, 'desc:', dsi);
-      console.log('[CSV DEBUG] First data line:', lines[headerIdx+1]);
-      console.log('[CSV DEBUG] First data line cols:', splitCSVLine(lines[headerIdx+1]||''));
 
       rows = lines.slice(headerIdx + 1)
         .map(line => {
