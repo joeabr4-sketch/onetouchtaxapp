@@ -2523,13 +2523,19 @@ function showPDFToast(msg) {
 
 // ── AUTH ──
 async function initApp() {
+  // Detect OAuth callback — access_token or code in URL means we're mid-redirect.
+  // Stay on loading screen and let onAuthStateChange handle it instead of flashing auth screen.
+  const urlStr = window.location.href;
+  const isOAuthCallback = urlStr.includes('access_token') || urlStr.includes('#refresh_token') || urlStr.includes('?code=') || urlStr.includes('&code=');
+
   // Safety net — if anything hangs, never leave user stuck on spinner
+  // Give OAuth callbacks extra time (12s) since they do a token exchange
   const spinnerGuard = setTimeout(() => {
     if (document.getElementById('loadingScreen').style.display !== 'none') {
       document.getElementById('loadingScreen').style.display = 'none';
       document.getElementById('authScreen').style.display = 'flex';
     }
-  }, 8000);
+  }, isOAuthCallback ? 12000 : 8000);
 
   sb.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session?.user) {
@@ -2554,6 +2560,9 @@ async function initApp() {
       document.getElementById('loadingScreen').style.display = 'flex';
       await loadUserProfile();
       clearTimeout(spinnerGuard);
+    } else if (isOAuthCallback) {
+      // Auth callback in progress — keep loading screen, onAuthStateChange will fire shortly
+      document.getElementById('loadingScreen').style.display = 'flex';
     } else {
       clearTimeout(spinnerGuard);
       document.getElementById('loadingScreen').style.display = 'none';
