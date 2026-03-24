@@ -126,7 +126,7 @@ export default async function handler(req, res) {
 
   // ── CALL ANTHROPIC ──
   try {
-    body.model = 'claude-sonnet-4-5-20251001';
+    body.model = 'claude-haiku-4-5-20251001';
     if (!body.max_tokens || body.max_tokens > 3000) body.max_tokens = 3000;
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {

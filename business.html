@@ -4081,6 +4081,7 @@ async function generateSavingTips() {
       messages:[{role:'user',content:`Business: ${userProfile?.biz_name}, VAT registered: ${isVatRegistered()}, Revenue: ${fmtR(income)}, Expenses: ${fmtR(exp)}, Categories: ${cats||'various'}. Give 4 SA-specific tax-saving tips.`}]});
     const tips = data.content?.[0]?.text||'';
     if (results) results.innerHTML = tips.split('\n').filter(l=>l.trim()).map(l=>`<div style="margin-bottom:8px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;font-size:13px;color:var(--text-2);line-height:1.65">${l}</div>`).join('');
+    recordAICallUsed();
   } catch(e) {
     if (results) results.innerHTML='<div style="color:var(--red);font-size:13px;padding:12px">Failed to generate tips. Please try again.</div>';
   }
@@ -4159,7 +4160,7 @@ async function checkAICalls() {
   if (!await requireAIConsent()) return false;
   const plan = userProfile?.plan||'free';
   if (plan==='free') { showUpgradePrompt('pro'); return false; }
-  const monthKey = await ensureMonthlyReset();
+  await ensureMonthlyReset();
   const calls = userProfile.ai_calls||0;
   if (plan==='pro') {
     if (calls >= USAGE_LIMITS.ai.pro) {
@@ -4172,10 +4173,16 @@ async function checkAICalls() {
       showToast('You\'ve made 200 AI calls this month — heavy usage! We\'ll keep going, but consider if you need all of these.','var(--amber)');
     }
   }
+  return true;
+}
+
+async function recordAICallUsed() {
+  if (!currentUser || !userProfile) return;
+  const monthKey = await ensureMonthlyReset();
+  const calls = userProfile.ai_calls||0;
   await sb.from('profiles').update({ai_calls: calls+1, ai_calls_month: monthKey}).eq('id', currentUser.id);
   userProfile.ai_calls = calls+1;
   updateUsageBadges();
-  return true;
 }
 
 async function trackWhatsAppSent() {
@@ -4241,6 +4248,7 @@ async function sendChat() {
       messages: getChatHistory().concat([{role:'user',content:msg}])});
     removeTyping();
     addMsg('ai', data.content?.[0]?.text||'Sorry, please try again.');
+    recordAICallUsed();
   } catch(err) {
     removeTyping();
     addMsg('ai','Error: '+(err.message||'Please try again.'));
