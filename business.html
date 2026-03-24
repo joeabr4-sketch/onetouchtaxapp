@@ -798,7 +798,7 @@ body.help-mode .main{padding-top:34px}
       <button class="s-btn" onclick="showSection('financials',this)"><span class="s-icon">📈</span><span data-i18n="nav_financials">Financials & P&L</span></button>
       <button class="s-btn" onclick="showSection('reconcile',this)"><span class="s-icon">🔗</span><span data-i18n="nav_reconcile">Reconciliation</span><span class="plan-lock nav-lock" id="lock-reconcile">PRO</span></button>
       <button class="s-btn" onclick="showSection('handoff',this)"><span class="s-icon">📦</span><span data-i18n="nav_bookkeeper">Bookkeeper Pack</span><span class="plan-lock nav-lock" id="lock-handoff">PRO</span></button>
-      <button class="s-btn" onclick="showSection('payroll',this)"><span class="s-icon">👥</span><span data-i18n="nav_payroll">Payroll</span><span class="plan-lock nav-lock" id="lock-payroll">PRO</span></button>
+      <button class="s-btn" onclick="showSection('payroll',this)"><span class="s-icon">👥</span><span data-i18n="nav_payroll">Payroll</span><span class="plan-lock nav-lock" id="lock-payroll">FULL</span></button>
       <div class="s-section" data-i18n="nav_ai_tools">AI Tools</div>
       <button class="s-btn" onclick="showSection('assistant',this)"><span class="s-icon">🤖</span><span data-i18n="nav_assistant">Tax Assistant</span></button>
     </nav>
@@ -807,6 +807,7 @@ body.help-mode .main{padding-top:34px}
         <div class="s-avatar" id="userAvatar">OT</div>
         <div style="overflow:hidden"><div class="s-uname" id="userName">Loading...</div><div class="s-uplan" id="planBadge">Free Plan</div></div>
       </div>
+      <button id="sidebarUpgradeBtn" onclick="showSection('settings',null)" style="display:none;width:100%;margin-bottom:8px;background:linear-gradient(135deg,#d4a843,#b8872e);color:#fff;border:none;padding:9px;border-radius:8px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.3px">⚡ Upgrade Plan</button>
       <div style="display:flex;gap:6px;margin-bottom:6px">
         <button class="s-out" onclick="showSection('settings',this)" style="flex:1">⚙ Settings</button>
         <button class="s-out" onclick="signOut()">Sign Out</button>
@@ -864,6 +865,14 @@ body.help-mode .main{padding-top:34px}
         <div class="stat amber"><div class="stat-label">Due This Month</div><div class="stat-value" id="statDue">—</div><div class="stat-sub">Upcoming submissions</div></div>
         <div class="stat red"><div class="stat-label">Overdue</div><div class="stat-value" id="statOverdue">—</div><div class="stat-sub" id="statOverdueSub">Check calendar</div></div>
         <div class="stat green"><div class="stat-label">Invoices Logged</div><div class="stat-value" id="statCount">0</div><div class="stat-sub">this financial year</div></div>
+      </div>
+      <!-- FREE PLAN BANNER -->
+      <div id="freePlanBanner" style="display:none;background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.25);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div style="font-size:13px;color:rgba(255,255,255,.8)">⚡ You're on the <strong style="color:#d4a843">Free plan</strong> — upgrade to unlock payroll, WhatsApp, email sending, and full automation.</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+          <button onclick="showSection('settings',null)" style="background:#d4a843;color:#0a0f1e;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">Upgrade to Full</button>
+          <button onclick="this.closest('#freePlanBanner').style.display='none';localStorage.setItem('freeBannerDismissed','1')" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:16px;cursor:pointer;padding:0 4px;line-height:1">✕</button>
+        </div>
       </div>
       <!-- RECONCILIATION STATUS BAR -->
       <div id="reconStatusBar" style="display:none;border-radius:12px;padding:12px 18px;margin-bottom:16px;border:1px solid rgba(245,158,11,.2);background:rgba(245,158,11,.06);transition:all .3s">
@@ -1454,8 +1463,8 @@ body.help-mode .main{padding-top:34px}
           <div id="accLinkLocked" style="display:none;background:var(--gold-dim);border:1px solid rgba(212,168,67,.25);border-radius:9px;padding:16px;text-align:center;margin-top:12px">
             <div style="font-size:24px;margin-bottom:8px">🔒</div>
             <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px">Full Plan Feature</div>
-            <div style="font-size:12px;color:var(--text-3);margin-bottom:12px">Upgrade to Full (R499/mo) to send your accountant a secure access link.</div>
-            <button onclick="window.open('https://onetouch.net.za/#pricing','_blank')" style="background:var(--gold);color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">⬆ Upgrade to Full</button>
+            <div style="font-size:12px;color:var(--text-3);margin-bottom:12px">This feature is available on the Full plan.</div>
+            <button onclick="showSection('settings',null)" style="background:var(--gold);color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">Upgrade to Full</button>
           </div>
         </div>
       </div>
@@ -1465,7 +1474,7 @@ body.help-mode .main{padding-top:34px}
     <!-- ═══ PAYROLL ═══ -->
     <div class="section" id="section-payroll">
       <div class="help-banner"><div class="help-banner-title">💡 Payroll</div><div class="help-banner-body">Add each employee once with their gross salary and allowances. The app calculates PAYE (using the 2025/26 SARS tax tables), UIF (1% employee + 1% employer, capped at R177.12/month), and SDL (1% if total annual payroll exceeds R500k). Run payroll each month to generate payslips and auto-post the salary expense to your books. EMP201 data is generated for you to submit on eFiling.</div><div class="help-banner-actions"><span>Add Employee — set up once, runs every month</span><span>Run Payroll — calculates and posts to books</span><span>Payslips — professional PDF per employee</span><span>EMP201 — SARS payroll return prep (Full plan)</span></div></div>
-      <div id="lock-section-payroll" style="display:none;position:absolute;pointer-events:none;inset:0;background:rgba(7,8,9,.85);backdrop-filter:blur(4px);border-radius:inherit;z-index:10;align-items:center;justify-content:center;padding:20px"><div style="background:var(--gold-dim);border:1px solid rgba(212,168,67,.25);border-radius:16px;padding:32px;text-align:center;max-width:380px"><div style="font-size:36px;margin-bottom:12px">🔒</div><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Full Plan Feature</div><div style="font-size:13px;color:var(--text-2);margin-bottom:20px;line-height:1.6">Payroll, payslips, PAYE/UIF/SDL calculator and EMP201 prep are available on the Full plan.</div><button onclick="window.open('https://onetouch.net.za/#pricing','_blank')" style="background:var(--gold);color:#fff;border:none;padding:11px 24px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer">⬆ Upgrade to Full — R499/mo</button></div></div>
+      <div id="lock-section-payroll" style="display:none;position:absolute;pointer-events:none;inset:0;background:rgba(7,8,9,.85);backdrop-filter:blur(4px);border-radius:inherit;z-index:10;align-items:center;justify-content:center;padding:20px"><div style="background:var(--gold-dim);border:1px solid rgba(212,168,67,.25);border-radius:16px;padding:32px;text-align:center;max-width:380px"><div style="font-size:36px;margin-bottom:12px">🔒</div><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Full Plan Feature</div><div style="font-size:13px;color:var(--text-2);margin-bottom:20px;line-height:1.6">Payroll, payslips, PAYE/UIF/SDL calculator and EMP201 prep are available on the Full plan.</div><button onclick="showSection('settings',null)" style="background:var(--gold);color:#fff;border:none;padding:11px 24px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer">Upgrade to Full — R599/mo</button></div></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px">
         <div>
           <div class="ot-tip-wrap"><h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px">👥 Payroll</h2><button class="ot-tip-btn" onclick="showTip(this,'payroll')">?</button></div>
@@ -1697,11 +1706,11 @@ body.help-mode .main{padding-top:34px}
             <div id="planFreeMsg" style="font-size:13px;color:var(--text-2);margin-bottom:14px">You're on the <strong style="color:var(--text)">Free plan</strong>. Upgrade to Pro to unlock VAT201, bank analysis, reconciliation, IRP6/ITR14 and bookkeeper pack.</div>
             <div id="upgradeButtons" style="display:flex;gap:8px;flex-wrap:wrap">
               <button onclick="payWithPayFast('pro')" style="background:var(--blue);color:#0f1520;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬆ Upgrade to Pro — R299/mo</button>
-              <button onclick="payWithPayFast('full')" style="background:var(--gold);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬆ Upgrade to Full — R499/mo</button>
+              <button onclick="payWithPayFast('full')" style="background:var(--gold);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬆ Upgrade to Full — R599/mo</button>
             </div>
             <div id="proUpgradeBtn" style="display:none">
               <div style="font-size:13px;color:var(--text-2);margin-bottom:14px">You're on the <strong style="color:var(--text)">⭐ Pro plan</strong>. Upgrade to Full to unlock WhatsApp delivery, payroll, EMP201, AI saving tips and accountant access link.</div>
-              <button onclick="window.open('https://onetouch.net.za/#pricing','_blank')" style="background:var(--gold);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬆ Upgrade to Full — R499/mo</button>
+              <button onclick="payWithPayFast('full')" style="background:var(--gold);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬆ Upgrade to Full — R599/mo</button>
             </div>
             <div id="cancelSubLink" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
               <a href="mailto:support@onetouch.net.za?subject=Cancel%20My%20Subscription&body=Please%20cancel%20my%20OneTouch%20TaxApp%20subscription.%20My%20account%20email%20is%3A%20" style="font-size:12px;color:var(--text-3);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-3)'">Cancel subscription →</a>
@@ -2450,11 +2459,7 @@ function canUse(feature) {
 }
 
 function showUpgradePrompt(tier) {
-  const msgs = {
-    pro: 'This feature is included in the <strong style="color:#fff">Pro plan</strong> (R299/mo). Upgrade to unlock bank reconciliation, VAT prep, AI assistant, financial history and more.',
-    full: 'This feature is included in the <strong style="color:#fff">Full plan</strong> (R599/mo). Upgrade to unlock payroll, EMP201, WhatsApp delivery, email sending and accountant handoff.'
-  };
-  document.getElementById('upgradeModalMsg').innerHTML = msgs[tier] || msgs.pro;
+  document.getElementById('upgradeModalMsg').textContent = 'Upgrade to Full to use this feature. Unlock payroll, WhatsApp, email sending, and more.';
   document.getElementById('upgradeModal').style.display = 'flex';
 }
 function closeUpgrade() {
@@ -2738,6 +2743,10 @@ function updateUserUI() {
   if (upgradeButtons) upgradeButtons.style.display = plan === 'free' ? 'flex' : 'none';
   const planFreeMsg = document.getElementById('planFreeMsg');
   if (planFreeMsg) planFreeMsg.style.display = plan === 'free' ? 'block' : 'none';
+  const sidebarUpgradeBtn = document.getElementById('sidebarUpgradeBtn');
+  if (sidebarUpgradeBtn) sidebarUpgradeBtn.style.display = plan !== 'full' ? 'block' : 'none';
+  const freePlanBanner = document.getElementById('freePlanBanner');
+  if (freePlanBanner) freePlanBanner.style.display = (plan === 'free' && !localStorage.getItem('freeBannerDismissed')) ? 'flex' : 'none';
   const proUpgradeBtn = document.getElementById('proUpgradeBtn');
   if (proUpgradeBtn) proUpgradeBtn.style.display = plan === 'pro' ? 'block' : 'none';
   const cancelSubLink = document.getElementById('cancelSubLink');
@@ -9071,11 +9080,11 @@ document.addEventListener('click', function(e) {
 
 <!-- UPGRADE PROMPT MODAL -->
 <div id="upgradeModal" style="position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9500;display:none;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeUpgrade()">
-  <div style="background:#0f1520;border-radius:16px;max-width:420px;width:100%;padding:32px;box-shadow:0 24px 64px rgba(0,0,0,.8);border:1px solid rgba(255,255,255,.12);text-align:center;animation:fadeUp .3s ease">
+  <div style="background:#131929;border-radius:16px;max-width:420px;width:100%;padding:32px;box-shadow:0 24px 64px rgba(0,0,0,.8);border:1px solid rgba(255,255,255,.12);text-align:center;animation:fadeUp .3s ease">
     <div style="font-size:38px;margin-bottom:12px">🔒</div>
-    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:10px">Upgrade Required</div>
-    <div id="upgradeModalMsg" style="font-size:13.5px;color:rgba(255,255,255,.6);line-height:1.65;margin-bottom:24px"></div>
-    <button class="upgrade-btn" onclick="closeUpgrade();showSection('billing',null)" style="display:block;width:100%;margin-bottom:10px">⚡ View Plans &amp; Upgrade</button>
+    <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:10px">Unlock this feature</div>
+    <div id="upgradeModalMsg" style="font-size:13.5px;color:rgba(255,255,255,.65);line-height:1.65;margin-bottom:24px">Upgrade to Full to use this feature. Unlock payroll, WhatsApp, email sending, and more.</div>
+    <button class="upgrade-btn" onclick="closeUpgrade();showSection('settings',null)" style="display:block;width:100%;margin-bottom:10px">Upgrade to Full</button>
     <button class="upgrade-close" onclick="closeUpgrade()">Maybe later</button>
   </div>
 </div>
