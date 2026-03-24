@@ -295,10 +295,30 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
 .reveal-delay-2{transition-delay:.2s}
 .reveal-delay-3{transition-delay:.3s}
 
+/* ── MOBILE VS DESKTOP SECTION ── */
+.devices{padding:80px 0;background:linear-gradient(180deg,transparent,rgba(10,15,30,.6),transparent)}
+.devices-inner{max-width:1100px;margin:0 auto;padding:0 40px}
+.devices-head{text-align:center;margin-bottom:52px}
+.devices-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.device-card{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:32px;position:relative;overflow:hidden}
+.device-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.device-card.mobile::before{background:linear-gradient(90deg,#4f8ef7,#2dd4bf)}
+.device-card.desktop::before{background:linear-gradient(90deg,#d4a843,#f59e0b)}
+.device-icon{font-size:36px;margin-bottom:16px}
+.device-title{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:20px;font-weight:700;margin-bottom:6px}
+.device-sub{font-size:13px;color:var(--text-3);margin-bottom:22px;line-height:1.5}
+.device-list{list-style:none;display:flex;flex-direction:column;gap:10px}
+.device-list li{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;color:var(--text-2);line-height:1.5}
+.device-list li .dl-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+.device-note{margin-top:20px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--text-3);line-height:1.6}
+.device-note strong{color:var(--text-2)}
+
 /* ── RESPONSIVE ── */
 @media(max-width:900px){
   nav{padding:0 20px}
   .nav-links{display:none}
+  .devices-grid{grid-template-columns:1fr}
+  .devices-inner{padding:0 20px}
   .feat-grid{grid-template-columns:1fr 1fr}
   .pricing-grid{grid-template-columns:1fr}
   .price-card.popular{transform:none}
@@ -822,6 +842,52 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
     </div>
     <div class="sars-note" style="margin-top:32px">
       ⚠️ OneTouch TaxApp generates preparation documents to assist with your SARS submissions. All figures should be verified with a registered tax practitioner before submitting. OneTouch is not a registered tax practitioner.
+    </div>
+  </div>
+</section>
+
+<!-- ── MOBILE VS DESKTOP ── -->
+<section class="devices">
+  <div class="devices-inner">
+    <div class="devices-head reveal">
+      <div class="section-badge">Works everywhere</div>
+      <h2 style="font-size:clamp(26px,4vw,38px);font-weight:800;letter-spacing:-1px;margin:12px 0 10px">Built for phone <em style="font-style:normal;color:var(--blue)">and</em> desktop</h2>
+      <p style="font-size:15px;color:var(--text-3);max-width:500px;margin:0 auto">Each device plays to its strengths. Use your phone on the go, sit down at your desk for the heavy lifting.</p>
+    </div>
+    <div class="devices-grid">
+
+      <!-- MOBILE CARD -->
+      <div class="device-card mobile reveal">
+        <div class="device-icon">📱</div>
+        <div class="device-title">On your phone</div>
+        <div class="device-sub">Quick actions, anywhere you are</div>
+        <ul class="device-list">
+          <li><span class="dl-icon">✅</span> Create and send invoices instantly</li>
+          <li><span class="dl-icon">✅</span> Send invoices via WhatsApp to clients</li>
+          <li><span class="dl-icon">✅</span> Check your dashboard — revenue, expenses, what's overdue</li>
+          <li><span class="dl-icon">✅</span> Ask the AI tax assistant a quick question</li>
+          <li><span class="dl-icon">✅</span> View your compliance calendar and deadlines</li>
+          <li><span class="dl-icon">✅</span> Log an expense on the spot</li>
+        </ul>
+        <div class="device-note"><strong>Install it on your home screen</strong> — OneTouch works as a progressive web app. No App Store needed. Tap Share → Add to Home Screen in Safari, or Install App in Chrome.</div>
+      </div>
+
+      <!-- DESKTOP CARD -->
+      <div class="device-card desktop reveal reveal-delay-2">
+        <div class="device-icon">💻</div>
+        <div class="device-title">On your desktop</div>
+        <div class="device-sub">Monthly tasks that need focus</div>
+        <ul class="device-list">
+          <li><span class="dl-icon">✅</span> Upload your bank statement CSV and reconcile transactions</li>
+          <li><span class="dl-icon">✅</span> Generate VAT201, EMP201, IRP6, ITR14 prep documents</li>
+          <li><span class="dl-icon">✅</span> Run payroll and generate payslips</li>
+          <li><span class="dl-icon">✅</span> Download your full bookkeeper pack for your accountant</li>
+          <li><span class="dl-icon">✅</span> Review your P&amp;L and financial history</li>
+          <li><span class="dl-icon">✅</span> Close your financial year and archive records</li>
+        </ul>
+        <div class="device-note"><strong>Bank statement tip:</strong> Download your CSV from your bank's online banking portal on desktop. Most major SA banks — FNB, Nedbank, Standard Bank, Absa — support CSV export.</div>
+      </div>
+
     </div>
   </div>
 </section>

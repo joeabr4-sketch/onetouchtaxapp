@@ -787,7 +787,9 @@ body.help-mode .main{padding-top:34px}
     max-height:80vh;overflow-y:auto;
   }
   .mob-drawer.open{transform:translateY(0)}
-  .mob-drawer-handle{width:36px;height:4px;background:rgba(255,255,255,.18);border-radius:2px;margin:12px auto 16px}
+  .mob-drawer-handle{width:36px;height:4px;background:rgba(255,255,255,.18);border-radius:2px;margin:0 auto}
+  .mob-drawer-header{display:flex;align-items:center;justify-content:center;padding:12px 16px 14px;position:relative}
+  .mob-drawer-close{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
   .mob-drawer-item{
     display:flex;align-items:center;gap:12px;width:100%;padding:13px 20px;
     background:none;border:none;color:rgba(255,255,255,.7);font-size:14px;
@@ -2079,7 +2081,10 @@ body.help-mode .main{padding-top:34px}
   <!-- ══ MOBILE MENU DRAWER ══ -->
   <div class="mob-drawer-overlay" id="mobDrawerOverlay" onclick="closeMobDrawer()"></div>
   <div class="mob-drawer" id="mobDrawer">
-    <div class="mob-drawer-handle"></div>
+    <div class="mob-drawer-header">
+      <div class="mob-drawer-handle"></div>
+      <button class="mob-drawer-close" onclick="closeMobDrawer()">✕</button>
+    </div>
     <div class="mob-drawer-section">Overview</div>
     <button class="mob-drawer-item" onclick="mobNav('dashboard');closeMobDrawer()"><span>📊</span> Dashboard</button>
     <button class="mob-drawer-item" onclick="mobNav('calendar');closeMobDrawer()"><span>📅</span> Compliance Calendar</button>
