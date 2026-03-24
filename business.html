@@ -549,6 +549,9 @@ h1,h2,h3,.logo-text,.stat-value{font-family:'Syne',sans-serif}
 .sup-typing span:nth-child(2){animation-delay:.15s}
 .sup-typing span:nth-child(3){animation-delay:.3s}
 @keyframes supBounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+.ai-tab-btn{background:none;border:none;color:var(--text-3);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:5px 10px;border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.ai-tab-btn:hover{color:var(--text-2)}
+.ai-tab-active{background:var(--blue-dim);color:var(--blue)}
 
 /* ── PLAN GATING TIP ── */
 .tip{display:inline-block;width:15px;height:15px;background:var(--border);color:var(--text-3);border-radius:50%;font-size:9px;text-align:center;line-height:15px;cursor:help;margin-left:5px;position:relative}
@@ -1654,29 +1657,58 @@ body.help-mode .main{padding-top:34px}
 
     <div class="section" id="section-assistant">
       <div class="chat-wrap">
+        <!-- Header with tab switcher -->
         <div class="chat-hd">
           <div class="ai-av">🤖</div>
-          <div><div class="ai-nm">OneTouch Tax Assistant</div><div class="ai-status">South African Tax Expert · Powered by Claude AI</div></div>
-          <div class="online" style="margin-left:auto;margin-right:8px"></div>
+          <div><div class="ai-nm">OneTouch Assistant</div><div class="ai-status">Powered by Claude AI</div></div>
+          <div class="online" style="margin-left:auto;margin-right:10px"></div>
+          <div style="display:flex;gap:2px;background:rgba(255,255,255,.06);border-radius:8px;padding:3px;margin-right:10px">
+            <button id="tabTaxBtn" class="ai-tab-btn ai-tab-active" onclick="switchAssistantTab('tax')">Tax Assistant</button>
+            <button id="tabAppBtn" class="ai-tab-btn" onclick="switchAssistantTab('app')">App Help</button>
+          </div>
           <div class="ai-calls-badge" id="aiCallsBadge">Loading...</div>
         </div>
-        <div class="chat-msgs" id="chatMsgs">
-          <div class="msg ai">
-            <div class="msg-av ai">🤖</div>
-            <div><div class="msg-bub" id="aiWelcomeBub">Hi there! I'm your South African business tax assistant. Ask me anything about VAT, PAYE, provisional tax, eFiling, SARS deadlines, or how to use OneTouch. How can I help you today?</div><div class="msg-time">Now</div></div>
+        <!-- TAX ASSISTANT PANEL -->
+        <div id="taxHelpPanel" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+          <div class="chat-msgs" id="chatMsgs">
+            <div class="msg ai">
+              <div class="msg-av ai">🤖</div>
+              <div><div class="msg-bub" id="aiWelcomeBub">Hi there! I'm your South African tax assistant. Ask me anything about VAT, PAYE, provisional tax, eFiling, or SARS deadlines. How can I help?</div><div class="msg-time">Now</div></div>
+            </div>
+          </div>
+          <div class="chat-foot">
+            <div class="qq" id="chatChips">
+              <div class="q-chip" onclick="sendQ(this)">When is my VAT due?</div>
+              <div class="q-chip" onclick="sendQ(this)">How do I calculate PAYE?</div>
+              <div class="q-chip" onclick="sendQ(this)">What is provisional tax?</div>
+              <div class="q-chip" onclick="sendQ(this)">How do I register for VAT?</div>
+              <div class="q-chip" onclick="sendQ(this)">What is the corporate tax rate?</div>
+            </div>
+            <div class="chat-row">
+              <textarea class="chat-in" id="chatInput" placeholder="Ask about VAT, PAYE, eFiling, SARS..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
+              <button class="send-btn" id="sendBtn" onclick="sendChat()">➤</button>
+            </div>
           </div>
         </div>
-        <div class="chat-foot">
-          <div class="qq" id="chatChips">
-            <div class="q-chip" onclick="sendQ(this)">When is my VAT due?</div>
-            <div class="q-chip" onclick="sendQ(this)">How do I calculate PAYE?</div>
-            <div class="q-chip" onclick="sendQ(this)">What is provisional tax?</div>
-            <div class="q-chip" onclick="sendQ(this)">How do I register for VAT?</div>
-            <div class="q-chip" onclick="sendQ(this)">What is the corporate tax rate?</div>
+        <!-- APP HELP PANEL -->
+        <div id="appHelpPanel" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+          <div id="supportMsgs" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:0">
+            <div class="sup-msg-ai">👋 Hi! I'm the App Help assistant.<br><br>I can help with <strong>billing, account issues, and app features</strong>. What do you need help with?</div>
+            <div id="supportQuickReplies" style="display:flex;flex-direction:column;gap:6px">
+              <div style="font-size:10px;color:var(--text-3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px">Common questions</div>
+              <button class="sq-btn" onclick="sendSupportQ(this)">How do I upgrade my plan?</button>
+              <button class="sq-btn" onclick="sendSupportQ(this)">I was charged incorrectly</button>
+              <button class="sq-btn" onclick="sendSupportQ(this)">How does bank statement analysis work?</button>
+              <button class="sq-btn" onclick="sendSupportQ(this)">I can't log in to my account</button>
+              <button class="sq-btn" onclick="sendSupportQ(this)">How do I cancel my subscription?</button>
+            </div>
           </div>
-          <div class="chat-row">
-            <textarea class="chat-in" id="chatInput" placeholder="Ask about VAT, PAYE, eFiling, SARS..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
-            <button class="send-btn" id="sendBtn" onclick="sendChat()">➤</button>
+          <div style="padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;background:var(--surface2)">
+            <input id="supportInput" type="text" placeholder="Ask about billing, features, account..." onkeydown="if(event.key==='Enter')sendSupportMsg()" style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none" />
+            <button onclick="sendSupportMsg()" style="background:var(--blue);border:none;color:#0f1520;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700">→</button>
+          </div>
+          <div style="padding:6px 12px 10px;text-align:center;font-size:10.5px;color:var(--text-3);background:var(--surface2);border-top:1px solid rgba(255,255,255,.04)">
+            Can't resolve it? Email <a href="mailto:support@onetouch.net.za" style="color:var(--blue);text-decoration:none">support@onetouch.net.za</a>
           </div>
         </div>
       </div>
@@ -1925,7 +1957,7 @@ body.help-mode .main{padding-top:34px}
     <!-- Actions -->
     <div style="padding:12px 16px;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:8px;flex-shrink:0;background:#13151a">
       <button onclick="closeWelcomePopup();showSection('invoices',document.querySelector('.s-btn[onclick*=invoices]'));setTimeout(openInvForm,200)" style="flex:1;background:var(--blue-dim);border:1px solid rgba(184,196,216,.2);color:var(--blue);padding:9px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">+ New Invoice</button>
-      <button onclick="closeWelcomePopup();toggleSupportWidget()" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text-2);padding:9px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">💬 Ask AI</button>
+      <button onclick="closeWelcomePopup();openTaxAI()" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text-2);padding:9px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">🤖 Tax Assistant</button>
       <button onclick="closeWelcomePopup()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text-3);padding:9px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">Dismiss</button>
     </div>
   </div>
@@ -2227,46 +2259,9 @@ body.help-mode .main{padding-top:34px}
   </div>
 </div>
 
-<!-- ── FLOATING AI BUTTON ── -->
-<button id="aiFloatBtn" onclick="toggleSupportWidget()" title="Open AI Assistant" style="position:fixed;bottom:24px;right:24px;z-index:7999;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1e2a42,#252d3d);border:1px solid rgba(184,196,216,.25);box-shadow:0 8px 24px rgba(0,0,0,.6),0 0 0 1px rgba(184,196,216,.08);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='scale(1.08)';this.style.boxShadow='0 12px 32px rgba(0,0,0,.7),0 0 0 2px rgba(184,196,216,.2)'" onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.6),0 0 0 1px rgba(184,196,216,.08)'">🤖</button>
+<!-- ── FLOATING TAX ASSISTANT BUTTON ── -->
+<button id="aiFloatBtn" onclick="openTaxAI()" title="Tax Assistant" style="position:fixed;bottom:24px;right:24px;z-index:7999;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1e2a42,#252d3d);border:1px solid rgba(184,196,216,.25);box-shadow:0 8px 24px rgba(0,0,0,.6),0 0 0 1px rgba(184,196,216,.08);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='scale(1.08)';this.style.boxShadow='0 12px 32px rgba(0,0,0,.7),0 0 0 2px rgba(184,196,216,.2)'" onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.6),0 0 0 1px rgba(184,196,216,.08)'">🤖</button>
 
-<!-- ── SUPPORT WIDGET ── -->
-<div id="supportWidget" style="position:fixed;bottom:24px;right:24px;z-index:8000;display:none;flex-direction:column;width:340px;max-height:520px;background:#13151a;border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:0 24px 64px rgba(0,0,0,.8);overflow:hidden;animation:fadeUp .3s ease">
-  <!-- Header -->
-  <div style="background:linear-gradient(135deg,#1e2128,#252830);border-bottom:1px solid rgba(255,255,255,.08);padding:16px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
-    <div style="display:flex;align-items:center;gap:10px">
-      <div style="width:34px;height:34px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px">🤖</div>
-      <div>
-        <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#fff">OneTouch Support</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;background:#22c55e;border-radius:50%;display:inline-block"></span> Online now</div>
-      </div>
-    </div>
-    <button onclick="toggleSupportWidget()" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">✕</button>
-  </div>
-  <!-- Messages -->
-  <div id="supportMsgs" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:260px;max-height:320px">
-    <div style="background:#1e2128;border:1px solid rgba(255,255,255,.07);border-radius:10px 10px 10px 2px;padding:11px 13px;font-size:13px;color:rgba(255,255,255,.7);line-height:1.6;max-width:90%">
-      👋 Hi! I'm the OneTouch support assistant.<br><br>I can help with <strong style="color:var(--text)">billing, account issues, app features</strong> and general questions. What do you need help with?
-    </div>
-    <!-- Quick replies -->
-    <div id="supportQuickReplies" style="display:flex;flex-direction:column;gap:6px">
-      <div style="font-size:10px;color:var(--text-3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px">Common questions</div>
-      <button class="sq-btn" onclick="sendSupportQ(this)">How do I upgrade my plan?</button>
-      <button class="sq-btn" onclick="sendSupportQ(this)">I was charged incorrectly</button>
-      <button class="sq-btn" onclick="sendSupportQ(this)">How does bank statement analysis work?</button>
-      <button class="sq-btn" onclick="sendSupportQ(this)">I can't log in to my account</button>
-      <button class="sq-btn" onclick="sendSupportQ(this)">How do I cancel my subscription?</button>
-    </div>
-  </div>
-  <!-- Input -->
-  <div style="padding:10px 12px;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:8px;flex-shrink:0">
-    <input id="supportInput" type="text" placeholder="Type your question..." onkeydown="if(event.key==='Enter')sendSupportMsg()" style="flex:1;background:#1e2128;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;outline:none" />
-    <button onclick="sendSupportMsg()" style="background:var(--blue);border:none;color:#0f1520;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:14px;transition:background .2s" onmouseover="this.style.background='#8a9ab8'" onmouseout="this.style.background='var(--blue)'">→</button>
-  </div>
-  <div style="padding:6px 12px 10px;text-align:center;font-size:10.5px;color:var(--text-3)">
-    Can't resolve it? Email <a href="mailto:support@onetouch.net.za" style="color:var(--blue);text-decoration:none">support@onetouch.net.za</a>
-  </div>
-</div>
 
 <script>
 
@@ -2288,6 +2283,7 @@ let editingInvId = null;
 let pendingDocFn = null;
 let logoDataUrl = null;
 let currentSection = 'dashboard';
+let currentAction = null; // Tracks what the user is currently doing (e.g. 'creating_invoice')
 
 // ── HELPERS ──
 function fmtR(v) { return 'R ' + (parseFloat(v)||0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2}); }
@@ -2821,8 +2817,9 @@ function showSection(name, btn) {
   if (name === 'reconcile') renderReconciliation();
   if (name === 'handoff') { updatePackStatus(); updateHandoffReconBanner(); }
   if (name === 'history') { _doAutoSaveSnapshot(); loadPeriodHistory(); }
+  if (name !== currentSection) currentAction = null;
   currentSection = name;
-  if (name === 'assistant') refreshAIContext();
+  if (name === 'assistant') { refreshAIContext(); switchAssistantTab('tax'); }
   if (name === 'settings') _syncHelpModeBtn();
   document.getElementById('notifDropdown').classList.remove('open');
 }
@@ -2960,6 +2957,7 @@ function updateDashStats() {
 
 // ── INVOICE BUILDER ──
 function openInvForm() {
+  currentAction = 'creating_invoice';
   if (!canUse('invoices') && invoices.length >= 5) { showUpgradePrompt('pro'); return; }
   editingInvId = null;
   lineItems = [{ desc: '', qty: 1, price: 0 }];
@@ -2991,6 +2989,7 @@ function openQuickAddForm() {
 }
 
 function openQuoteForm() {
+  currentAction = 'creating_quote';
   openInvForm();
   document.getElementById('invFormTitle').textContent = '📋 Create Quote';
   document.getElementById('inv-number').value = genQuoteNumber();
@@ -4244,7 +4243,7 @@ async function sendChat() {
   try {
     const screenCtx = buildScreenContext(currentSection);
     const data = await aiCall({model:'claude-sonnet-4-20250514',max_tokens:800,
-      system:`You are a South African business tax assistant for OneTouch TaxApp. Specialise in SARS, VAT, PAYE, provisional tax and eFiling. Be concise, practical and guide the user — do not make decisions for them.\n\nCurrent user context:\n${screenCtx}\n\nRULES: Never guarantee correctness of figures. Never instruct the user to submit to SARS without reviewing first. Treat all outputs as estimates for review.`,
+      system:`You are a South African business tax assistant embedded in OneTouch TaxApp. Specialise in SARS, VAT, PAYE, provisional tax and eFiling. You are an intelligent co-pilot — use the user's current context to give specific, relevant advice rather than generic answers.\n\nUSER CONTEXT:\n${screenCtx}\n\nINSTRUCTIONS:\n- Reference the user's current screen and data in your response where relevant\n- Be concise, practical and actionable\n- Do not make decisions for the user\n- Never guarantee correctness of figures — treat all outputs as estimates for review\n- Never instruct the user to submit to SARS without reviewing first\n- If the user asks about app features or billing, direct them to the "App Help" tab`,
       messages: getChatHistory().concat([{role:'user',content:msg}])});
     removeTyping();
     addMsg('ai', data.content?.[0]?.text||'Sorry, please try again.');
@@ -4297,6 +4296,7 @@ function buildScreenContext(screen) {
   lines.push(`PAYE registered: ${userProfile?.has_paye || false}`);
   lines.push(`Provisional tax: ${userProfile?.is_provisional || false}`);
   lines.push(`Plan: ${userProfile?.plan || 'free'}`);
+  if (currentAction) lines.push(`Current action: ${currentAction}`);
 
   if (screen === 'invoices') {
     const inc = invoices.filter(i => i.type === 'income');
@@ -4396,6 +4396,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function handleFile(e) { const f=e.target.files[0]; if(f) processFile(f); }
 
 async function processFile(file) {
+  currentAction = 'uploading_transactions';
   if (!canUse('bankanalysis')) { showUpgradePrompt('pro'); return; }
   if (!await requireAIConsent()) return;
   document.getElementById('uploadZone').style.display = 'none';
@@ -6576,18 +6577,30 @@ function acceptPOPIA() { localStorage.setItem('ot_popia_'+currentUser.id,'accept
 function declinePOPIA() { localStorage.setItem('ot_popia_'+currentUser.id,'essential'); document.getElementById('popiaBanner').classList.remove('show'); }
 
 // ── SUPPORT WIDGET ──
+// Now lives inside section-assistant as the "App Help" tab
 function toggleSupportWidget() {
-  const w = document.getElementById('supportWidget');
-  const fab = document.getElementById('aiFloatBtn');
-  const isOpen = w.style.display === 'flex';
-  w.style.display = isOpen ? 'none' : 'flex';
-  if (fab) fab.style.display = isOpen ? 'flex' : 'none';
-  if (!isOpen) {
-    document.getElementById('supportInput').focus();
-    // Reset conversation tracking for new session
-    supportConvHistory = [];
-    supportEscalated = false;
-  }
+  showSection('assistant', document.querySelector('.s-btn[onclick*="assistant"]'));
+  switchAssistantTab('app');
+  setTimeout(() => document.getElementById('supportInput')?.focus(), 100);
+}
+
+function openTaxAI() {
+  showSection('assistant', document.querySelector('.s-btn[onclick*="assistant"]'));
+  switchAssistantTab('tax');
+}
+
+function switchAssistantTab(tab) {
+  const isTax = tab === 'tax';
+  const taxPanel = document.getElementById('taxHelpPanel');
+  const appPanel = document.getElementById('appHelpPanel');
+  if (taxPanel) taxPanel.style.display = isTax ? 'flex' : 'none';
+  if (appPanel) appPanel.style.display = isTax ? 'none' : 'flex';
+  const taxBtn = document.getElementById('tabTaxBtn');
+  const appBtn = document.getElementById('tabAppBtn');
+  if (taxBtn) taxBtn.className = isTax ? 'ai-tab-btn ai-tab-active' : 'ai-tab-btn';
+  if (appBtn) appBtn.className = isTax ? 'ai-tab-btn' : 'ai-tab-btn ai-tab-active';
+  const badge = document.getElementById('aiCallsBadge');
+  if (badge) badge.style.visibility = isTax ? 'visible' : 'hidden';
 }
 
 function sendSupportQ(btn) {
@@ -6660,8 +6673,9 @@ APP SECTIONS:
 - Opening Balances: Set year-start balances, YTD figures — for both new and existing businesses
 - Settings: Business profile, invoice branding, bank details, language, plan status, Help & Onboarding
 
-CURRENT USER:
+CURRENT USER CONTEXT:
 Email: ${userEmail} | Plan: ${userPlan} | Business: ${bizName}
+Screen: ${AI_SCREEN_LABELS[currentSection] || currentSection}${currentAction ? ' | Action: ' + currentAction : ''}
 
 COMMON ISSUES & FIXES:
 
@@ -6715,7 +6729,7 @@ Escalate immediately for: database errors, data loss, billing issues, security c
 
 RULES:
 - Under 120 words per response
-- Never give tax advice — direct to the Tax Assistant tab
+- Never give tax advice — direct user to the "Tax Assistant" tab (click it above)
 - Never promise refunds — direct to billing@onetouch.net.za
 - Always end with a follow-up question if the issue may not be fully resolved
 - Be definitive — give ONE clear answer, not a list of possibilities`;
@@ -7876,6 +7890,7 @@ function updateInvFormType() {
 
 // Quick add expense — opens form pre-set to expense type
 function openExpenseForm() {
+  currentAction = 'creating_expense';
   openInvForm();
   setTimeout(() => {
     const typeEl = document.getElementById('inv-type');
