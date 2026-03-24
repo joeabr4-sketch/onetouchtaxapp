@@ -2556,6 +2556,10 @@ async function initApp() {
       await loadUserProfile();
       clearTimeout(spinnerGuard);
     } else if (event === 'SIGNED_OUT') {
+      // Verify the session is actually gone — implicit flow can fire a spurious SIGNED_OUT
+      // during token cleanup before re-firing SIGNED_IN with the stored session.
+      const { data: { session: check } } = await sb.auth.getSession();
+      if (check?.user) return; // Session still valid — ignore spurious event
       currentUser = null; userProfile = null; invoices = []; _profileLoading = false;
       clearTimeout(spinnerGuard);
       resetAuthScreen();
