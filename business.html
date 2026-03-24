@@ -755,18 +755,18 @@ body.help-mode .main{padding-top:34px}
     </div>
     <nav class="s-nav">
       <div class="s-section" data-i18n="nav_overview">Overview</div>
-      <button class="s-btn active" onclick="showSection('dashboard',this)"><span class="s-icon">📊</span><span data-i18n="nav_dashboard">Dashboard</span></button>
-      <button class="s-btn" onclick="showSection('calendar',this)"><span class="s-icon">📅</span><span data-i18n="nav_calendar">Compliance Calendar</span></button>
-      <button class="s-btn" onclick="showSection('checklist',this)"><span class="s-icon">✅</span><span data-i18n="nav_checklists">Checklists</span></button>
-      <button class="s-btn" onclick="showSection('history',this);loadPeriodHistory()"><span class="s-icon">📁</span><span data-i18n="nav_history">Financial History</span></button>
+      <button class="s-btn active" onclick="navToggle('dashboard',this)"><span class="s-icon">📊</span><span data-i18n="nav_dashboard">Dashboard</span></button>
+      <button class="s-btn" onclick="navToggle('calendar',this)"><span class="s-icon">📅</span><span data-i18n="nav_calendar">Compliance Calendar</span></button>
+      <button class="s-btn" onclick="navToggle('checklist',this)"><span class="s-icon">✅</span><span data-i18n="nav_checklists">Checklists</span></button>
+      <button class="s-btn" onclick="navToggle('history',this)"><span class="s-icon">📁</span><span data-i18n="nav_history">Financial History</span></button>
       <div class="s-section" data-i18n="nav_business_tools">Business Tools</div>
       <button class="s-btn" onclick="navToggle('financials',this)"><span class="s-icon">📈</span><span data-i18n="nav_financials">Financials & P&L</span></button>
       <button class="s-btn" onclick="navToggle('invoices',this)"><span class="s-icon">🧾</span><span data-i18n="nav_invoices">Invoices</span></button>
-      <button class="s-btn" onclick="navToggle('reconcile',this)"><span class="s-icon">🔗</span><span data-i18n="nav_reconcile">Reconciliation</span><span class="plan-lock nav-lock" id="lock-reconcile">PRO</span></button>
+      <button class="s-btn" onclick="navToggle('reconcile',this)"><span class="s-icon">🔗</span><span data-i18n="nav_reconcile" style="flex:1">Reconciliation<span style="display:block;font-size:9.5px;color:var(--text-3);font-weight:400;margin-top:1px">Match transactions to invoices</span></span><span class="plan-lock nav-lock" id="lock-reconcile">PRO</span></button>
       <button class="s-btn" onclick="navToggle('payroll',this)"><span class="s-icon">👥</span><span data-i18n="nav_payroll">Payroll</span><span class="plan-lock nav-lock" id="lock-payroll">FULL</span></button>
       <button class="s-btn" onclick="navToggle('handoff',this)"><span class="s-icon">📦</span><span data-i18n="nav_bookkeeper">Bookkeeper Pack</span><span class="plan-lock nav-lock" id="lock-handoff">PRO</span></button>
       <div class="s-section" data-i18n="nav_ai_tools">AI Tools</div>
-      <button class="s-btn" onclick="showSection('assistant',this)"><span class="s-icon">🤖</span><span data-i18n="nav_assistant">Tax Assistant</span></button>
+      <button class="s-btn" onclick="navToggle('assistant',this)"><span class="s-icon">🤖</span><span data-i18n="nav_assistant">Tax Assistant</span></button>
     </nav>
     <div class="s-foot">
       <div class="s-user">
@@ -795,6 +795,7 @@ body.help-mode .main{padding-top:34px}
       <div class="tb-right">
         <span class="badge b-red" id="tb-overdue" style="display:none">🔴 Overdue</span>
         <span class="badge b-amber" id="tb-due-soon" style="display:none">🟡 Due Soon</span>
+        <button id="tbUpgradeBtn" onclick="showSection('settings',null)" style="display:none;background:linear-gradient(135deg,#d4a843,#b8872e);color:#fff;border:none;padding:5px 14px;border-radius:7px;font-family:'Syne',sans-serif;font-size:11.5px;font-weight:700;cursor:pointer;letter-spacing:.2px;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">⬆ Upgrade</button>
         <div class="notif-wrap">
           <div class="notif-bell" onclick="toggleNotifs()" id="notifBell">🔔
             <div class="notif-badge" id="notifCount" style="display:none">0</div>
@@ -833,7 +834,7 @@ body.help-mode .main{padding-top:34px}
         <div class="stat green"><div class="stat-label">Invoices Logged</div><div class="stat-value" id="statCount">0</div><div class="stat-sub">this financial year</div></div>
       </div>
       <!-- FREE PLAN BANNER -->
-      <div id="freePlanBanner" style="display:none;background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.25);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <div id="freePlanBanner" style="display:none;background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.25);border-radius:10px;padding:12px 16px;margin-bottom:16px;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
         <div style="font-size:13px;color:rgba(255,255,255,.8)">⚡ You're on the <strong style="color:#d4a843">Free plan</strong> — upgrade to unlock payroll, WhatsApp, email sending, and full automation.</div>
         <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
           <button onclick="showSection('settings',null)" style="background:#d4a843;color:#0a0f1e;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">Upgrade to Full</button>
@@ -909,6 +910,11 @@ body.help-mode .main{padding-top:34px}
             <div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Net Profit / Loss</div>
             <div id="summaryPL" style="font-size:17px;font-weight:700;font-family:'Syne',sans-serif">R 0</div>
           </div>
+        </div>
+        <!-- UPGRADE NUDGE (shown only after first upload for non-full users) -->
+        <div id="uploadUpgradeNudge" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(212,168,67,.06);border:1px solid rgba(212,168,67,.18);border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div style="font-size:12px;color:rgba(255,255,255,.6)">⚡ <strong style="color:#d4a843">Unlock automation, payroll, and messaging</strong> with the Full plan</div>
+          <button onclick="showSection('settings',null)" style="background:none;border:1px solid rgba(212,168,67,.4);color:#d4a843;padding:4px 12px;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap">See plans →</button>
         </div>
       </div>
 
@@ -1271,7 +1277,7 @@ body.help-mode .main{padding-top:34px}
     <!-- ═══ RECONCILIATION ═══ -->
     <div class="section" id="section-reconcile" style="position:relative">
       <div class="help-banner"><div class="help-banner-title">💡 Bank Reconciliation</div><div class="help-banner-body">At the end of each month: download your bank statement as a CSV from your internet banking app, then upload it in the Bank Statement card below. The app will match each bank transaction to your logged invoices — auto-matching where it can, letting you match manually for the rest. When you hit 80%+ confidence, close the month to lock it. This creates an immutable audit trail that proves your books are clean.</div><div class="help-banner-actions"><span>Upload CSV — drop your bank statement in the card below</span><span>Auto-Match — let AI do the first pass</span><span>Manual match — drag transactions to invoices</span><span>Close Month — locks the period when 80%+ matched</span><span>Audit tab — full tamper-evident history</span></div></div>
-      <div id="lock-section-reconcile" style="display:none;position:absolute;pointer-events:none;inset:0;background:rgba(7,8,9,.85);backdrop-filter:blur(4px);z-index:10;align-items:center;justify-content:center;padding:20px"><div style="background:rgba(184,196,216,.08);border:1px solid rgba(184,196,216,.2);border-radius:16px;padding:32px;text-align:center;max-width:380px"><div style="font-size:36px;margin-bottom:12px">🔒</div><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Pro Plan Feature</div><div style="font-size:13px;color:var(--text-2);margin-bottom:20px;line-height:1.6">Bank reconciliation is available on the Pro plan.</div><button onclick="window.open('https://onetouch.net.za/#pricing','_blank')" style="background:var(--blue);color:#0f1520;border:none;padding:11px 24px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer">⬆ Upgrade to Pro</button></div></div>
+      <div id="lock-section-reconcile" style="display:none;position:absolute;pointer-events:all;inset:0;background:rgba(7,8,9,.85);backdrop-filter:blur(4px);z-index:10;align-items:center;justify-content:center;padding:20px"><div style="background:rgba(184,196,216,.08);border:1px solid rgba(184,196,216,.2);border-radius:16px;padding:32px;text-align:center;max-width:380px"><div style="font-size:36px;margin-bottom:12px">🔒</div><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Unlock this feature</div><div style="font-size:13px;color:var(--text-2);margin-bottom:6px;line-height:1.6">Upgrade to Pro to use this feature.</div><div style="font-size:12px;color:var(--text-3);margin-bottom:20px">Unlock bank reconciliation, audit trail, transaction matching and more.</div><button onclick="showSection('settings',null)" style="background:var(--blue);color:#0f1520;border:none;padding:11px 24px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer">⬆ Upgrade to Pro — R299/mo</button></div></div>
 
       <!-- HEADER -->
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
@@ -1407,9 +1413,9 @@ body.help-mode .main{padding-top:34px}
     </div>
 
     <!-- ═══ BOOKKEEPER PACK ═══ -->
-    <div class="section" id="section-handoff">
+    <div class="section" id="section-handoff" style="position:relative">
       <div class="help-banner"><div class="help-banner-title">💡 Bookkeeper Handoff Pack</div><div class="help-banner-body">One-click PDF that packages everything your accountant needs — your P&amp;L, invoice list, reconciliation summary, VAT201 figures, and opening balances. Generate this at the end of each quarter or year-end. You can also create a 30-day share link so your accountant can view it online without needing app access.</div><div class="help-banner-actions"><span>Download Pack — generates a single PDF</span><span>Share Link — 30-day read-only access for your accountant (Full plan)</span></div></div>
-      <div id="lock-section-handoff" style="display:none;position:absolute;pointer-events:none;inset:0;background:rgba(7,8,9,.85);backdrop-filter:blur(4px);border-radius:inherit;z-index:10;align-items:center;justify-content:center;padding:20px"><div style="background:rgba(184,196,216,.08);border:1px solid rgba(184,196,216,.2);border-radius:16px;padding:32px;text-align:center;max-width:380px"><div style="font-size:36px;margin-bottom:12px">🔒</div><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Pro Plan Feature</div><div style="font-size:13px;color:var(--text-2);margin-bottom:20px;line-height:1.6">The Bookkeeper Handoff Pack is available on Pro. Download your full P&L, VAT summary, invoice register and tax liability report in one click.</div><button onclick="window.open('https://onetouch.net.za/#pricing','_blank')" style="background:var(--blue);color:#0f1520;border:none;padding:11px 24px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer">⬆ Upgrade to Pro — R299/mo</button></div></div>
+      <div id="lock-section-handoff" style="display:none;position:absolute;pointer-events:all;inset:0;background:rgba(7,8,9,.85);backdrop-filter:blur(4px);border-radius:inherit;z-index:10;align-items:center;justify-content:center;padding:20px"><div style="background:rgba(184,196,216,.08);border:1px solid rgba(184,196,216,.2);border-radius:16px;padding:32px;text-align:center;max-width:380px"><div style="font-size:36px;margin-bottom:12px">🔒</div><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Unlock this feature</div><div style="font-size:13px;color:var(--text-2);margin-bottom:6px;line-height:1.6">Upgrade to Pro to use this feature.</div><div style="font-size:12px;color:var(--text-3);margin-bottom:20px">Unlock P&amp;L export, invoice register, VAT summary and bookkeeper pack.</div><button onclick="showSection('settings',null)" style="background:var(--blue);color:#0f1520;border:none;padding:11px 24px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer">⬆ Upgrade to Pro — R299/mo</button></div></div>
       <div style="margin-bottom:18px"><h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:3px">📦 Bookkeeper Handoff Pack</h2><p style="font-size:13px;color:var(--text-2)">One-click download of everything your accountant needs. Clean, verified, ready to sign off.</p></div>
       <!-- RECONCILIATION STATUS BANNER -->
       <div id="handoffReconBanner" style="margin-bottom:16px;border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:14px;background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.2)">
@@ -1478,7 +1484,7 @@ body.help-mode .main{padding-top:34px}
     <!-- ═══ PAYROLL ═══ -->
     <div class="section" id="section-payroll">
       <div class="help-banner"><div class="help-banner-title">💡 Payroll</div><div class="help-banner-body">Add each employee once with their gross salary and allowances. The app calculates PAYE (using the 2025/26 SARS tax tables), UIF (1% employee + 1% employer, capped at R177.12/month), and SDL (1% if total annual payroll exceeds R500k). Run payroll each month to generate payslips and auto-post the salary expense to your books. EMP201 data is generated for you to submit on eFiling.</div><div class="help-banner-actions"><span>Add Employee — set up once, runs every month</span><span>Run Payroll — calculates and posts to books</span><span>Payslips — professional PDF per employee</span><span>EMP201 — SARS payroll return prep (Full plan)</span></div></div>
-      <div id="lock-section-payroll" style="display:none;position:absolute;pointer-events:none;inset:0;background:rgba(7,8,9,.85);backdrop-filter:blur(4px);border-radius:inherit;z-index:10;align-items:center;justify-content:center;padding:20px"><div style="background:var(--gold-dim);border:1px solid rgba(212,168,67,.25);border-radius:16px;padding:32px;text-align:center;max-width:380px"><div style="font-size:36px;margin-bottom:12px">🔒</div><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Full Plan Feature</div><div style="font-size:13px;color:var(--text-2);margin-bottom:20px;line-height:1.6">Payroll, payslips, PAYE/UIF/SDL calculator and EMP201 prep are available on the Full plan.</div><button onclick="showSection('settings',null)" style="background:var(--gold);color:#fff;border:none;padding:11px 24px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer">Upgrade to Full — R499/mo</button></div></div>
+      <div id="lock-section-payroll" style="display:none;position:absolute;pointer-events:all;inset:0;background:rgba(7,8,9,.85);backdrop-filter:blur(4px);border-radius:inherit;z-index:10;align-items:center;justify-content:center;padding:20px"><div style="background:var(--gold-dim);border:1px solid rgba(212,168,67,.25);border-radius:16px;padding:32px;text-align:center;max-width:380px"><div style="font-size:36px;margin-bottom:12px">🔒</div><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Unlock this feature</div><div style="font-size:13px;color:var(--text-2);margin-bottom:6px;line-height:1.6">Upgrade to Full to use this feature.</div><div style="font-size:12px;color:var(--text-3);margin-bottom:20px">Unlock payroll, payslips, PAYE/UIF/SDL and EMP201 prep.</div><button onclick="showSection('settings',null)" style="background:var(--gold);color:#fff;border:none;padding:11px 24px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer">⬆ Upgrade to Full — R499/mo</button></div></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px">
         <div>
           <div class="ot-tip-wrap"><h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px">👥 Payroll</h2><button class="ot-tip-btn" onclick="showTip(this,'payroll')">?</button></div>
@@ -2754,6 +2760,8 @@ function updateUserUI() {
   if (planFreeMsg) planFreeMsg.style.display = plan === 'free' ? 'block' : 'none';
   const sidebarUpgradeBtn = document.getElementById('sidebarUpgradeBtn');
   if (sidebarUpgradeBtn) sidebarUpgradeBtn.style.display = plan !== 'full' ? 'block' : 'none';
+  const tbUpgradeBtn = document.getElementById('tbUpgradeBtn');
+  if (tbUpgradeBtn) tbUpgradeBtn.style.display = plan !== 'full' ? 'inline-flex' : 'none';
   const freePlanBanner = document.getElementById('freePlanBanner');
   if (freePlanBanner) freePlanBanner.style.display = (plan === 'free' && !localStorage.getItem('freeBannerDismissed')) ? 'flex' : 'none';
   const proUpgradeBtn = document.getElementById('proUpgradeBtn');
@@ -2773,18 +2781,18 @@ function updateUserUI() {
   const waIsLocked = !canUse('whatsapp');
   const waFormBtn = document.getElementById('waFormBtn');
   if (waFormBtn) {
-    waFormBtn.style.opacity = waIsLocked ? '0.35' : '1';
-    waFormBtn.style.filter = waIsLocked ? 'grayscale(1)' : 'none';
-    waFormBtn.style.cursor = waIsLocked ? 'not-allowed' : 'pointer';
-    waFormBtn.title = waIsLocked ? 'Full Plan feature — upgrade at onetouch.net.za/#pricing' : 'Send via WhatsApp';
+    waFormBtn.style.opacity = waIsLocked ? '0.5' : '1';
+    waFormBtn.style.filter = waIsLocked ? 'grayscale(.6)' : 'none';
+    waFormBtn.style.cursor = 'pointer';
+    waFormBtn.title = waIsLocked ? 'Available on Full plan — click to upgrade' : 'Send via WhatsApp';
   }
   const emailIsLocked = !canUse('email');
   const emailFormBtn = document.getElementById('emailFormBtn');
   if (emailFormBtn) {
-    emailFormBtn.style.opacity = emailIsLocked ? '0.35' : '1';
-    emailFormBtn.style.filter = emailIsLocked ? 'grayscale(1)' : 'none';
-    emailFormBtn.style.cursor = emailIsLocked ? 'not-allowed' : 'pointer';
-    emailFormBtn.title = emailIsLocked ? 'Full Plan feature — upgrade at onetouch.net.za/#pricing' : 'Send via Email';
+    emailFormBtn.style.opacity = emailIsLocked ? '0.5' : '1';
+    emailFormBtn.style.filter = emailIsLocked ? 'grayscale(.6)' : 'none';
+    emailFormBtn.style.cursor = 'pointer';
+    emailFormBtn.title = emailIsLocked ? 'Available on Full plan — click to upgrade' : 'Send via Email';
   }
   updateUsageBadges();
 }
@@ -2812,7 +2820,7 @@ function showSection(name, btn) {
   if (name === 'financials') { renderFinancials(); updateTipsState(); }
   if (name === 'reconcile') renderReconciliation();
   if (name === 'handoff') { updatePackStatus(); updateHandoffReconBanner(); }
-  if (name === 'history') _doAutoSaveSnapshot();
+  if (name === 'history') { _doAutoSaveSnapshot(); loadPeriodHistory(); }
   currentSection = name;
   if (name === 'assistant') refreshAIContext();
   if (name === 'settings') _syncHelpModeBtn();
@@ -5022,6 +5030,9 @@ function showUploadSummaryOnDashboard() {
     plEl.textContent = (pl >= 0 ? '' : '-') + fmtR(pl);
     plEl.style.color = pl >= 0 ? 'var(--green)' : 'var(--red)';
     card.style.display = 'block';
+    // Show upgrade nudge for non-full users
+    const nudge = document.getElementById('uploadUpgradeNudge');
+    if (nudge) nudge.style.display = (userProfile?.plan !== 'full') ? 'flex' : 'none';
   } catch {}
 }
 
@@ -6998,7 +7009,7 @@ async function sendInvoiceWhatsApp(inv) {
 
 async function saveAndWhatsApp() {
   if (!canUse('whatsapp')) {
-    showToast('📲 WhatsApp delivery is a Full Plan feature', 'var(--gold)');
+    showUpgradePrompt('full');
     return;
   }
   // Grab whatsapp number from form before saving
@@ -7017,7 +7028,7 @@ async function saveAndWhatsApp() {
 
 async function saveAndEmail() {
   if (!canUse('email')) {
-    showToast('✉ Email delivery is a Full Plan feature', 'var(--gold)');
+    showUpgradePrompt('full');
     return;
   }
   // Capture form values before saveInvoice() closes the form
