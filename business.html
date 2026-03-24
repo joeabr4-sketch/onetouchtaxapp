@@ -1624,8 +1624,10 @@ body.help-mode .main{padding-top:34px}
             <hr class="payslip-divider">
             <div class="payslip-row head"><span>Deductions</span><span>Amount</span></div>
             <div class="payslip-row red"><span>PAYE (Income Tax)</span><span id="ps-paye">R 0.00</span></div>
+            <div id="ps-medical-row" style="display:none;flex-direction:column;padding:2px 0 6px">
+              <div style="font-size:10.5px;color:rgba(34,197,94,.7);padding:3px 0 0;line-height:1.4">✓ Medical Aid Tax Credit (MATC) of <span id="ps-medical-val">R 0.00</span> applied — PAYE reduced accordingly (SARS s6A)</div>
+            </div>
             <div class="payslip-row red"><span>UIF (Employee 1%)</span><span id="ps-uif-emp">R 0.00</span></div>
-            <div class="payslip-row red" id="ps-medical-row" style="display:none"><span>Medical Aid</span><span id="ps-medical-val">R 0.00</span></div>
             <div class="payslip-row red" id="ps-pension-row" style="display:none"><span>Pension Fund</span><span id="ps-pension-val">R 0.00</span></div>
             <div class="payslip-row bold red"><span>Total Deductions</span><span id="ps-total-ded">R 0.00</span></div>
             <hr class="payslip-divider">
@@ -3257,7 +3259,8 @@ async function saveInvoice(exportPDF) {
   if (!editingInvId && invData.type === 'income' && invData.invoice_number) {
     const dup = invoices.find(i => i.type === 'income' && i.invoice_number === invData.invoice_number);
     if (dup) {
-      showToast(`⚠️ Invoice number ${invData.invoice_number} already exists — saved anyway`, 'var(--amber)');
+      showToast(`Invoice number ${invData.invoice_number} already exists — please use a different number`, 'var(--red)');
+      return;
     }
   }
   // Clear quote flag
@@ -7404,7 +7407,13 @@ function calcPayslip() {
   showRow('ps-travel-row','ps-travel-val', travel);
   showRow('ps-housing-row','ps-housing-val', housing);
   showRow('ps-bonus-row','ps-bonus-val', bonus);
-  showRow('ps-medical-row','ps-medical-val', medical);
+  // Medical is a SARS tax credit, not a deduction — show as a note under PAYE
+  const medRow = document.getElementById('ps-medical-row');
+  const medVal = document.getElementById('ps-medical-val');
+  if (medRow && medVal) {
+    medVal.textContent = fmtPayroll(medical);
+    medRow.style.display = medical > 0 ? 'flex' : 'none';
+  }
   showRow('ps-pension-row','ps-pension-val', pension);
 
   return { ...emp, ...result };
