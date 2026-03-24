@@ -1474,7 +1474,7 @@ body.help-mode .main{padding-top:34px}
     <!-- ═══ PAYROLL ═══ -->
     <div class="section" id="section-payroll">
       <div class="help-banner"><div class="help-banner-title">💡 Payroll</div><div class="help-banner-body">Add each employee once with their gross salary and allowances. The app calculates PAYE (using the 2025/26 SARS tax tables), UIF (1% employee + 1% employer, capped at R177.12/month), and SDL (1% if total annual payroll exceeds R500k). Run payroll each month to generate payslips and auto-post the salary expense to your books. EMP201 data is generated for you to submit on eFiling.</div><div class="help-banner-actions"><span>Add Employee — set up once, runs every month</span><span>Run Payroll — calculates and posts to books</span><span>Payslips — professional PDF per employee</span><span>EMP201 — SARS payroll return prep (Full plan)</span></div></div>
-      <div id="lock-section-payroll" style="display:none;position:absolute;pointer-events:none;inset:0;background:rgba(7,8,9,.85);backdrop-filter:blur(4px);border-radius:inherit;z-index:10;align-items:center;justify-content:center;padding:20px"><div style="background:var(--gold-dim);border:1px solid rgba(212,168,67,.25);border-radius:16px;padding:32px;text-align:center;max-width:380px"><div style="font-size:36px;margin-bottom:12px">🔒</div><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Full Plan Feature</div><div style="font-size:13px;color:var(--text-2);margin-bottom:20px;line-height:1.6">Payroll, payslips, PAYE/UIF/SDL calculator and EMP201 prep are available on the Full plan.</div><button onclick="showSection('settings',null)" style="background:var(--gold);color:#fff;border:none;padding:11px 24px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer">Upgrade to Full — R599/mo</button></div></div>
+      <div id="lock-section-payroll" style="display:none;position:absolute;pointer-events:none;inset:0;background:rgba(7,8,9,.85);backdrop-filter:blur(4px);border-radius:inherit;z-index:10;align-items:center;justify-content:center;padding:20px"><div style="background:var(--gold-dim);border:1px solid rgba(212,168,67,.25);border-radius:16px;padding:32px;text-align:center;max-width:380px"><div style="font-size:36px;margin-bottom:12px">🔒</div><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Full Plan Feature</div><div style="font-size:13px;color:var(--text-2);margin-bottom:20px;line-height:1.6">Payroll, payslips, PAYE/UIF/SDL calculator and EMP201 prep are available on the Full plan.</div><button onclick="showSection('settings',null)" style="background:var(--gold);color:#fff;border:none;padding:11px 24px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer">Upgrade to Full — R499/mo</button></div></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px">
         <div>
           <div class="ot-tip-wrap"><h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px">👥 Payroll</h2><button class="ot-tip-btn" onclick="showTip(this,'payroll')">?</button></div>
@@ -1706,11 +1706,11 @@ body.help-mode .main{padding-top:34px}
             <div id="planFreeMsg" style="font-size:13px;color:var(--text-2);margin-bottom:14px">You're on the <strong style="color:var(--text)">Free plan</strong>. Upgrade to Pro to unlock VAT201, bank analysis, reconciliation, IRP6/ITR14 and bookkeeper pack.</div>
             <div id="upgradeButtons" style="display:flex;gap:8px;flex-wrap:wrap">
               <button onclick="payWithPayFast('pro')" style="background:var(--blue);color:#0f1520;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬆ Upgrade to Pro — R299/mo</button>
-              <button onclick="payWithPayFast('full')" style="background:var(--gold);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬆ Upgrade to Full — R599/mo</button>
+              <button onclick="payWithPayFast('full')" style="background:var(--gold);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬆ Upgrade to Full — R499/mo</button>
             </div>
             <div id="proUpgradeBtn" style="display:none">
               <div style="font-size:13px;color:var(--text-2);margin-bottom:14px">You're on the <strong style="color:var(--text)">⭐ Pro plan</strong>. Upgrade to Full to unlock WhatsApp delivery, payroll, EMP201, AI saving tips and accountant access link.</div>
-              <button onclick="payWithPayFast('full')" style="background:var(--gold);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬆ Upgrade to Full — R599/mo</button>
+              <button onclick="payWithPayFast('full')" style="background:var(--gold);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬆ Upgrade to Full — R499/mo</button>
             </div>
             <div id="cancelSubLink" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
               <a href="mailto:support@onetouch.net.za?subject=Cancel%20My%20Subscription&body=Please%20cancel%20my%20OneTouch%20TaxApp%20subscription.%20My%20account%20email%20is%3A%20" style="font-size:12px;color:var(--text-3);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-3)'">Cancel subscription →</a>
@@ -6895,7 +6895,7 @@ initApp();
 // ── WHATSAPP INVOICE DELIVERY ──
 async function sendInvoiceWhatsApp(inv) {
   if (!canUse('whatsapp')) {
-    showToast('📲 WhatsApp delivery is a Full Plan feature — upgrade at onetouch.net.za/#pricing', 'var(--gold)');
+    showToast('📲 WhatsApp delivery is a Full Plan feature', 'var(--gold)');
     return;
   }
   const clientPhone = inv.whatsapp || inv.client_whatsapp;
@@ -6949,7 +6949,7 @@ async function sendInvoiceWhatsApp(inv) {
 
 async function saveAndWhatsApp() {
   if (!canUse('whatsapp')) {
-    showToast('📲 WhatsApp delivery is a Full Plan feature — upgrade at onetouch.net.za/#pricing', 'var(--gold)');
+    showToast('📲 WhatsApp delivery is a Full Plan feature', 'var(--gold)');
     return;
   }
   // Grab whatsapp number from form before saving
@@ -6968,7 +6968,7 @@ async function saveAndWhatsApp() {
 
 async function saveAndEmail() {
   if (!canUse('email')) {
-    showToast('✉ Email delivery is a Full Plan feature — upgrade at onetouch.net.za/#pricing', 'var(--gold)');
+    showToast('✉ Email delivery is a Full Plan feature', 'var(--gold)');
     return;
   }
   // Capture form values before saveInvoice() closes the form

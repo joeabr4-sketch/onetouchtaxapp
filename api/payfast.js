@@ -11,7 +11,7 @@ const SITE_URL     = process.env.SITE_URL || 'https://onetouchtaxapp.vercel.app'
 
 const PLANS = {
   pro:  { name: 'OneTouch Pro Plan',  amount: '299.00' },
-  full: { name: 'OneTouch Full Plan', amount: '599.00' }
+  full: { name: 'OneTouch Full Plan', amount: '499.00' }
 };
 
 export default async function handler(req, res) {
