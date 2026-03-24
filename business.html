@@ -692,6 +692,9 @@ body.help-mode .main{padding-top:34px}
   /* Main area fills full width, pad bottom for nav bar */
   .main{margin-left:0!important;padding-bottom:72px!important}
 
+  /* Raise AI float button above mobile nav bar */
+  #aiFloatBtn{bottom:76px!important}
+
   /* Topbar — hide clock, keep title + bells */
   #liveClock{display:none!important}
   .topbar{padding:10px 14px!important}
@@ -2479,6 +2482,7 @@ const sb = createClient(
 let currentUser = null;
 let userProfile = null;
 let invoices = [];
+let _profileLoading = false;
 let currentPeriod = '3m';
 let lineItems = [];
 let invVATEnabled = true;
@@ -2552,7 +2556,7 @@ async function initApp() {
       await loadUserProfile();
       clearTimeout(spinnerGuard);
     } else if (event === 'SIGNED_OUT') {
-      currentUser = null; userProfile = null; invoices = [];
+      currentUser = null; userProfile = null; invoices = []; _profileLoading = false;
       clearTimeout(spinnerGuard);
       resetAuthScreen();
     }
@@ -2560,13 +2564,14 @@ async function initApp() {
 
   try {
     const { data: { session } } = await sb.auth.getSession();
-    if (session?.user) {
+    if (session?.user && !isOAuthCallback) {
+      // Normal page load with stored session — load profile directly
       currentUser = session.user;
       document.getElementById('loadingScreen').style.display = 'flex';
       await loadUserProfile();
       clearTimeout(spinnerGuard);
-    } else if (isOAuthCallback) {
-      // Auth callback in progress — keep loading screen, onAuthStateChange will fire shortly
+    } else if (isOAuthCallback || session?.user) {
+      // OAuth redirect in progress — keep loading screen, onAuthStateChange will fire shortly
       document.getElementById('loadingScreen').style.display = 'flex';
     } else {
       clearTimeout(spinnerGuard);
@@ -2652,12 +2657,15 @@ async function acceptTos() {
 
 // ── PROFILE ──
 async function loadUserProfile() {
+  if (_profileLoading) return;
+  _profileLoading = true;
   applyLanguage(localStorage.getItem('ot_lang') || 'en');
   await ensureProfileSchema();
   try {
     const { data, error } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
     if (error && error.code !== 'PGRST116') throw error;
     userProfile = data;
+    _profileLoading = false;
     document.getElementById('loadingScreen').style.display = 'none';
     if (!userProfile?.tos_accepted) {
       // New user or existing user who hasn't accepted ToS — show blocking modal
@@ -2668,6 +2676,7 @@ async function loadUserProfile() {
       await initDashboard();
     }
   } catch(e) {
+    _profileLoading = false;
     console.error('loadUserProfile error:', e);
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('authScreen').style.display = 'flex';
