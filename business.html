@@ -2794,6 +2794,7 @@ function showSection(name, btn) {
   if (sec) sec.classList.add('active');
   if (btn) btn.classList.add('active');
   document.getElementById('pageTitle').textContent = sec?.querySelector('h2')?.textContent?.replace(/^[^\w]+/, '') || name;
+  if (name === 'dashboard') renderObChecklist();
   if (name === 'financials') { renderFinancials(); updateTipsState(); }
   if (name === 'reconcile') renderReconciliation();
   if (name === 'handoff') { updatePackStatus(); updateHandoffReconBanner(); }
@@ -9029,7 +9030,7 @@ const OB_CHECKS = [
     check: () => !!(userProfile?.biz_name),
     nav: () => {
       showSection('settings', document.querySelector('.s-btn[onclick*="settings"]'));
-      showToast('💼 This is where your business details live — name, VAT number, and logo. They show up on every invoice you send. Fill in what you can and hit Save.', 'var(--blue)', 8000);
+      setTimeout(() => _showObGuideTip('💼 Your Business Profile', 'This is where your business details live — your name, VAT number, and logo. They show up on every invoice you send. Fill in what you can and hit Save when you\'re done.'), 300);
     }
   },
   {
@@ -9038,16 +9039,16 @@ const OB_CHECKS = [
     check: () => invoices.length > 0,
     nav: () => {
       showSection('invoices', document.querySelector('.s-btn[onclick*="invoices"]'));
-      showToast('🧾 This is where every rand you earn gets logged. Add an invoice for each sale, and log business costs as expenses. Do it as things happen and your books stay clean.', 'var(--blue)', 8000);
+      setTimeout(() => _showObGuideTip('🧾 Invoices & Expenses', 'This is where every rand you earn and spend gets logged. Add an invoice for each sale you make, and record your business costs as expenses. The more consistently you do this, the cleaner your books will be.'), 300);
     }
   },
   {
     key: 'recon',
     label: 'Upload & reconcile bank transactions',
-    check: () => { try { return !!JSON.parse(localStorage.getItem('ot_recon_done_' + currentUser?.id) || 'false'); } catch { return false; } },
+    check: () => reconTransactions.length > 0,
     nav: () => {
       showSection('reconcile', document.querySelector('.s-btn[onclick*="reconcile"]'));
-      showToast('🏦 Download your bank transactions from your bank\'s app as a CSV or Excel file and upload them here. We\'ll match them to your invoices automatically — this is how you prove your books are correct.', 'var(--blue)', 8000);
+      setTimeout(() => _showObGuideTip('🏦 Bank Reconciliation', 'Download your bank transactions from your bank\'s app as a CSV or Excel file and upload them here. We\'ll match them to your invoices automatically. This is how you prove your books are correct and catch anything that was missed.'), 300);
     }
   },
   {
@@ -9057,8 +9058,7 @@ const OB_CHECKS = [
     nav: () => {
       showSection('payroll', document.querySelector('.s-btn[onclick*="payroll"]'));
       localStorage.setItem('ot_payroll_viewed_' + (currentUser?.id || 'x'), 'true');
-      setTimeout(renderObChecklist, 300);
-      showToast('👥 Got employees? Add them here and we\'ll calculate their PAYE, UIF and SDL automatically — including payslips and your EMP201. Full plan feature, but good to know it\'s here.', 'var(--blue)', 8000);
+      setTimeout(() => _showObGuideTip('👥 Payroll', 'Got employees? Add them here and we\'ll calculate their PAYE, UIF and SDL automatically. It generates payslips and your EMP201 in one click. This is a Full plan feature — but it\'s good to know it\'s here when you need it.'), 300);
     }
   },
   {
@@ -9068,8 +9068,7 @@ const OB_CHECKS = [
     nav: () => {
       showSection('handoff', document.querySelector('.s-btn[onclick*="handoff"]'));
       localStorage.setItem('ot_handoff_viewed_' + (currentUser?.id || 'x'), 'true');
-      setTimeout(renderObChecklist, 300);
-      showToast('📁 When your accountant asks for your books, come here and hit Generate. It creates a clean summary with everything they need — one click and you\'re done.', 'var(--blue)', 8000);
+      setTimeout(() => _showObGuideTip('📁 Bookkeeper Pack', 'When your accountant asks for your books, come here and hit Generate. It packages everything they need into a clean PDF — your invoices, expenses, reconciliation, and payroll summary. One click and you\'re done.'), 300);
     }
   }
 ];
@@ -9111,6 +9110,16 @@ function renderObChecklist() {
 function _obCheckNav(key) {
   const check = OB_CHECKS.find(c => c.key === key);
   if (check) check.nav();
+}
+
+function _showObGuideTip(title, body) {
+  const el = document.getElementById('obSectionGuide');
+  const titleEl = document.getElementById('obSectionGuideTitle');
+  const bodyEl = document.getElementById('obSectionGuideBody');
+  if (!el || !titleEl || !bodyEl) return;
+  titleEl.textContent = title;
+  bodyEl.textContent = body;
+  el.style.display = 'flex';
 }
 
 function dismissObChecklist() {
@@ -9250,6 +9259,15 @@ document.addEventListener('click', function(e) {
       <button onclick="acceptAIConsent()" style="flex:1;background:#d4a843;color:#0a0f1e;border:none;padding:12px 20px;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">I Understand — Continue</button>
       <button onclick="cancelAIConsent()" style="background:#1e2535;color:#b0bcd4;border:1px solid rgba(255,255,255,.18);padding:12px 16px;border-radius:9px;font-size:13px;cursor:pointer;font-family:inherit">Cancel</button>
     </div>
+  </div>
+</div>
+
+<!-- CHECKLIST STEP GUIDE CARD -->
+<div id="obSectionGuide" style="display:none;position:fixed;inset:0;z-index:8500;background:rgba(0,0,0,.65);backdrop-filter:blur(5px);align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--surface);border:1px solid rgba(79,142,247,.3);border-radius:14px;padding:28px 30px;max-width:460px;width:92%;box-shadow:0 32px 80px rgba(0,0,0,.6),0 0 0 1px rgba(79,142,247,.08)">
+    <div id="obSectionGuideTitle" style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:10px"></div>
+    <div id="obSectionGuideBody" style="font-size:13.5px;color:var(--text-2);line-height:1.8;margin-bottom:22px"></div>
+    <button onclick="document.getElementById('obSectionGuide').style.display='none'" style="background:var(--blue);color:#0f1520;border:none;padding:11px 24px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;width:100%">Got it ✓</button>
   </div>
 </div>
 
