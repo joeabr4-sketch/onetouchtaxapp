@@ -2260,7 +2260,7 @@ body.help-mode .main{padding-top:34px}
 </div>
 
 <!-- ── FLOATING TAX ASSISTANT BUTTON ── -->
-<button id="aiFloatBtn" onclick="openTaxAI()" title="Tax Assistant" style="position:fixed;bottom:24px;right:24px;z-index:7999;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1e2a42,#252d3d);border:1px solid rgba(184,196,216,.25);box-shadow:0 8px 24px rgba(0,0,0,.6),0 0 0 1px rgba(184,196,216,.08);cursor:pointer;font-size:22px;display:none;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='scale(1.08)';this.style.boxShadow='0 12px 32px rgba(0,0,0,.7),0 0 0 2px rgba(184,196,216,.2)'" onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.6),0 0 0 1px rgba(184,196,216,.08)'">🤖</button>
+<button id="aiFloatBtn" onclick="toggleTaxAI()" title="Tax Assistant" style="position:fixed;bottom:24px;right:24px;z-index:7999;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1e2a42,#252d3d);border:1px solid rgba(184,196,216,.25);box-shadow:0 8px 24px rgba(0,0,0,.6),0 0 0 1px rgba(184,196,216,.08);cursor:pointer;display:none;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='scale(1.08)';this.style.boxShadow='0 12px 32px rgba(0,0,0,.7),0 0 0 2px rgba(184,196,216,.2)'" onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.6),0 0 0 1px rgba(184,196,216,.08)'"><span style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;letter-spacing:-.5px;color:#c0c8d8;text-shadow:0 0 12px rgba(184,196,216,.8),0 0 24px rgba(184,196,216,.4)">AI</span></button>
 
 
 <script>
@@ -2819,9 +2819,10 @@ function showSection(name, btn) {
   if (name === 'reconcile') renderReconciliation();
   if (name === 'handoff') { updatePackStatus(); updateHandoffReconBanner(); }
   if (name === 'history') { _doAutoSaveSnapshot(); loadPeriodHistory(); }
+  const prevSection = currentSection;
   if (name !== currentSection) currentAction = null;
   currentSection = name;
-  if (name === 'assistant') { refreshAIContext(); switchAssistantTab('tax'); }
+  if (name === 'assistant') { refreshAIContext(prevSection); switchAssistantTab('tax'); }
   if (name === 'settings') _syncHelpModeBtn();
   document.getElementById('notifDropdown').classList.remove('open');
 }
@@ -4347,8 +4348,9 @@ function buildScreenContext(screen) {
   return lines.join('\n');
 }
 
-function refreshAIContext() {
-  const screen = currentSection;
+function refreshAIContext(prevScreen) {
+  // Use the section the user came FROM so the welcome message is context-aware
+  const screen = (prevScreen && prevScreen !== 'assistant') ? prevScreen : currentSection;
   const label = AI_SCREEN_LABELS[screen] || 'your work';
 
   // Update welcome bubble without wiping the chat history
@@ -6589,6 +6591,15 @@ function toggleSupportWidget() {
 function openTaxAI() {
   showSection('assistant', document.querySelector('.s-btn[onclick*="assistant"]'));
   switchAssistantTab('tax');
+}
+
+function toggleTaxAI() {
+  if (currentSection === 'assistant') {
+    showSection('dashboard', document.querySelector('.s-btn[onclick*="dashboard"]'));
+  } else {
+    showSection('assistant', document.querySelector('.s-btn[onclick*="assistant"]'));
+    switchAssistantTab('tax');
+  }
 }
 
 function switchAssistantTab(tab) {
