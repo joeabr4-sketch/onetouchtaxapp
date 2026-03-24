@@ -9130,17 +9130,24 @@ function dismissObChecklist() {
 
 
 function restartObWizard() {
-  // Clear all onboarding state for this user
-  try { localStorage.removeItem('ot_ob_' + (currentUser?.id || 'x')); } catch {}
+  const uid = currentUser?.id || 'x';
+  // Clear all onboarding state including per-step visit flags
+  try {
+    localStorage.removeItem('ot_ob_' + uid);
+    localStorage.removeItem('ot_payroll_viewed_' + uid);
+    localStorage.removeItem('ot_handoff_viewed_' + uid);
+    localStorage.removeItem('ot_recon_done_' + uid);
+  } catch {}
   _obStep = 0;
   // Close pill/complete modal if open
   const wiz = document.getElementById('obWizard');
   const complete = document.getElementById('obComplete');
   if (complete) complete.classList.remove('open');
   if (wiz) wiz.classList.add('ob-hidden');
-  // Re-show the checklist
+  // Re-show and re-render the checklist with all items reset
   const checklist = document.getElementById('obChecklist');
   if (checklist) checklist.classList.remove('ob-hidden');
+  renderObChecklist();
   // Launch wizard after short delay
   setTimeout(() => showObWizard(0), 400);
 }
