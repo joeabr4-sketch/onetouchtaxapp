@@ -675,6 +675,140 @@ body.help-mode .main{padding-top:34px}
 .empty-state .es-desc{font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:18px;max-width:340px;margin-left:auto;margin-right:auto}
 .empty-state .es-btn{background:var(--blue);color:#0f1520;border:none;padding:10px 22px;border-radius:9px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer}
 .empty-state .es-hint{font-size:11px;color:var(--text-3);margin-top:10px}
+
+/* ══════════════════════════════════════════════
+   MOBILE RESPONSIVE  (≤ 768px)
+   Pure CSS — no logic changes.
+   ══════════════════════════════════════════════ */
+
+/* ── Bottom nav bar ── */
+.mob-nav{display:none}
+
+@media(max-width:768px){
+
+  /* Hide desktop sidebar */
+  .sidebar{display:none!important}
+
+  /* Main area fills full width, pad bottom for nav bar */
+  .main{margin-left:0!important;padding-bottom:72px!important}
+
+  /* Topbar — hide clock, keep title + bells */
+  #liveClock{display:none!important}
+  .topbar{padding:10px 14px!important}
+  .page-title{font-size:16px!important}
+
+  /* Content padding */
+  .section{padding:14px!important}
+
+  /* Cards */
+  .card{border-radius:10px!important}
+
+  /* ── Fix multi-column grids → 2 cols ── */
+  .stats-grid,
+  div[style*="grid-template-columns:repeat(4"],
+  div[style*="grid-template-columns: repeat(4"]{
+    grid-template-columns:repeat(2,1fr)!important;
+  }
+  div[style*="grid-template-columns:repeat(3"],
+  div[style*="grid-template-columns: repeat(3"]{
+    grid-template-columns:repeat(2,1fr)!important;
+  }
+  div[style*="grid-template-columns:1fr 1fr"],
+  div[style*="grid-template-columns: 1fr 1fr"]{
+    grid-template-columns:1fr!important;
+  }
+
+  /* ── Tables — horizontal scroll ── */
+  .card table,
+  #invoiceList table,
+  #payrollRunsList table{
+    min-width:520px;
+  }
+  .card,
+  #invoiceList,
+  #payrollRunsList{
+    overflow-x:auto;
+  }
+
+  /* ── Invoice form — full width fields ── */
+  .inv-row{flex-direction:column!important}
+  .inv-field{width:100%!important}
+  .inv-2col{grid-template-columns:1fr!important}
+
+  /* ── Modals — full screen on small screens ── */
+  .sars-modal-card{max-width:100%!important;margin:0 12px!important}
+  div[style*="max-width:520px"],
+  div[style*="max-width:460px"],
+  div[style*="max-width:440px"],
+  div[style*="max-width:420px"]{
+    max-width:calc(100vw - 24px)!important;
+  }
+
+  /* ── POPIA banner ── */
+  .popia-banner{padding:12px 14px!important}
+
+  /* ── Help banner ── */
+  .help-banner{padding:12px 14px!important}
+  .help-banner-actions{display:none!important}
+
+  /* ── Bottom nav visible on mobile ── */
+  .mob-nav{
+    display:flex;
+    position:fixed;
+    bottom:0;left:0;right:0;
+    height:60px;
+    background:#0d1117;
+    border-top:1px solid rgba(255,255,255,.1);
+    z-index:200;
+    align-items:stretch;
+  }
+  .mob-nav-btn{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:3px;background:none;border:none;color:rgba(255,255,255,.4);
+    font-size:9.5px;font-weight:600;font-family:'DM Sans',sans-serif;
+    cursor:pointer;transition:color .15s;letter-spacing:.3px;text-transform:uppercase;
+    padding:0;
+  }
+  .mob-nav-btn .mn-icon{font-size:18px;line-height:1}
+  .mob-nav-btn.active{color:#c0c8d8}
+  .mob-nav-btn:active{opacity:.7}
+
+  /* ── Mobile menu drawer ── */
+  .mob-drawer-overlay{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;
+  }
+  .mob-drawer-overlay.open{display:block}
+  .mob-drawer{
+    position:fixed;bottom:0;left:0;right:0;
+    background:#0f1520;border-radius:20px 20px 0 0;
+    border-top:1px solid rgba(255,255,255,.1);
+    z-index:301;padding:0 0 24px;
+    transform:translateY(100%);transition:transform .3s cubic-bezier(.16,1,.3,1);
+    max-height:80vh;overflow-y:auto;
+  }
+  .mob-drawer.open{transform:translateY(0)}
+  .mob-drawer-handle{width:36px;height:4px;background:rgba(255,255,255,.18);border-radius:2px;margin:12px auto 16px}
+  .mob-drawer-item{
+    display:flex;align-items:center;gap:12px;width:100%;padding:13px 20px;
+    background:none;border:none;color:rgba(255,255,255,.7);font-size:14px;
+    font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;text-align:left;
+    border-bottom:1px solid rgba(255,255,255,.05);transition:background .15s;
+  }
+  .mob-drawer-item:last-child{border-bottom:none}
+  .mob-drawer-item:active{background:rgba(255,255,255,.06)}
+  .mob-drawer-item.active{color:#e8edf5;background:rgba(184,196,216,.08)}
+  .mob-drawer-section{
+    font-size:9px;color:rgba(255,255,255,.25);letter-spacing:2px;
+    text-transform:uppercase;padding:14px 20px 4px;font-weight:700;
+  }
+  .mob-drawer-foot{
+    padding:16px 20px 0;display:flex;gap:8px;
+  }
+  .mob-drawer-foot button{
+    flex:1;padding:10px;border-radius:8px;font-size:12.5px;font-weight:600;
+    font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;
+  }
+}
 </style>
 </head>
 <body>
@@ -1923,6 +2057,48 @@ body.help-mode .main{padding-top:34px}
 
   </div><!-- end .main -->
 
+  <!-- ══ MOBILE BOTTOM NAV ══ -->
+  <nav class="mob-nav" id="mobNav">
+    <button class="mob-nav-btn active" id="mbn-dashboard" onclick="mobNav('dashboard')">
+      <span class="mn-icon">📊</span><span>Home</span>
+    </button>
+    <button class="mob-nav-btn" id="mbn-invoices" onclick="mobNav('invoices')">
+      <span class="mn-icon">🧾</span><span>Invoices</span>
+    </button>
+    <button class="mob-nav-btn" id="mbn-financials" onclick="mobNav('financials')">
+      <span class="mn-icon">📈</span><span>P&amp;L</span>
+    </button>
+    <button class="mob-nav-btn" id="mbn-assistant" onclick="mobNav('assistant')">
+      <span class="mn-icon">🤖</span><span>AI</span>
+    </button>
+    <button class="mob-nav-btn" id="mbn-more" onclick="openMobDrawer()">
+      <span class="mn-icon">☰</span><span>More</span>
+    </button>
+  </nav>
+
+  <!-- ══ MOBILE MENU DRAWER ══ -->
+  <div class="mob-drawer-overlay" id="mobDrawerOverlay" onclick="closeMobDrawer()"></div>
+  <div class="mob-drawer" id="mobDrawer">
+    <div class="mob-drawer-handle"></div>
+    <div class="mob-drawer-section">Overview</div>
+    <button class="mob-drawer-item" onclick="mobNav('dashboard');closeMobDrawer()"><span>📊</span> Dashboard</button>
+    <button class="mob-drawer-item" onclick="mobNav('calendar');closeMobDrawer()"><span>📅</span> Compliance Calendar</button>
+    <button class="mob-drawer-item" onclick="mobNav('checklist');closeMobDrawer()"><span>✅</span> Checklists</button>
+    <button class="mob-drawer-item" onclick="mobNav('history');closeMobDrawer()"><span>📁</span> Financial History</button>
+    <div class="mob-drawer-section">Business Tools</div>
+    <button class="mob-drawer-item" onclick="mobNav('financials');closeMobDrawer()"><span>📈</span> Financials &amp; P&amp;L</button>
+    <button class="mob-drawer-item" onclick="mobNav('invoices');closeMobDrawer()"><span>🧾</span> Invoices</button>
+    <button class="mob-drawer-item" onclick="mobNav('reconcile');closeMobDrawer()"><span>🔗</span> Reconciliation</button>
+    <button class="mob-drawer-item" onclick="mobNav('payroll');closeMobDrawer()"><span>👥</span> Payroll</button>
+    <button class="mob-drawer-item" onclick="mobNav('handoff');closeMobDrawer()"><span>📦</span> Bookkeeper Pack</button>
+    <div class="mob-drawer-section">AI Tools</div>
+    <button class="mob-drawer-item" onclick="mobNav('assistant');closeMobDrawer()"><span>🤖</span> Tax Assistant</button>
+    <div class="mob-drawer-foot">
+      <button onclick="showSection('settings',null);closeMobDrawer()" style="background:var(--surface2);border:1px solid rgba(255,255,255,.12);color:var(--text-2)">⚙ Settings</button>
+      <button onclick="signOut()" style="background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.25);color:var(--red)">Sign Out</button>
+    </div>
+  </div>
+
 </div><!-- end #mainWrapper -->
 
 <!-- ═══ TERMS OF SERVICE ACCEPTANCE MODAL ═══ -->
@@ -2929,6 +3105,37 @@ function showSection(name, btn) {
   if (name === 'assistant') { refreshAIContext(prevSection); switchAssistantTab('tax'); }
   if (name === 'settings') _syncHelpModeBtn();
   document.getElementById('notifDropdown').classList.remove('open');
+  _syncMobNav(name);
+}
+
+// ── MOBILE NAV ──
+const _MOB_NAV_TABS = ['dashboard','invoices','financials','assistant'];
+function mobNav(name) {
+  showSection(name, document.querySelector(`.s-btn[onclick*="'${name}'"]`));
+}
+function _syncMobNav(name) {
+  _MOB_NAV_TABS.forEach(t => {
+    const el = document.getElementById('mbn-' + t);
+    if (el) el.classList.toggle('active', t === name);
+  });
+  // 'More' tab lights up for any section not in the bottom 4
+  const moreBtn = document.getElementById('mbn-more');
+  if (moreBtn) moreBtn.classList.toggle('active', !_MOB_NAV_TABS.includes(name));
+}
+function openMobDrawer() {
+  document.getElementById('mobDrawer')?.classList.add('open');
+  document.getElementById('mobDrawerOverlay')?.classList.add('open');
+  // Sync drawer active states
+  const sec = currentSection;
+  document.querySelectorAll('.mob-drawer-item').forEach(el => {
+    const onclick = el.getAttribute('onclick') || '';
+    const match = onclick.match(/mobNav\('([^']+)'\)/);
+    el.classList.toggle('active', match ? match[1] === sec : false);
+  });
+}
+function closeMobDrawer() {
+  document.getElementById('mobDrawer')?.classList.remove('open');
+  document.getElementById('mobDrawerOverlay')?.classList.remove('open');
 }
 
 // ── INVOICES LOAD ──
