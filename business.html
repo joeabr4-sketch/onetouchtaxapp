@@ -721,6 +721,16 @@ body.help-mode .main{padding-top:34px}
     <div class="ob-title">Set up your business 🏢</div>
     <div class="ob-sub">Three quick questions — we'll personalise your dashboard.</div>
     <div id="obs1">
+      <div class="f-group" style="margin-bottom:18px">
+        <label class="f-label" style="margin-bottom:8px">Choose your language</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <button type="button" onclick="setLanguage('en')" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(79,142,247,.35);background:rgba(79,142,247,.08);color:var(--text);font-size:13px;cursor:pointer">🇬🇧 English</button>
+          <button type="button" onclick="setLanguage('af')" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(79,142,247,.35);background:rgba(79,142,247,.08);color:var(--text);font-size:13px;cursor:pointer">🇿🇦 Afrikaans</button>
+          <button type="button" onclick="setLanguage('zu')" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(79,142,247,.35);background:rgba(79,142,247,.08);color:var(--text);font-size:13px;cursor:pointer">🇿🇦 Zulu</button>
+          <button type="button" onclick="setLanguage('xh')" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(79,142,247,.35);background:rgba(79,142,247,.08);color:var(--text);font-size:13px;cursor:pointer">🇿🇦 Xhosa</button>
+          <button type="button" onclick="setLanguage('tn')" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(79,142,247,.35);background:rgba(79,142,247,.08);color:var(--text);font-size:13px;cursor:pointer">🇿🇦 Setswana</button>
+        </div>
+      </div>
       <div class="f-group"><label class="f-label">Business Name</label><input class="f-input" id="ob-biz" placeholder="e.g. Nkosi Electrical (Pty) Ltd" /></div>
       <div class="f-group"><label class="f-label">VAT Registered?</label>
         <div class="toggle-row">
@@ -9048,7 +9058,7 @@ const OB_CHECKS = [
     check: () => reconTransactions.length > 0,
     nav: () => {
       showSection('reconcile', document.querySelector('.s-btn[onclick*="reconcile"]'));
-      setTimeout(() => _showObGuideTip('🏦 Bank Reconciliation', 'Download your bank transactions from your bank\'s app as a CSV or Excel file and upload them here. We\'ll match them to your invoices automatically. This is how you prove your books are correct and catch anything that was missed.'), 300);
+      setTimeout(() => _showObGuideTip('🏦 Bank Reconciliation', 'Download your bank transactions from your online banking as a CSV or Excel file and upload them here. We\'ll match them to your invoices automatically — this is how you prove your books are correct and catch anything that was missed. The best time to do this is 3 to 5 days before month end. By then most of your transactions have cleared, giving you a high match rate without having to wait for the new month. Upload, match what you can, and close the month — then catch any outstanding items in the next cycle.'), 300);
     }
   },
   {
