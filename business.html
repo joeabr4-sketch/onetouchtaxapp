@@ -719,16 +719,16 @@ body.help-mode .main{padding-top:34px}
 <div class="ob-overlay" id="onboardingModal" style="display:none">
   <div class="ob-card">
     <div class="ob-title">Set up your business 🏢</div>
-    <div class="ob-sub">Three quick questions — we'll personalise your dashboard.</div>
+    <div class="ob-sub">Let's get you set up.</div>
     <div id="obs1">
       <div class="f-group" style="margin-bottom:18px">
         <label class="f-label" style="margin-bottom:8px">Choose your language</label>
         <div style="display:flex;flex-wrap:wrap;gap:8px">
-          <button type="button" onclick="setLanguage('en')" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(79,142,247,.35);background:rgba(79,142,247,.08);color:var(--text);font-size:13px;cursor:pointer">🇬🇧 English</button>
-          <button type="button" onclick="setLanguage('af')" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(79,142,247,.35);background:rgba(79,142,247,.08);color:var(--text);font-size:13px;cursor:pointer">🇿🇦 Afrikaans</button>
-          <button type="button" onclick="setLanguage('zu')" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(79,142,247,.35);background:rgba(79,142,247,.08);color:var(--text);font-size:13px;cursor:pointer">🇿🇦 Zulu</button>
-          <button type="button" onclick="setLanguage('xh')" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(79,142,247,.35);background:rgba(79,142,247,.08);color:var(--text);font-size:13px;cursor:pointer">🇿🇦 Xhosa</button>
-          <button type="button" onclick="setLanguage('tn')" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(79,142,247,.35);background:rgba(79,142,247,.08);color:var(--text);font-size:13px;cursor:pointer">🇿🇦 Setswana</button>
+          <button type="button" class="lang-opt" data-lang="en" onclick="setLanguage('en')" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(79,142,247,.35);background:rgba(79,142,247,.08);color:var(--text);font-size:13px;cursor:pointer;transition:all .2s">🇬🇧 English</button>
+          <button type="button" class="lang-opt" data-lang="af" onclick="setLanguage('af')" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(79,142,247,.35);background:rgba(79,142,247,.08);color:var(--text);font-size:13px;cursor:pointer;transition:all .2s">🇿🇦 Afrikaans</button>
+          <button type="button" class="lang-opt" data-lang="zu" onclick="setLanguage('zu')" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(79,142,247,.35);background:rgba(79,142,247,.08);color:var(--text);font-size:13px;cursor:pointer;transition:all .2s">🇿🇦 Zulu</button>
+          <button type="button" class="lang-opt" data-lang="xh" onclick="setLanguage('xh')" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(79,142,247,.35);background:rgba(79,142,247,.08);color:var(--text);font-size:13px;cursor:pointer;transition:all .2s">🇿🇦 Xhosa</button>
+          <button type="button" class="lang-opt" data-lang="tn" onclick="setLanguage('tn')" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(79,142,247,.35);background:rgba(79,142,247,.08);color:var(--text);font-size:13px;cursor:pointer;transition:all .2s">🇿🇦 Setswana</button>
         </div>
       </div>
       <div class="f-group"><label class="f-label">Business Name</label><input class="f-input" id="ob-biz" placeholder="e.g. Nkosi Electrical (Pty) Ltd" /></div>
@@ -1894,7 +1894,7 @@ body.help-mode .main{padding-top:34px}
     <!-- ── APP FOOTER ── -->
     <div id="appFooter" style="border-top:1px solid var(--border);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;background:var(--surface)">
       <div style="font-size:11px;color:var(--text-3);line-height:1.6">
-        © 2025 justadopeboy (Pty) Ltd t/a <strong style="color:var(--text-2)">OneTouch TaxApp</strong><br>
+        © <span id="copyrightYear"></span> <strong style="color:var(--text-2)">OneTouch TaxApp</strong><br>
         <span style="opacity:.65">OneTouch is a financial tool designed to assist with bookkeeping and tax preparation. It is not a registered accountant or tax practitioner. All figures must be reviewed before submission to SARS.</span>
       </div>
       <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
@@ -2246,7 +2246,7 @@ body.help-mode .main{padding-top:34px}
           <li>Submit only through official SARS eFiling or a SARS branch</li>
         </ul>
       </div>
-      <p style="font-size:11.5px;color:var(--text-3);margin-bottom:18px;line-height:1.6">OneTouch and justadopeboy (Pty) Ltd t/a OneTouch accept no liability for errors, penalties or assessments arising from figures submitted to SARS.</p>
+      <p style="font-size:11.5px;color:var(--text-3);margin-bottom:18px;line-height:1.6">OneTouch TaxApp accepts no liability for errors, penalties or assessments arising from figures submitted to SARS.</p>
       <div style="display:flex;gap:10px">
         <button onclick="confirmSarsDisclaimer()" style="flex:1;background:var(--amber);color:#fff;border:none;padding:12px;border-radius:9px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif">I Understand — Download</button>
         <button onclick="closeSarsDisclaimer()" style="background:#1e2535;border:1.5px solid rgba(255,255,255,.18);color:#b0bcd4;padding:12px 18px;border-radius:9px;font-size:13.5px;cursor:pointer;font-family:'DM Sans',sans-serif">Cancel</button>
@@ -2292,6 +2292,18 @@ let pendingDocFn = null;
 let logoDataUrl = null;
 let currentSection = 'dashboard';
 let currentAction = null; // Tracks what the user is currently doing (e.g. 'creating_invoice')
+let _dbReconTxCount = -1; // -1 = not yet loaded; populated from Supabase for checklist step 3
+
+async function _refreshReconTxCount() {
+  if (!currentUser) return;
+  try {
+    const { count } = await sb.from('bank_transactions')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', currentUser.id);
+    _dbReconTxCount = count || 0;
+    renderObChecklist(); // re-render once we have the real count
+  } catch {}
+}
 
 // ── HELPERS ──
 function fmtR(v) { return 'R ' + (parseFloat(v)||0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2}); }
@@ -2418,6 +2430,7 @@ async function acceptTos() {
   const { error } = await sb.from('profiles').upsert({ id: currentUser.id, tos_accepted: true }, { onConflict: 'id' });
   if (error) {
     console.error('ToS save error:', error);
+    showToast('Something went wrong — please check your connection and try again', 'var(--red)');
     btn.textContent = 'Continue to OneTouch →';
     btn.disabled = false;
     document.getElementById('tosCheckbox').checked = false;
@@ -2597,7 +2610,7 @@ async function payWithPayFast(plan) {
     // Show pending toast, then poll until IPN has updated the plan in Supabase
     setTimeout(() => {
       const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1);
-      showToast(`🎉 Payment received — activating your ${planLabel} plan. This may take a moment.`, 'var(--green)', 7000);
+      showToast(`🎉 Payment received — activating your ${planLabel} plan shortly.`, 'var(--green)', 7000);
       if (currentUser) {
         let attempts = 0;
         const pollPlan = async () => {
@@ -2665,26 +2678,29 @@ async function saveProfile() {
     ai_calls: 0
   };
 
+  // Save profile — guard dashboard init behind successful save
   try {
-    // Try upsert — handles both new and existing profiles
     const { error } = await sb.from('profiles').upsert(data, { onConflict: 'id' });
     if (error) {
-      console.error('Profile save error:', error);
-      // Try insert as fallback
+      console.error('Profile save error (upsert):', error);
+      // Fallback to insert
       const { error: insertError } = await sb.from('profiles').insert(data);
-      if (insertError) {
-        showToast('Setup failed — please try again or contact support@onetouch.net.za', 'var(--red)');
-        if (btn) { btn.textContent = 'Launch My Dashboard →'; btn.disabled = false; }
-        return;
-      }
+      if (insertError) throw insertError;
     }
-    userProfile = data;
-    document.getElementById('onboardingModal').style.display = 'none';
+  } catch(e) {
+    console.error('saveProfile failed:', e);
+    showToast('Setup failed — please check your connection and try again', 'var(--red)');
+    if (btn) { btn.textContent = 'Launch My Dashboard →'; btn.disabled = false; }
+    return; // Do NOT proceed to initDashboard
+  }
+  // Save succeeded — proceed to dashboard
+  userProfile = data;
+  document.getElementById('onboardingModal').style.display = 'none';
+  try {
     await initDashboard();
   } catch(e) {
-    console.error('saveProfile exception:', e);
-    showToast('Something went wrong during setup. Please refresh and try again.', 'var(--red)');
-    if (btn) { btn.textContent = 'Launch My Dashboard →'; btn.disabled = false; }
+    console.error('initDashboard exception:', e);
+    showToast('Dashboard loaded with some errors. Refresh if anything looks wrong.', 'var(--amber)');
   }
 }
 
@@ -2693,6 +2709,7 @@ async function initDashboard() {
   // Reset any stale state from previous session
   invoices = [];
   setTimeout(checkReconReminders, 3000);
+  _refreshReconTxCount();
   document.getElementById('notifDropdown').classList.remove('open');
   document.getElementById('sarsDisclaimerModal').classList.remove('open');
 
@@ -2703,6 +2720,8 @@ async function initDashboard() {
   document.getElementById('loadingScreen').style.display = 'none';
   document.getElementById('mainWrapper').style.display = 'block';
   document.getElementById('calYear').textContent = new Date().getFullYear();
+  const cy = document.getElementById('copyrightYear');
+  if (cy) cy.textContent = new Date().getFullYear();
   updateUserUI();
   showUploadSummaryOnDashboard();
   window._appReady = true; // flag: profile is loaded, upgrade prompts allowed
@@ -2884,7 +2903,7 @@ function showSection(name, btn) {
   if (sec) sec.classList.add('active');
   if (btn) btn.classList.add('active');
   document.getElementById('pageTitle').textContent = sec?.querySelector('h2')?.textContent?.replace(/^[^\w]+/, '') || name;
-  if (name === 'dashboard') renderObChecklist();
+  if (name === 'dashboard') { renderObChecklist(); _refreshReconTxCount(); }
   if (name === 'financials') { renderFinancials(); updateTipsState(); }
   if (name === 'reconcile') renderReconciliation();
   if (name === 'handoff') { updatePackStatus(); updateHandoffReconBanner(); }
@@ -7088,9 +7107,18 @@ async function sendInvoiceWhatsApp(inv) {
     return;
   }
 
-  // Format phone — ensure it starts with +
-  let phone = clientPhone.replace(/\s/g,'').replace(/^0/, '+27');
-  if (!phone.startsWith('+')) phone = '+' + phone;
+  // Normalise to E.164 SA format: strip spaces/dashes, 082... → +2782...
+  let phone = clientPhone.replace(/[\s\-()]/g, '');
+  if (/^0\d{9}$/.test(phone)) phone = '+27' + phone.slice(1);
+  else if (/^27\d{9}$/.test(phone)) phone = '+' + phone;
+  else if (!phone.startsWith('+')) phone = '+' + phone;
+  // Validate: +27 followed by exactly 9 digits
+  if (!/^\+27\d{9}$/.test(phone)) {
+    showToast('Invalid WhatsApp number. Use format +27 82 123 4567 or 082 123 4567', 'var(--amber)');
+    const b = document.querySelector('[onclick="saveAndWhatsApp()"]') || document.querySelector('[onclick*="WhatsApp"]');
+    if (b) { b.textContent = '💬 Save & WhatsApp'; b.disabled = false; }
+    return;
+  }
 
   const docType = inv.doc_type === 'quote' ? 'quote' : 'invoice';
   const amount = inv.total ? 'R ' + parseFloat(inv.total).toLocaleString('en-ZA', {minimumFractionDigits:2}) : '';
@@ -7136,15 +7164,17 @@ async function saveAndWhatsApp() {
     showUpgradePrompt('full');
     return;
   }
-  // Grab whatsapp number from form before saving
-  const waNum = document.getElementById('inv-whatsapp')?.value?.trim() || '';
+  // Capture form values before saveInvoice() closes the form
+  const waNum    = document.getElementById('inv-whatsapp')?.value?.trim() || '';
+  const invNum   = document.getElementById('inv-number')?.value?.trim() || '';
   await saveInvoice();
-  // Find the invoice we just saved
-  await loadInvoices();
-  const latest = invoices[0];
-  if (latest) {
-    latest.whatsapp = waNum;
-    await sendInvoiceWhatsApp(latest);
+  // Find the specific invoice we just saved by its number (not invoices[0] which could be wrong)
+  const saved = invoices.find(i => i.invoice_number === invNum);
+  if (saved) {
+    saved.whatsapp = waNum;
+    await sendInvoiceWhatsApp(saved);
+  } else {
+    showToast('Could not find saved invoice to send — please send WhatsApp manually', 'var(--amber)');
   }
 }
 
@@ -9238,7 +9268,7 @@ const OB_CHECKS = [
   {
     key: 'recon',
     label: 'Upload & reconcile bank transactions',
-    check: () => reconTransactions.length > 0,
+    check: () => reconTransactions.length > 0 || _dbReconTxCount > 0,
     nav: () => {
       showSection('reconcile', document.querySelector('.s-btn[onclick*="reconcile"]'));
       setTimeout(() => _showObGuideTip('🏦 Bank Reconciliation', 'Download your bank transactions from your online banking as a CSV or Excel file and upload them here. We\'ll match them to your invoices automatically — this is how you prove your books are correct and catch anything that was missed. The best time to do this is 3 to 5 days before month end. By then most of your transactions have cleared, giving you a high match rate without having to wait for the new month. Upload, match what you can, and close the month — then catch any outstanding items in the next cycle.'), 300);
