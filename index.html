@@ -221,7 +221,7 @@ section{position:relative;z-index:1}
 /* ── PRICING ── */
 .pricing{padding:100px 0}
 .pricing-inner{text-align:center;margin-bottom:56px}
-.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start}
+.pricing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;align-items:start}
 .price-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;position:relative;transition:all .3s}
 .price-card:hover{transform:translateY(-4px);box-shadow:0 20px 50px rgba(0,0,0,.3)}
 .price-card.popular{border-color:rgba(79,142,247,.65);background:linear-gradient(160deg,rgba(79,142,247,.1),rgba(79,142,247,.03));transform:scale(1.04);box-shadow:0 0 0 1px rgba(79,142,247,.2),0 24px 64px rgba(79,142,247,.18),0 0 40px rgba(79,142,247,.08)}
@@ -320,7 +320,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
   .devices-grid{grid-template-columns:1fr}
   .devices-inner{padding:0 20px}
   .feat-grid{grid-template-columns:1fr 1fr}
-  .pricing-grid{grid-template-columns:1fr}
+  .pricing-grid{grid-template-columns:repeat(2,1fr)}
   .price-card.popular{transform:none}
   .compare-grid{grid-template-columns:1fr}
   .footer-grid{grid-template-columns:1fr 1fr}
@@ -338,6 +338,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
   nav{grid-template-columns:1fr auto auto}
   .hero{padding:80px 16px 40px}
   .feat-grid{grid-template-columns:1fr}
+  .pricing-grid{grid-template-columns:1fr}
   .footer-grid{grid-template-columns:1fr}
   .cc-health{grid-template-columns:1fr}
   .cc-bot{grid-template-columns:1fr}
@@ -354,7 +355,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
     <div class="nav-wordmark">OneTouch <span>Tax</span>App</div>
   </a>
   <div class="nav-links">
-    <a href="#features">Features</a>
+    <a href="#features">Phone &amp; Desktop</a>
     <a href="#how">How it works</a>
     <a href="#pricing">Pricing</a>
     <a href="#faq">FAQ</a>
@@ -382,11 +383,6 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
     <div class="hero-btns">
       <a class="btn-primary" href="/business.html">Start for Free →</a>
       <a class="btn-secondary" href="#pricing">See Pricing</a>
-    </div>
-    <div style="margin-top:10px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap">
-      <span style="font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:5px">🖥️ Business Edition — best on desktop</span>
-      <span style="font-size:11px;color:var(--text-3)">·</span>
-      <span style="font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:5px">📱 Personal Edition — <a href="/personal.html" style="color:var(--blue);text-decoration:none;font-weight:600">mobile friendly</a></span>
     </div>
     <div class="hero-trust">
       <div class="trust-item"><span>✓</span> No credit card required</div>
@@ -586,87 +582,48 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
   </div>
 </section>
 
-<!-- ── FEATURES ── -->
-<section class="features" id="features">
-  <div class="container">
-    <div class="features-inner reveal">
-      <div class="section-badge">Features</div>
-      <h2 class="section-h">Everything your business needs</h2>
-      <p class="section-sub" style="margin:0 auto">Built specifically for the South African tax environment — not a generic global app with SA bolted on.</p>
+<!-- ── BUILT FOR PHONE & DESKTOP ── -->
+<section class="devices" id="features">
+  <div class="devices-inner">
+    <div class="devices-head reveal">
+      <div class="section-badge">Works everywhere</div>
+      <h2 style="font-size:clamp(26px,4vw,38px);font-weight:800;letter-spacing:-1px;margin:12px 0 10px">Built for phone <em style="font-style:normal;color:var(--blue)">and</em> desktop</h2>
+      <p style="font-size:15px;color:var(--text-3);max-width:500px;margin:0 auto">Each device plays to its strengths. Use your phone on the go, sit down at your desk for the heavy lifting.</p>
     </div>
-    <div class="feat-grid">
-      <div class="feat-card reveal">
-        <div class="feat-icon">🧾</div>
-        <div class="feat-title">Professional Invoices &amp; Quotes</div>
-        <p class="feat-desc">Create branded invoices and quotes with line items, VAT, deposit tracking and balance outstanding. Export as PDF or send via WhatsApp in seconds.</p>
-        <span class="feat-tag tag-free">Free</span>
+    <div class="devices-grid">
+
+      <!-- MOBILE CARD -->
+      <div class="device-card mobile reveal">
+        <div class="device-icon">📱</div>
+        <div class="device-title">On your phone</div>
+        <div class="device-sub">Quick actions, anywhere you are</div>
+        <ul class="device-list">
+          <li><span class="dl-icon">✅</span> Create and send invoices instantly</li>
+          <li><span class="dl-icon">✅</span> Send invoices via WhatsApp to clients</li>
+          <li><span class="dl-icon">✅</span> Check your dashboard — revenue, expenses, what's overdue</li>
+          <li><span class="dl-icon">✅</span> Ask the AI tax assistant a quick question</li>
+          <li><span class="dl-icon">✅</span> View your compliance calendar and deadlines</li>
+          <li><span class="dl-icon">✅</span> Log an expense on the spot</li>
+        </ul>
+        <div class="device-note"><strong>Install it on your home screen</strong> — OneTouch works as a progressive web app. No App Store needed. Tap Share → Add to Home Screen in Safari, or Install App in Chrome.</div>
       </div>
-      <div class="feat-card reveal reveal-delay-1">
-        <div class="feat-icon">📊</div>
-        <div class="feat-title">Financials &amp; P&amp;L</div>
-        <p class="feat-desc">Your full Profit &amp; Loss updates automatically as you capture transactions. Know exactly where your business stands at any moment.</p>
-        <span class="feat-tag tag-free">Free</span>
+
+      <!-- DESKTOP CARD -->
+      <div class="device-card desktop reveal reveal-delay-2">
+        <div class="device-icon">💻</div>
+        <div class="device-title">On your desktop</div>
+        <div class="device-sub">Monthly tasks that need focus</div>
+        <ul class="device-list">
+          <li><span class="dl-icon">✅</span> Upload your bank statement CSV and reconcile transactions</li>
+          <li><span class="dl-icon">✅</span> Generate VAT201, EMP201, IRP6, ITR14 prep documents</li>
+          <li><span class="dl-icon">✅</span> Run payroll and generate payslips</li>
+          <li><span class="dl-icon">✅</span> Download your full bookkeeper pack for your accountant</li>
+          <li><span class="dl-icon">✅</span> Review your P&amp;L and financial history</li>
+          <li><span class="dl-icon">✅</span> Close your financial year and archive records</li>
+        </ul>
+        <div class="device-note"><strong>Bank statement tip:</strong> Download your CSV from your bank's online banking portal on desktop. Most major SA banks — FNB, Nedbank, Standard Bank, Absa — support CSV export.</div>
       </div>
-      <div class="feat-card reveal reveal-delay-2">
-        <div class="feat-icon">📅</div>
-        <div class="feat-title">SARS Compliance Calendar</div>
-        <p class="feat-desc">Never miss a VAT201, EMP201, IRP6 or ITR14 deadline again. Your calendar auto-updates based on your VAT and PAYE registration status.</p>
-        <span class="feat-tag tag-free">Free</span>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon">🏦</div>
-        <div class="feat-title">AI Bank Transaction Analysis</div>
-        <p class="feat-desc">Import your bank transactions (CSV or Excel) and get instant categorisation, VAT extraction and SARS audit risk flags — powered by AI, no manual capturing. Works with exports from FNB, Absa, Standard Bank, Nedbank and Capitec.</p>
-        <span class="feat-tag tag-pro">Pro</span>
-      </div>
-      <div class="feat-card reveal reveal-delay-1">
-        <div class="feat-icon">🔗</div>
-        <div class="feat-title">Bank Reconciliation</div>
-        <p class="feat-desc">Auto-match bank transactions to invoices, flag missing records and export a clean reconciliation report with a full audit trail — ready for SARS or your accountant.</p>
-        <span class="feat-tag tag-pro">Pro</span>
-      </div>
-      <div class="feat-card reveal reveal-delay-2">
-        <div class="feat-icon">📄</div>
-        <div class="feat-title">VAT201, IRP6 &amp; ITR14 Prep</div>
-        <p class="feat-desc">Auto-generate your VAT return, provisional tax and annual return prep documents directly from your data. Download and submit via SARS eFiling.</p>
-        <span class="feat-tag tag-pro">Pro</span>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon">📁</div>
-        <div class="feat-title">Bookkeeper Handoff Pack</div>
-        <p class="feat-desc">One-click download of your full P&amp;L, VAT summary, invoice register and tax liability report. Everything your accountant needs, clean and ready to sign off.</p>
-        <span class="feat-tag tag-pro">Pro</span>
-      </div>
-      <div class="feat-card reveal reveal-delay-1">
-        <div class="feat-icon">📥</div>
-        <div class="feat-title">Transaction Import</div>
-        <p class="feat-desc">Already using another system? Import your transactions via CSV. Franchise owners, Pastel users — your bookkeeping layer, your way.</p>
-        <span class="feat-tag tag-pro">Pro</span>
-      </div>
-      <div class="feat-card reveal reveal-delay-2">
-        <div class="feat-icon">👥</div>
-        <div class="feat-title">Payroll &amp; Payslips</div>
-        <p class="feat-desc">Add employees, generate professional payslips and calculate PAYE, UIF and SDL using the latest SARS tax tables. EMP201 prep in one click. SDL threshold-aware for your payroll size.</p>
-        <span class="feat-tag tag-full">Full</span>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon">📲</div>
-        <div class="feat-title">WhatsApp Invoice Delivery</div>
-        <p class="feat-desc">Send professional invoices directly to your client's WhatsApp with one tap. No app needed on their side — they receive it instantly like any other message.</p>
-        <span class="feat-tag tag-full">Full</span>
-      </div>
-      <div class="feat-card reveal reveal-delay-1">
-        <div class="feat-icon">💡</div>
-        <div class="feat-title">AI Business Saving Tips</div>
-        <p class="feat-desc">Get personalised SA tax-saving advice based on your actual revenue, expenses and VAT status. Legally reduce your tax bill — in plain language.</p>
-        <span class="feat-tag tag-full">Full</span>
-      </div>
-      <div class="feat-card reveal reveal-delay-2">
-        <div class="feat-icon">💬</div>
-        <div class="feat-title">AI Tax Assistant</div>
-        <p class="feat-desc">Ask anything about SA tax — VAT, PAYE, eFiling, SARS notices, provisional tax. Clear answers in your home language. Available in 5 SA languages.</p>
-        <span class="feat-tag tag-full">Full</span>
-      </div>
+
     </div>
   </div>
 </section>
@@ -704,50 +661,6 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
   </div>
 </section>
 
-<!-- ── PERSONAL vs BUSINESS ── -->
-<section class="compare" id="compare">
-  <div class="container">
-    <div class="compare-inner reveal">
-      <div class="section-badge">Choose your app</div>
-      <h2 class="section-h">Business or Personal?</h2>
-      <p class="section-sub" style="margin:0 auto">Whether you're filing your own income tax or running a business, we have the right tool.</p>
-    </div>
-    <div class="compare-grid">
-      <div class="compare-card personal reveal">
-        <div class="free-badge">FREE</div>
-        <div class="compare-label">For Individuals</div>
-        <div class="compare-title">Personal Tax</div>
-        <div class="compare-price">R0</div>
-        <div class="compare-price-note">Always free — no card needed</div>
-        <ul class="compare-list">
-          <li>Step-by-step eFiling guide</li>
-          <li>IRP5 income capture</li>
-          <li>Medical aid &amp; retirement deductions</li>
-          <li>Travel allowance calculator</li>
-          <li>Home office deduction guide</li>
-          <li>SARS efiling checklist</li>
-        </ul>
-        <a href="/personal.html" class="compare-btn green">Start Personal Tax →</a>
-      </div>
-      <div class="compare-card business featured reveal reveal-delay-1">
-        <div class="compare-label">For Businesses</div>
-        <div class="compare-title">Business Suite</div>
-        <div class="compare-price paid">From R0</div>
-        <div class="compare-price-note">Free plan available · Pro from R299/month</div>
-        <ul class="compare-list">
-          <li>Financial Control Center dashboard</li>
-          <li>Invoices, quotes &amp; PDF export</li>
-          <li>VAT201, EMP201 &amp; IRP6 prep</li>
-          <li>AI bank transaction analysis &amp; reconciliation</li>
-          <li>Guided onboarding — no accountant needed</li>
-          <li>Bookkeeper handoff pack (Full)</li>
-        </ul>
-        <a href="/business.html" class="compare-btn blue">Start Business App →</a>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- ── PRICING ── -->
 <section class="pricing" id="pricing">
   <div class="container">
@@ -757,6 +670,27 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
       <p class="section-sub" style="margin:0 auto">No hidden fees. No per-user charges. Cancel anytime — your data stays yours.</p>
     </div>
     <div class="pricing-grid">
+
+      <!-- PERSONAL -->
+      <div class="price-card reveal">
+        <div class="price-top-bar" style="background:linear-gradient(90deg,var(--green),var(--cyan))"></div>
+        <div class="price-tier">Personal</div>
+        <div class="price-amount" style="color:var(--green)"><sup>R</sup>0</div>
+        <div class="price-period">always free</div>
+        <div class="price-desc">For individuals filing their own income tax return.</div>
+        <ul class="price-features">
+          <li><span class="check">✓</span> Step-by-step eFiling guide</li>
+          <li><span class="check">✓</span> IRP5 income capture</li>
+          <li><span class="check">✓</span> Medical aid &amp; retirement deductions</li>
+          <li><span class="check">✓</span> Travel allowance calculator</li>
+          <li><span class="check">✓</span> Home office deduction guide</li>
+          <li><span class="check">✓</span> SARS eFiling checklist</li>
+          <li><span class="check">✓</span> Personal income tax calculator</li>
+          <li><span class="check">✓</span> 5 South African languages</li>
+        </ul>
+        <a href="/personal.html" class="price-cta outline">Open Personal App →</a>
+        <div style="text-align:center;margin-top:8px;font-size:10.5px;color:var(--text-3)">📱 Mobile friendly</div>
+      </div>
 
       <!-- FREE -->
       <div class="price-card reveal">
@@ -842,52 +776,6 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
     </div>
     <div class="sars-note" style="margin-top:32px">
       ⚠️ OneTouch TaxApp generates preparation documents to assist with your SARS submissions. All figures should be verified with a registered tax practitioner before submitting. OneTouch is not a registered tax practitioner.
-    </div>
-  </div>
-</section>
-
-<!-- ── MOBILE VS DESKTOP ── -->
-<section class="devices">
-  <div class="devices-inner">
-    <div class="devices-head reveal">
-      <div class="section-badge">Works everywhere</div>
-      <h2 style="font-size:clamp(26px,4vw,38px);font-weight:800;letter-spacing:-1px;margin:12px 0 10px">Built for phone <em style="font-style:normal;color:var(--blue)">and</em> desktop</h2>
-      <p style="font-size:15px;color:var(--text-3);max-width:500px;margin:0 auto">Each device plays to its strengths. Use your phone on the go, sit down at your desk for the heavy lifting.</p>
-    </div>
-    <div class="devices-grid">
-
-      <!-- MOBILE CARD -->
-      <div class="device-card mobile reveal">
-        <div class="device-icon">📱</div>
-        <div class="device-title">On your phone</div>
-        <div class="device-sub">Quick actions, anywhere you are</div>
-        <ul class="device-list">
-          <li><span class="dl-icon">✅</span> Create and send invoices instantly</li>
-          <li><span class="dl-icon">✅</span> Send invoices via WhatsApp to clients</li>
-          <li><span class="dl-icon">✅</span> Check your dashboard — revenue, expenses, what's overdue</li>
-          <li><span class="dl-icon">✅</span> Ask the AI tax assistant a quick question</li>
-          <li><span class="dl-icon">✅</span> View your compliance calendar and deadlines</li>
-          <li><span class="dl-icon">✅</span> Log an expense on the spot</li>
-        </ul>
-        <div class="device-note"><strong>Install it on your home screen</strong> — OneTouch works as a progressive web app. No App Store needed. Tap Share → Add to Home Screen in Safari, or Install App in Chrome.</div>
-      </div>
-
-      <!-- DESKTOP CARD -->
-      <div class="device-card desktop reveal reveal-delay-2">
-        <div class="device-icon">💻</div>
-        <div class="device-title">On your desktop</div>
-        <div class="device-sub">Monthly tasks that need focus</div>
-        <ul class="device-list">
-          <li><span class="dl-icon">✅</span> Upload your bank statement CSV and reconcile transactions</li>
-          <li><span class="dl-icon">✅</span> Generate VAT201, EMP201, IRP6, ITR14 prep documents</li>
-          <li><span class="dl-icon">✅</span> Run payroll and generate payslips</li>
-          <li><span class="dl-icon">✅</span> Download your full bookkeeper pack for your accountant</li>
-          <li><span class="dl-icon">✅</span> Review your P&amp;L and financial history</li>
-          <li><span class="dl-icon">✅</span> Close your financial year and archive records</li>
-        </ul>
-        <div class="device-note"><strong>Bank statement tip:</strong> Download your CSV from your bank's online banking portal on desktop. Most major SA banks — FNB, Nedbank, Standard Bank, Absa — support CSV export.</div>
-      </div>
-
     </div>
   </div>
 </section>
