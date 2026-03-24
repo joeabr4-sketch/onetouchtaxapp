@@ -813,16 +813,7 @@ body.help-mode .main{padding-top:34px}
 
     <!-- ═══ DASHBOARD ═══ -->
     <div class="section active" id="section-dashboard">
-      <div class="help-banner"><div class="help-banner-title">💡 Dashboard</div><div class="help-banner-body">Your financial control centre. The numbers here update automatically as you log invoices and reconcile your bank statement. Use it to spot what's overdue, what's coming up on the SARS calendar, and how healthy your cash flow is.</div><div class="help-banner-actions"><span>Use the nav on the left to jump to any section</span><span>Guidance mode shows ? buttons on section headings</span></div></div>
-      <div id="newUserBanner" style="display:none;background:linear-gradient(135deg,rgba(79,142,247,.08),rgba(184,196,216,.05));border:1px solid rgba(79,142,247,.25);border-radius:14px;padding:22px 26px;margin-bottom:20px">
-        <div style="font-size:11px;font-weight:700;color:rgba(79,142,247,.9);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px">💡 First step</div>
-        <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:6px;color:#fff">Let's get your first data in</div>
-        <div style="font-size:13px;color:var(--text-2);margin-bottom:18px;max-width:520px">Upload your bank transactions (CSV or Excel) to automatically track your income and expenses. This is the fastest way to see your business performance.</div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-          <button onclick="navToggle('reconcile',document.querySelector('.s-btn[onclick*=reconcile]'))" style="background:linear-gradient(135deg,rgba(79,142,247,.9),rgba(59,120,220,.9));color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 4px 12px rgba(79,142,247,.3)">📤 Upload Transactions</button>
-          <button onclick="showSection('invoices',document.querySelector('.s-btn[onclick*=invoices]'));setTimeout(openInvForm,200)" style="background:var(--surface2);color:var(--text-2);border:1px solid var(--border);padding:10px 18px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif">Or add an invoice first</button>
-        </div>
-      </div>
+      <div class="help-banner"><div class="help-banner-title">💡 Dashboard</div><div class="help-banner-body">Your financial control centre. The numbers here update automatically as you log invoices and reconcile your bank transactions. Use it to spot what's overdue, what's coming up on the SARS calendar, and how healthy your cash flow is.</div><div class="help-banner-actions"><span>Use the nav on the left to jump to any section</span><span>Guidance mode shows ? buttons on section headings</span></div></div>
       <div class="welcome">
         <div>
           <h2>Good day, <span id="welcomeName" style="color:var(--blue)">there</span> 👋</h2>
@@ -881,18 +872,6 @@ body.help-mode .main{padding-top:34px}
         </div>
       </div>
 
-      <!-- NEXT STEP GUIDANCE -->
-      <div id="nextStepCard" style="display:none;background:var(--surface);border:1px solid rgba(79,142,247,.2);border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
-        <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:200px">
-          <div id="nextStepIcon" style="font-size:22px;flex-shrink:0">📤</div>
-          <div>
-            <div style="font-size:11px;font-weight:700;color:rgba(79,142,247,.9);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">Next Step</div>
-            <div id="nextStepText" style="font-size:13px;font-weight:600;color:var(--text)">Upload your bank transactions</div>
-            <div id="nextStepSub" style="font-size:11.5px;color:var(--text-3);margin-top:2px"></div>
-          </div>
-        </div>
-        <button id="nextStepBtn" style="background:rgba(79,142,247,.15);border:1px solid rgba(79,142,247,.3);color:rgba(79,142,247,.9);padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;flex-shrink:0">Go →</button>
-      </div>
 
       <!-- POST-UPLOAD SUMMARY -->
       <div id="uploadSummaryCard" style="display:none;background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.18);border-radius:12px;padding:16px 20px;margin-bottom:16px">
@@ -1068,7 +1047,7 @@ body.help-mode .main{padding-top:34px}
           <div style="padding:14px 20px">
             <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">All sales invoices captured for the period</div></div>
             <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">All supplier invoices captured</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Bank statement reconciled</div></div>
+            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Bank transactions reconciled</div></div>
             <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Output VAT calculated (15% on sales)</div></div>
             <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Input VAT identified on qualifying purchases</div></div>
             <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Zero-rated / exempt supplies noted</div></div>
@@ -1104,7 +1083,7 @@ body.help-mode .main{padding-top:34px}
           <div class="card-head"><div class="card-title">Year-End Preparation</div><span class="badge b-green">Annual</span></div>
           <div style="padding:14px 20px">
             <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">All invoices captured for full financial year</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Bank statements uploaded and reconciled</div></div>
+            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Bank transactions uploaded and reconciled</div></div>
             <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">P&L statement reviewed and accurate</div></div>
             <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">All VAT submissions filed and paid</div></div>
             <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Bookkeeper pack generated and sent</div></div>
@@ -1117,11 +1096,11 @@ body.help-mode .main{padding-top:34px}
     <!-- ═══ FINANCIAL HISTORY ═══ -->
     <div class="section" id="section-history">
       <div class="help-banner"><div class="help-banner-title">💡 Financial History</div><div class="help-banner-body">A month-by-month record of your revenue, expenses, and profit. Snapshots are saved automatically when you close a reconciliation period. Use this to spot trends, compare months, and have a full picture ready when your accountant asks for history.</div><div class="help-banner-actions"><span>Snapshots save automatically when you close a month</span><span>Opening balances set your year-start position</span></div></div>
-      <div style="margin-bottom:18px"><h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:3px">📁 Financial History</h2><p style="font-size:13px;color:var(--text-2)">Monthly snapshots, document history, bank statements and opening balances.</p></div>
+      <div style="margin-bottom:18px"><h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:3px">📁 Financial History</h2><p style="font-size:13px;color:var(--text-2)">Monthly snapshots, document history, bank transactions and opening balances.</p></div>
       <div style="display:flex;gap:6px;margin-bottom:16px;border-bottom:1.5px solid var(--border);padding-bottom:0">
         <button class="hist-tab active" id="htab-monthly" onclick="switchHistTab('monthly')">📊 Monthly Financials</button>
         <button class="hist-tab" id="htab-docs" onclick="switchHistTab('docs')">📄 Document History</button>
-        <button class="hist-tab" id="htab-statements" onclick="switchHistTab('statements')">🏦 Bank Statements</button>
+        <button class="hist-tab" id="htab-statements" onclick="switchHistTab('statements')">🏦 Bank Transactions</button>
         <button class="hist-tab" id="htab-opening" onclick="switchHistTab('opening')">🔢 Opening Balances</button>
       </div>
       <div id="htab-monthly-content">
@@ -1159,7 +1138,7 @@ body.help-mode .main{padding-top:34px}
         <div class="card"><div class="card-head"><div class="card-title">Generated Documents</div><span class="badge b-blue" id="docHistBadge">Loading...</span></div><div id="docHistList" style="padding:0 20px 16px"><div style="text-align:center;padding:40px 20px;color:var(--text-3)"><div style="font-size:36px;margin-bottom:10px">📄</div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:5px">No documents generated yet</div><div style="font-size:12px">Every PDF you generate is logged here automatically.</div></div></div></div>
       </div>
       <div id="htab-statements-content" style="display:none">
-        <div class="card"><div class="card-head"><div class="card-title">Bank Statement Uploads</div><span class="badge b-blue" id="histBadge">Loading...</span></div><div id="historyList"><div style="text-align:center;padding:40px 20px;color:var(--text-3)"><div style="font-size:36px;margin-bottom:10px">🏦</div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:5px">No statements yet</div><div style="font-size:12px">Upload a bank statement via the Reconciliation section — it saves here automatically.</div></div></div></div>
+        <div class="card"><div class="card-head"><div class="card-title">Bank Transaction Uploads</div><span class="badge b-blue" id="histBadge">Loading...</span></div><div id="historyList"><div style="text-align:center;padding:40px 20px;color:var(--text-3)"><div style="font-size:36px;margin-bottom:10px">🏦</div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:5px">No transactions yet</div><div style="font-size:12px">Upload bank transactions via the Reconciliation section — they save here automatically.</div></div></div></div>
       </div>
       <div id="htab-opening-content" style="display:none">
         <div class="card">
@@ -1279,14 +1258,14 @@ body.help-mode .main{padding-top:34px}
 
     <!-- ═══ RECONCILIATION ═══ -->
     <div class="section" id="section-reconcile" style="position:relative">
-      <div class="help-banner"><div class="help-banner-title">💡 Bank Reconciliation</div><div class="help-banner-body">At the end of each month: download your bank statement as a CSV from your internet banking app, then upload it in the Bank Statement card below. The app will match each bank transaction to your logged invoices — auto-matching where it can, letting you match manually for the rest. When you hit 80%+ confidence, close the month to lock it. This creates an immutable audit trail that proves your books are clean.</div><div class="help-banner-actions"><span>Upload CSV — drop your bank statement in the card below</span><span>Auto-Match — let AI do the first pass</span><span>Manual match — drag transactions to invoices</span><span>Close Month — locks the period when 80%+ matched</span><span>Audit tab — full tamper-evident history</span></div></div>
+      <div class="help-banner"><div class="help-banner-title">💡 Bank Reconciliation</div><div class="help-banner-body">At the end of each month: download your bank transactions as a CSV from your internet banking app, then upload them in the Bank Transactions card below. The app will match each bank transaction to your logged invoices — auto-matching where it can, letting you match manually for the rest. When you hit 80%+ confidence, close the month to lock it. This creates an immutable audit trail that proves your books are clean.</div><div class="help-banner-actions"><span>Upload CSV — drop your bank transactions in the card below</span><span>Auto-Match — let AI do the first pass</span><span>Manual match — drag transactions to invoices</span><span>Close Month — locks the period when 80%+ matched</span><span>Audit tab — full tamper-evident history</span></div></div>
       <div id="lock-section-reconcile" style="display:none;position:absolute;pointer-events:all;inset:0;background:rgba(7,8,9,.85);backdrop-filter:blur(4px);z-index:10;align-items:center;justify-content:center;padding:20px"><div style="background:rgba(184,196,216,.08);border:1px solid rgba(184,196,216,.2);border-radius:16px;padding:32px;text-align:center;max-width:380px"><div style="font-size:36px;margin-bottom:12px">🔒</div><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Unlock this feature</div><div style="font-size:13px;color:var(--text-2);margin-bottom:6px;line-height:1.6">Upgrade to Pro to use this feature.</div><div style="font-size:12px;color:var(--text-3);margin-bottom:20px">Unlock bank reconciliation, audit trail, transaction matching and more.</div><button onclick="showSection('settings',null)" style="background:var(--blue);color:#0f1520;border:none;padding:11px 24px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer">⬆ Upgrade to Pro — R299/mo</button></div></div>
 
       <!-- HEADER -->
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
         <div>
           <div class="ot-tip-wrap"><h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px">🔗 Bank Reconciliation</h2><button class="ot-tip-btn" onclick="showTip(this,'recon')">?</button></div>
-          <div class="ot-tip-popup" id="tip-recon" style="display:none"><button class="ot-close" onclick="hideTip('recon')">✕</button><strong>Bank Reconciliation</strong>Upload your bank statement CSV, then match each transaction to your invoices. When you hit 80%+ match rate you can lock the month. This is your audit trail and catches any missing entries.</div>
+          <div class="ot-tip-popup" id="tip-recon" style="display:none"><button class="ot-close" onclick="hideTip('recon')">✕</button><strong>Bank Reconciliation</strong>Upload your bank transactions CSV, then match each transaction to your invoices. When you hit 80%+ match rate you can lock the month. This is your audit trail and catches any missing entries.</div>
           <p style="font-size:13px;color:var(--text-2)" id="reconSessionLabel">Loading...</p>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
@@ -1425,7 +1404,7 @@ body.help-mode .main{padding-top:34px}
         <div style="font-size:24px" id="handoffReconIcon">🔴</div>
         <div style="flex:1">
           <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text)" id="handoffReconTitle">Not Reconciled</div>
-          <div style="font-size:12px;color:var(--text-2);margin-top:3px" id="handoffReconDesc">Upload a bank statement and complete reconciliation before sharing with your accountant</div>
+          <div style="font-size:12px;color:var(--text-2);margin-top:3px" id="handoffReconDesc">Upload bank transactions and complete reconciliation before sharing with your accountant</div>
         </div>
         <div style="text-align:right;flex-shrink:0">
           <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--text)" id="handoffReconPct">0%</div>
@@ -1698,7 +1677,7 @@ body.help-mode .main{padding-top:34px}
               <div style="font-size:10px;color:var(--text-3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px">Common questions</div>
               <button class="sq-btn" onclick="sendSupportQ(this)">How do I upgrade my plan?</button>
               <button class="sq-btn" onclick="sendSupportQ(this)">I was charged incorrectly</button>
-              <button class="sq-btn" onclick="sendSupportQ(this)">How does bank statement analysis work?</button>
+              <button class="sq-btn" onclick="sendSupportQ(this)">How does bank transaction analysis work?</button>
               <button class="sq-btn" onclick="sendSupportQ(this)">I can't log in to my account</button>
               <button class="sq-btn" onclick="sendSupportQ(this)">How do I cancel my subscription?</button>
             </div>
@@ -2233,7 +2212,7 @@ body.help-mode .main{padding-top:34px}
       <div style="background:var(--red-dim);border:1px solid rgba(244,63,94,.2);border-radius:10px;padding:13px;margin-bottom:14px">
         <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Before submitting to SARS you must:</div>
         <ul style="margin:0;padding-left:16px;font-size:12.5px;color:var(--text);line-height:1.9">
-          <li>Verify every figure against your actual bank statements</li>
+          <li>Verify every figure against your actual bank transactions</li>
           <li>Confirm calculations with a registered tax practitioner</li>
           <li>Submit only through official SARS eFiling or a SARS branch</li>
         </ul>
@@ -2296,12 +2275,12 @@ function vatOn(subtotal) { return rnd(subtotal * 0.15); }      // VAT on excl-VA
 function vatFrom(gross) { return rnd(gross * 15 / 115); }       // Extract VAT from incl-VAT amount
 function exclVat(gross) { return rnd(gross - vatFrom(gross)); }  // Strip VAT from incl-VAT amount
 
-function showToast(msg, color) {
+function showToast(msg, color, duration) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.style.borderColor = color || 'var(--border)';
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3500);
+  setTimeout(() => t.classList.remove('show'), duration || 3500);
 }
 
 function showPDFToast(msg) {
@@ -2837,9 +2816,6 @@ async function loadInvoices() {
   updateDashStats();
   renderFinancials();
   renderObChecklist();
-  renderNextStep();
-  const banner = document.getElementById('newUserBanner');
-  if (banner) banner.style.display = invoices.length === 0 ? 'block' : 'none';
   const finEmpty = document.getElementById('finEmptyState');
   const finContent = document.getElementById('finContent');
   if (finEmpty && finContent) {
@@ -3711,7 +3687,7 @@ function renderComplianceScore() {
 
 // ── CHECKLIST ──
 function buildDashChecklist() {
-  const items = ['Invoices captured this month','Bank statement reconciled','Payroll processed','VAT201 prepared','IRP6 calculated'];
+  const items = ['Invoices captured this month','Bank transactions reconciled','Payroll processed','VAT201 prepared','IRP6 calculated'];
   const el = document.getElementById('dashChecklist'); if (!el) return;
   el.innerHTML = items.map(item => `<div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">${item}</div></div>`).join('');
 }
@@ -4416,11 +4392,11 @@ async function processFile(file) {
   };
   try {
     let content = (file.name.endsWith('.pdf')||file.type==='application/pdf')
-      ? `[PDF bank statement: ${file.name}, size: ${(file.size/1024).toFixed(1)}KB]`
+      ? `[PDF bank transactions: ${file.name}, size: ${(file.size/1024).toFixed(1)}KB]`
       : await file.text();
     const [_, data] = await Promise.all([animSteps(), aiCall({
       model:'claude-sonnet-4-20250514', max_tokens:2500,
-      system:`You are a South African bank statement parser. Extract ONLY real data you can actually see in the text. NEVER guess, estimate or make up any numbers.
+      system:`You are a South African bank transaction parser. Extract ONLY real data you can actually see in the text. NEVER guess, estimate or make up any numbers.
 
 STRICT RULES:
 - Only include transactions you can actually read with a real date, description and amount
@@ -4435,7 +4411,7 @@ Return ONLY valid JSON, no markdown, no explanation:
 {"period":"actual period from statement or null","totalIncome":"R X,XXX from real data","totalExpenses":"R X,XXX from real data","estimatedVatLiability":"R X,XXX calculated from real data","flaggedCount":0,"dataQuality":"full|partial|minimal","unreadableFields":["list any fields you could not read"],"insights":["only insights based on real data you found"],"flags":[{"item":"real item","reason":"real reason"}],"transactions":[{"date":"real date","description":"real description","amount":"real amount","type":"income or expense","category":"Sales|Rent|Fuel|Salaries|Bank Charges|Other","vatClaimable":true}]}
 
 If unreadable: {"unreadable":true}`,
-      messages:[{role:'user',content:`Parse this SA business bank statement. Extract only what you can actually read:\nFilename: ${file.name}\n\n${content.substring(0,5000)}`}]
+      messages:[{role:'user',content:`Parse these SA business bank transactions. Extract only what you can actually read:\nFilename: ${file.name}\n\n${content.substring(0,5000)}`}]
     })]);
     pw.classList.remove('show');
     const raw = data.content?.[0]?.text||'';
@@ -5009,7 +4985,6 @@ async function commitReconRows(rows, file) {
     const totalExp = newRows.filter(r=>r.type==='debit').reduce((s,r)=>s+r.amount,0);
     try { localStorage.setItem('ot_upload_summary_' + currentUser.id, JSON.stringify({ income: totalInc, expenses: totalExp, count: newRows.length, ts: Date.now() })); } catch {}
     showUploadSummaryOnDashboard();
-    renderNextStep();
 
   } catch(e) {
     console.error(e);
@@ -5058,7 +5033,7 @@ async function clearReconStatement() {
   await sb.from('invoices').update({ reconciled: false, status: 'outstanding', status_log: 'Statement cleared — pending re-reconciliation' })
     .eq('user_id', currentUser.id).eq('reconciled', true);
   await loadInvoices();
-  addReconAudit('clear', 'Bank statement cleared');
+  addReconAudit('clear', 'Bank transactions cleared');
   updateReconUI();
   renderTxTable();
   renderInvoiceReconTable();
@@ -5075,7 +5050,7 @@ async function runReconciliationEngine() {
 
     if (!reconTransactions.length) {
       if (btn) { btn.disabled = false; btn.textContent = '⚡ Auto-Match'; }
-      showToast('Upload a bank statement first', 'var(--amber)'); return;
+      showToast('Upload bank transactions first', 'var(--amber)'); return;
     }
     const credits = reconTransactions.filter(t => t.type === 'credit' && !t.ignored && t.match_status === 'unmatched');
     const invs = invoices.filter(i => i.type === 'income' && i.doc_type !== 'quote');
@@ -5732,7 +5707,7 @@ function updateHandoffReconBanner() {
     banner.style.borderColor = 'rgba(244,63,94,.2)';
     if (icon) icon.textContent = '🔴';
     if (title) title.textContent = 'Not Reconciled';
-    if (desc) desc.textContent = 'Upload a bank statement and complete reconciliation before sharing with your accountant';
+    if (desc) desc.textContent = 'Upload bank transactions and complete reconciliation before sharing with your accountant';
   }
   if (pct) pct.textContent = conf + '%';
 }
@@ -6248,7 +6223,7 @@ async function loadPeriodTransactions(period, container) {
       if (!r.error) txns = r.data || [];
     }
     if (!txns.length) {
-      container.innerHTML = `<div style="text-align:center;padding:28px;color:var(--text-3);font-size:12.5px">No bank transactions for this period.<br><span style="font-size:11px">Upload a bank statement in Reconciliation to see transactions here.</span></div>`;
+      container.innerHTML = `<div style="text-align:center;padding:28px;color:var(--text-3);font-size:12.5px">No bank transactions for this period.<br><span style="font-size:11px">Upload bank transactions in Reconciliation to see them here.</span></div>`;
       return;
     }
     const isLocked = p && p.locked;
@@ -6417,7 +6392,7 @@ async function loadStatementHistory() {
   }
   if (badge) badge.textContent = data && data.length ? data.length + ' statement' + (data.length===1?'':'s') : 'None';
   if (!data||!data.length) {
-    list.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--text-3)"><div style="font-size:36px;margin-bottom:10px">🏦</div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:5px">No statements yet</div><div style="font-size:12px">Upload a bank statement via the Reconciliation section — it saves here automatically.</div></div>';
+    list.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--text-3)"><div style="font-size:36px;margin-bottom:10px">🏦</div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:5px">No transactions yet</div><div style="font-size:12px">Upload bank transactions via the Reconciliation section — they save here automatically.</div></div>';
     return;
   }
   list.innerHTML = data.map((s,i) => `
@@ -6670,13 +6645,13 @@ TECH STACK:
 
 PLANS:
 FREE (R0): 5 invoices/quotes, PDF export, Financial Control Center dashboard, Financials & P&L, SARS compliance calendar, Opening balances & new business setup, Guided onboarding wizard, 5 South African languages
-PRO (R299/mo): Everything in Free + unlimited invoices/quotes, VAT201 prep, Bank reconciliation & immutable audit trail, AI bank statement analysis & categorisation, Transaction import (CSV), Monthly financial history & snapshots, IRP6 & ITR14 prep, Bookkeeper handoff pack (PDF), 10 AI assistant calls/month
+PRO (R299/mo): Everything in Free + unlimited invoices/quotes, VAT201 prep, Bank reconciliation & immutable audit trail, AI bank transaction analysis & categorisation, Transaction import (CSV), Monthly financial history & snapshots, IRP6 & ITR14 prep, Bookkeeper handoff pack (PDF), 10 AI assistant calls/month
 FULL (R499/mo): Everything in Pro + WhatsApp invoice delivery, Payroll (unlimited employees), PAYE/UIF/SDL calculator (SARS 2025/26 tables), Professional payslips (PDF), EMP201 prep (payroll auto-posts to books), Accountant access link (30-day revokable), AI business saving tips, Unlimited AI assistant calls, Priority support
 
 APP SECTIONS:
 - Dashboard: Financial health overview, reconciliation status, monthly summaries, SARS deadlines, getting-started checklist
 - Invoices & Documents: Create/edit income invoices and expenses, PDF download, WhatsApp send (Full plan), CSV import, status tracking
-- Bank Analysis: Upload bank statement (PDF/CSV/XLS), AI parses transactions, shows totals and flagged items (Pro+)
+- Bank Analysis: Upload bank transactions (PDF/CSV/XLS), AI parses them, shows totals and flagged items (Pro+)
 - Reconciliation: Match bank transactions to invoices, auto/fuzzy/manual matching, confidence score, immutable audit log, close month (Pro+)
 - Financial History: Monthly snapshots with revenue/expenses/profit per period (Pro+)
 - Financials & P&L: Live income vs expense breakdown, VAT201, IRP6, ITR14 prep
@@ -6964,7 +6939,7 @@ async function showWelcomePopup() {
       } else if (day >= 14 && day <= 16) {
         msg += `<span style="color:var(--amber)">📊 Mid-month checkpoint.</span> Now is a good time to reconcile ${curLabel} (currently ${curConf}%). Staying on top of it takes just a few minutes.<br><br>`;
       } else if (curConf === 0) {
-        msg += `<span style="color:var(--text-3)">📌 Reconciliation for ${curLabel} hasn't started yet.</span> Upload a bank statement when you're ready.<br><br>`;
+        msg += `<span style="color:var(--text-3)">📌 Reconciliation for ${curLabel} hasn't started yet.</span> Upload bank transactions when you're ready.<br><br>`;
       } else {
         msg += `<span style="color:var(--amber)">📊 ${curLabel} reconciliation is ${curConf}% complete.</span> Keep going to close the month cleanly.<br><br>`;
       }
@@ -7806,7 +7781,7 @@ function openMatchPayrollPanel(runId, paymentType) {
               </div>
               <button onclick="matchPayrollTransaction('${runId}','${tx.id}','${paymentType}');document.getElementById('matchPayrollOverlay').remove()" style="background:var(--green);color:#0f1520;border:none;padding:6px 14px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;flex-shrink:0">Match</button>
             </div>`).join('')}
-        ` : `<div style="text-align:center;padding:24px;color:var(--text-3);font-size:13px">No matching debit transactions found.<br><span style="font-size:11px">Upload your bank statement and run auto-match first.</span></div>`}
+        ` : `<div style="text-align:center;padding:24px;color:var(--text-3);font-size:13px">No matching debit transactions found.<br><span style="font-size:11px">Upload your bank transactions and run auto-match first.</span></div>`}
       </div>
     </div>
   </div>`;
@@ -8862,8 +8837,8 @@ const OB_STEPS = [
       {
         icon: '👀',
         label: 'Show me where to upload',
-        desc: 'This is the Bank Statement card in the Reconciliation section.',
-        fn: () => { _goObSection('reconcile', '📍 Bank Statement upload card', 'Scroll down to see it — tap Got it when ready →'); setTimeout(() => { const dz = document.getElementById('reconDropZone'); if (dz) dz.scrollIntoView({behavior:'smooth',block:'center'}); }, 400); }
+        desc: 'This is the Bank Transactions upload card in the Reconciliation section.',
+        fn: () => { _goObSection('reconcile', '📍 Bank Transactions upload card', 'Scroll down to see it — tap Got it when ready →'); setTimeout(() => { const dz = document.getElementById('reconDropZone'); if (dz) dz.scrollIntoView({behavior:'smooth',block:'center'}); }, 400); }
       }
     ],
     nextLabel: "Got it, next →"
@@ -9048,11 +9023,55 @@ function closeObComplete() {
 // ── ONBOARDING CHECKLIST ──────────────────────────────────────────
 
 const OB_CHECKS = [
-  { key: 'profile',    label: 'Business profile set up',       check: () => !!(userProfile?.biz_name) },
-  { key: 'invoice',    label: 'First invoice added',            check: () => invoices.length > 0 },
-  { key: 'recon',      label: 'Bank statement reconciled',      check: () => { try { const s = JSON.parse(localStorage.getItem('ot_recon_done_' + currentUser.id) || 'false'); return !!s; } catch { return false; } } },
-  { key: 'opening',    label: 'Opening balances saved',         check: () => localStorage.getItem('ot_ob_done_' + (currentUser?.id || '')) === 'true' },
-  { key: 'deadline',   label: 'Compliance calendar reviewed',   check: () => !!(getObState().calReviewed) }
+  {
+    key: 'profile',
+    label: 'Set up your business profile',
+    check: () => !!(userProfile?.biz_name),
+    nav: () => {
+      showSection('settings', document.querySelector('.s-btn[onclick*="settings"]'));
+      showToast('💼 This is where your business details live — name, VAT number, and logo. They show up on every invoice you send. Fill in what you can and hit Save.', 'var(--blue)', 8000);
+    }
+  },
+  {
+    key: 'invoice',
+    label: 'Create your first invoice',
+    check: () => invoices.length > 0,
+    nav: () => {
+      showSection('invoices', document.querySelector('.s-btn[onclick*="invoices"]'));
+      showToast('🧾 This is where every rand you earn gets logged. Add an invoice for each sale, and log business costs as expenses. Do it as things happen and your books stay clean.', 'var(--blue)', 8000);
+    }
+  },
+  {
+    key: 'recon',
+    label: 'Upload & reconcile bank transactions',
+    check: () => { try { return !!JSON.parse(localStorage.getItem('ot_recon_done_' + currentUser?.id) || 'false'); } catch { return false; } },
+    nav: () => {
+      showSection('reconcile', document.querySelector('.s-btn[onclick*="reconcile"]'));
+      showToast('🏦 Download your bank transactions from your bank\'s app as a CSV or Excel file and upload them here. We\'ll match them to your invoices automatically — this is how you prove your books are correct.', 'var(--blue)', 8000);
+    }
+  },
+  {
+    key: 'payroll',
+    label: 'Explore Payroll',
+    check: () => !!localStorage.getItem('ot_payroll_viewed_' + (currentUser?.id || '')),
+    nav: () => {
+      showSection('payroll', document.querySelector('.s-btn[onclick*="payroll"]'));
+      localStorage.setItem('ot_payroll_viewed_' + (currentUser?.id || 'x'), 'true');
+      setTimeout(renderObChecklist, 300);
+      showToast('👥 Got employees? Add them here and we\'ll calculate their PAYE, UIF and SDL automatically — including payslips and your EMP201. Full plan feature, but good to know it\'s here.', 'var(--blue)', 8000);
+    }
+  },
+  {
+    key: 'handoff',
+    label: 'See your Bookkeeper Pack',
+    check: () => !!localStorage.getItem('ot_handoff_viewed_' + (currentUser?.id || '')),
+    nav: () => {
+      showSection('handoff', document.querySelector('.s-btn[onclick*="handoff"]'));
+      localStorage.setItem('ot_handoff_viewed_' + (currentUser?.id || 'x'), 'true');
+      setTimeout(renderObChecklist, 300);
+      showToast('📁 When your accountant asks for your books, come here and hit Generate. It creates a clean summary with everything they need — one click and you\'re done.', 'var(--blue)', 8000);
+    }
+  }
 ];
 
 function renderObChecklist() {
@@ -9069,18 +9088,29 @@ function renderObChecklist() {
   const done = results.filter(r => r.done).length;
   const total = results.length;
 
-  // Hide checklist once everything is done
-  if (done === total) { el.classList.add('ob-hidden'); return; }
+  // All done — show celebration modal then hide checklist
+  if (done === total) {
+    el.classList.add('ob-hidden');
+    const complete = document.getElementById('obComplete');
+    if (complete && !complete.classList.contains('open')) complete.classList.add('open');
+    return;
+  }
 
   el.classList.remove('ob-hidden');
   if (badge) badge.textContent = done + ' / ' + total;
   if (bar) bar.style.width = Math.round((done / total) * 100) + '%';
 
   itemsEl.innerHTML = results.map(r => `
-    <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;background:${r.done ? 'rgba(34,197,94,.06)' : 'var(--surface2)'};border:1px solid ${r.done ? 'rgba(34,197,94,.15)' : 'var(--border)'}">
+    <div onclick="${r.done ? '' : `_obCheckNav('${r.key}')`}" style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:8px;background:${r.done ? 'rgba(34,197,94,.06)' : 'var(--surface2)'};border:1px solid ${r.done ? 'rgba(34,197,94,.15)' : 'var(--border)'};cursor:${r.done ? 'default' : 'pointer'};transition:background .15s" ${r.done ? '' : `onmouseover="this.style.background='var(--blue-dim)'" onmouseout="this.style.background='var(--surface2)'"`}>
       <div style="width:18px;height:18px;border-radius:50%;background:${r.done ? 'var(--green)' : 'var(--surface)'};border:2px solid ${r.done ? 'var(--green)' : 'var(--border)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:#fff">${r.done ? '✓' : ''}</div>
-      <div style="font-size:12.5px;color:${r.done ? 'var(--text-3)' : 'var(--text)'};text-decoration:${r.done ? 'line-through' : 'none'}">${escHtml(r.label)}</div>
+      <div style="font-size:12.5px;color:${r.done ? 'var(--text-3)' : 'var(--text)'};text-decoration:${r.done ? 'line-through' : 'none'};flex:1">${escHtml(r.label)}</div>
+      ${r.done ? '' : '<div style="font-size:10px;color:var(--text-3)">→</div>'}
     </div>`).join('');
+}
+
+function _obCheckNav(key) {
+  const check = OB_CHECKS.find(c => c.key === key);
+  if (check) check.nav();
 }
 
 function dismissObChecklist() {
@@ -9089,59 +9119,6 @@ function dismissObChecklist() {
   if (el) el.classList.add('ob-hidden');
 }
 
-// ── NEXT STEP GUIDANCE ──────────────────────────────────────────
-function renderNextStep() {
-  const card = document.getElementById('nextStepCard');
-  if (!card) return;
-  const s = getObState();
-  if (s.nextStepDismissed) { card.style.display = 'none'; return; }
-
-  const hasTx = reconTransactions.length > 0;
-  const hasInv = invoices.length > 0;
-  const hasPayroll = !!(userProfile?.has_paye);
-  const hasMatchedTx = reconTransactions.some(t => t.matched || t.inv_id);
-  const payrollDone = !!localStorage.getItem('ot_payroll_done_' + (currentUser?.id || ''));
-
-  let step = null;
-
-  if (!hasTx) {
-    step = {
-      icon: '📤',
-      text: 'Upload your bank transactions',
-      sub: 'CSV or Excel from your bank — we\'ll calculate your income and expenses automatically.',
-      fn: () => navToggle('reconcile', document.querySelector('.s-btn[onclick*=reconcile]'))
-    };
-  } else if (!hasInv) {
-    step = {
-      icon: '🧾',
-      text: 'Create your first invoice',
-      sub: 'Log your income by creating an invoice for a client or sale.',
-      fn: () => { showSection('invoices', document.querySelector('.s-btn[onclick*=invoices]')); setTimeout(openInvForm, 200); }
-    };
-  } else if (!hasMatchedTx) {
-    step = {
-      icon: '🔗',
-      text: 'Match your transactions to invoices',
-      sub: 'Link your bank credits to your invoices to verify your income.',
-      fn: () => navToggle('reconcile', document.querySelector('.s-btn[onclick*=reconcile]'))
-    };
-  } else if (hasPayroll && !payrollDone) {
-    step = {
-      icon: '👥',
-      text: 'Set up payroll',
-      sub: 'Add your employees to calculate PAYE, UIF and SDL automatically.',
-      fn: () => navToggle('payroll', document.querySelector('.s-btn[onclick*=payroll]'))
-    };
-  }
-
-  if (!step) { card.style.display = 'none'; return; }
-
-  card.style.display = 'flex';
-  document.getElementById('nextStepIcon').textContent = step.icon;
-  document.getElementById('nextStepText').textContent = step.text;
-  document.getElementById('nextStepSub').textContent = step.sub;
-  document.getElementById('nextStepBtn').onclick = step.fn;
-}
 
 function restartObWizard() {
   // Clear all onboarding state for this user
