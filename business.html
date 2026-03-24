@@ -2260,7 +2260,7 @@ body.help-mode .main{padding-top:34px}
 </div>
 
 <!-- ── FLOATING TAX ASSISTANT BUTTON ── -->
-<button id="aiFloatBtn" onclick="openTaxAI()" title="Tax Assistant" style="position:fixed;bottom:24px;right:24px;z-index:7999;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1e2a42,#252d3d);border:1px solid rgba(184,196,216,.25);box-shadow:0 8px 24px rgba(0,0,0,.6),0 0 0 1px rgba(184,196,216,.08);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='scale(1.08)';this.style.boxShadow='0 12px 32px rgba(0,0,0,.7),0 0 0 2px rgba(184,196,216,.2)'" onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.6),0 0 0 1px rgba(184,196,216,.08)'">🤖</button>
+<button id="aiFloatBtn" onclick="openTaxAI()" title="Tax Assistant" style="position:fixed;bottom:24px;right:24px;z-index:7999;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1e2a42,#252d3d);border:1px solid rgba(184,196,216,.25);box-shadow:0 8px 24px rgba(0,0,0,.6),0 0 0 1px rgba(184,196,216,.08);cursor:pointer;font-size:22px;display:none;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform='scale(1.08)';this.style.boxShadow='0 12px 32px rgba(0,0,0,.7),0 0 0 2px rgba(184,196,216,.2)'" onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.6),0 0 0 1px rgba(184,196,216,.08)'">🤖</button>
 
 
 <script>
@@ -2758,6 +2758,8 @@ function updateUserUI() {
   if (sidebarUpgradeBtn) sidebarUpgradeBtn.style.display = plan !== 'full' ? 'block' : 'none';
   const tbUpgradeBtn = document.getElementById('tbUpgradeBtn');
   if (tbUpgradeBtn) tbUpgradeBtn.style.display = plan !== 'full' ? 'inline-flex' : 'none';
+  const aiFloatBtn = document.getElementById('aiFloatBtn');
+  if (aiFloatBtn) aiFloatBtn.style.display = 'flex';
   const freePlanBanner = document.getElementById('freePlanBanner');
   if (freePlanBanner) freePlanBanner.style.display = (plan === 'free' && !localStorage.getItem('freeBannerDismissed')) ? 'flex' : 'none';
   const proUpgradeBtn = document.getElementById('proUpgradeBtn');
