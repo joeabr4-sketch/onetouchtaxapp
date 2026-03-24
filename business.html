@@ -1098,6 +1098,9 @@ body.help-mode .main{padding-top:34px}
             <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">All VAT submissions filed and paid</div></div>
             <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Bookkeeper pack generated and sent</div></div>
             <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Accountant handed ITR14 prep pack</div></div>
+            <div style="padding:14px 20px 18px;border-top:1px solid var(--border);margin-top:8px">
+              <button onclick="showYearCloseModal()" style="width:100%;background:rgba(212,168,67,.08);border:1.5px solid rgba(212,168,67,.3);color:var(--gold);padding:11px;border-radius:9px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(212,168,67,.14)'" onmouseout="this.style.background='rgba(212,168,67,.08)'">🗓 Close Financial Year & Start Fresh</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1112,6 +1115,7 @@ body.help-mode .main{padding-top:34px}
         <button class="hist-tab" id="htab-docs" onclick="switchHistTab('docs')">📄 Document History</button>
         <button class="hist-tab" id="htab-statements" onclick="switchHistTab('statements')">🏦 Bank Transactions</button>
         <button class="hist-tab" id="htab-opening" onclick="switchHistTab('opening')">🔢 Opening Balances</button>
+        <button class="hist-tab" id="htab-annual" onclick="switchHistTab('annual')">📅 Annual Summaries</button>
       </div>
       <div id="htab-monthly-content">
         <!-- Filter bar -->
@@ -1150,6 +1154,14 @@ body.help-mode .main{padding-top:34px}
       <div id="htab-statements-content" style="display:none">
         <div class="card"><div class="card-head"><div class="card-title">Bank Transaction Uploads</div><span class="badge b-blue" id="histBadge">Loading...</span></div><div id="historyList"><div style="text-align:center;padding:40px 20px;color:var(--text-3)"><div style="font-size:36px;margin-bottom:10px">🏦</div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:5px">No transactions yet</div><div style="font-size:12px">Upload bank transactions via the Reconciliation section — they save here automatically.</div></div></div></div>
       </div>
+      <div id="htab-annual-content" style="display:none">
+        <div class="card">
+          <div class="card-head"><div class="card-title">📅 Annual Summaries</div><span class="badge b-gold">Year-on-Year</span></div>
+          <div style="padding:14px 20px 6px;font-size:13px;color:var(--text-2);line-height:1.6">Headline figures saved at the close of each financial year. These are preserved permanently for comparison.</div>
+          <div id="annualSummaryTable" style="padding:0 8px 16px"></div>
+        </div>
+      </div>
+
       <div id="htab-opening-content" style="display:none">
         <div class="card">
           <div class="card-head"><div class="card-title">🔢 Opening Balances</div><span class="badge b-amber" id="openingBadge">Not set</span></div>
@@ -2748,6 +2760,7 @@ async function initDashboard() {
   startClock();
   updateTipsState();
   loadReconStatusBar();
+  loadAnnualSummaries();
   // Logo is a Full-plan feature — only load if user qualifies
   const savedLogo = localStorage.getItem('ot_logo_' + currentUser.id);
   if (savedLogo && canUse('branding')) { logoDataUrl = savedLogo; showLogoPreview(savedLogo); }
@@ -6160,7 +6173,7 @@ function checkAccountantLinkStatus() {
 
 // ── HISTORY ──
 function switchHistTab(tab) {
-  ['monthly','docs','statements','opening'].forEach(t => {
+  ['monthly','docs','statements','opening','annual'].forEach(t => {
     const btn = document.getElementById('htab-'+t);
     const content = document.getElementById('htab-'+t+'-content');
     if (btn) btn.classList.toggle('active', t===tab);
@@ -6170,6 +6183,7 @@ function switchHistTab(tab) {
   if (tab==='statements') loadStatementHistory();
   if (tab==='docs') loadDocHistory();
   if (tab==='opening') loadOpeningBalances();
+  if (tab==='annual') loadAnnualSummaries();
 }
 
 let _periodData = [];
@@ -6287,6 +6301,169 @@ async function _executeClearHistory() {
   } catch(e) {
     showToast('Error clearing history: ' + e.message, 'var(--red)');
   }
+}
+
+// ── YEAR-END CLOSE ──
+function _getCurrentFinancialYear() {
+  const monthIndex = { January:0,February:1,March:2,April:3,May:4,June:5,July:6,August:7,September:8,October:9,November:10,December:11 };
+  const yem = monthIndex[userProfile?.year_end] ?? 1; // February default
+  const m = new Date().getMonth();
+  const y = new Date().getFullYear();
+  const startYear = m > yem ? y : y - 1;
+  return `${startYear}/${String(startYear + 1).slice(2)}`;
+}
+
+function showYearCloseModal() {
+  const fy = _getCurrentFinancialYear();
+  const modal = document.getElementById('yearCloseModal');
+  const label = document.getElementById('yearCloseLabel');
+  const hint  = document.getElementById('yearCloseHint');
+  const input = document.getElementById('yearCloseInput');
+  const btn   = document.getElementById('yearCloseConfirmBtn');
+  if (!modal) return;
+  if (label) label.textContent = fy;
+  if (hint)  hint.textContent  = fy;
+  if (input) input.value = '';
+  if (btn)   { btn.disabled = true; btn.style.opacity = '.4'; }
+  // Uncheck all checkboxes
+  modal.querySelectorAll('.yc-check').forEach(cb => cb.checked = false);
+  modal.style.display = 'flex';
+}
+
+function _closeYearCloseModal() {
+  const modal = document.getElementById('yearCloseModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function _onYearCloseCheck() { _validateYearCloseForm(); }
+function _onYearCloseInput() { _validateYearCloseForm(); }
+
+function _validateYearCloseForm() {
+  const fy     = _getCurrentFinancialYear();
+  const input  = document.getElementById('yearCloseInput');
+  const btn    = document.getElementById('yearCloseConfirmBtn');
+  const modal  = document.getElementById('yearCloseModal');
+  if (!input || !btn || !modal) return;
+  const allChecked = [...modal.querySelectorAll('.yc-check')].every(cb => cb.checked);
+  const typed      = input.value.trim() === fy;
+  const ok = allChecked && typed;
+  btn.disabled    = !ok;
+  btn.style.opacity = ok ? '1' : '.4';
+}
+
+async function _executeYearClose() {
+  const fy  = _getCurrentFinancialYear();
+  const btn = document.getElementById('yearCloseConfirmBtn');
+  if (btn) { btn.textContent = '⏳ Closing year…'; btn.disabled = true; }
+  _closeYearCloseModal();
+
+  try {
+    const uid = currentUser.id;
+
+    // 1 — Gather headline figures before deleting anything
+    const [incR, expR, payR, vatR] = await Promise.all([
+      sb.from('invoices').select('amount').eq('user_id', uid).eq('type', 'income'),
+      sb.from('invoices').select('amount').eq('user_id', uid).eq('type', 'expense'),
+      sb.from('payroll_runs').select('total_gross').eq('user_id', uid),
+      sb.from('monthly_snapshots').select('vat_owing').eq('user_id', uid)
+    ]);
+    const totalIncome   = (incR.data||[]).reduce((s,r) => s+(r.amount||0), 0);
+    const totalExpenses = (expR.data||[]).reduce((s,r) => s+(r.amount||0), 0);
+    const payrollTotal  = (payR.data||[]).reduce((s,r) => s+(r.total_gross||0), 0);
+    const vatLiability  = (vatR.data||[]).reduce((s,r) => s+(r.vat_owing||0), 0);
+
+    // 2 — Save annual summary (upsert in case they re-run for same year)
+    const { error: sumErr } = await sb.from('annual_summaries').upsert({
+      user_id: uid,
+      financial_year: fy,
+      total_income:   Math.round(totalIncome   * 100) / 100,
+      total_expenses: Math.round(totalExpenses * 100) / 100,
+      net_profit:     Math.round((totalIncome - totalExpenses) * 100) / 100,
+      vat_liability:  Math.round(vatLiability  * 100) / 100,
+      payroll_total:  Math.round(payrollTotal  * 100) / 100
+    }, { onConflict: 'user_id,financial_year' });
+    if (sumErr) throw sumErr;
+
+    // 3 — Delete all transactional data (bank_transactions cascade via reconciliation_sessions)
+    const [d1, d2, d3, d4] = await Promise.all([
+      sb.from('invoices').delete().eq('user_id', uid),
+      sb.from('monthly_snapshots').delete().eq('user_id', uid),
+      sb.from('reconciliation_sessions').delete().eq('user_id', uid),
+      sb.from('payroll_runs').delete().eq('user_id', uid)
+    ]);
+    if (d1.error) throw d1.error;
+    if (d2.error) throw d2.error;
+    if (d3.error) throw d3.error;
+    if (d4.error) throw d4.error;
+
+    // 4 — Clear localStorage caches
+    try {
+      localStorage.removeItem('ot_recon_audit_' + uid);
+      localStorage.removeItem('ot_recon_done_' + uid);
+    } catch {}
+
+    // 5 — Reset in-memory state
+    invoices         = [];
+    reconSession     = null;
+    bankTransactions = [];
+    payrollRuns      = [];
+
+    // 6 — Refresh all UI sections
+    renderInvoices();
+    updateStats();
+    await loadPeriodHistory();
+    loadAnnualSummaries();
+    loadReconStatusBar();
+    updateReconUI();
+    renderPayrollRunsSection();
+    renderEMP201();
+
+    showToast(`✅ Financial year ${fy} closed. Starting fresh!`, 'var(--green)', 6000);
+  } catch(e) {
+    showToast('Error closing year: ' + e.message + '. No data was deleted — please try again.', 'var(--red)', 8000);
+    if (btn) { btn.textContent = 'Close Year & Start Fresh'; btn.disabled = false; btn.style.opacity = '1'; }
+  }
+}
+
+async function loadAnnualSummaries() {
+  if (!currentUser) return;
+  const { data } = await sb.from('annual_summaries')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('financial_year', { ascending: false });
+  _renderAnnualSummaries(data || []);
+}
+
+function _renderAnnualSummaries(rows) {
+  const el = document.getElementById('annualSummaryTable');
+  if (!el) return;
+  if (!rows.length) {
+    el.innerHTML = '<div style="text-align:center;padding:24px;font-size:13px;color:var(--text-3)">No closed financial years yet. Your annual summary will appear here after your first year-end close.</div>';
+    return;
+  }
+  const fmtR = v => 'R ' + Number(v||0).toLocaleString('en-ZA', {minimumFractionDigits:0,maximumFractionDigits:0});
+  el.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border)">
+          <th style="text-align:left;padding:8px 12px;color:var(--text-3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px">Year</th>
+          <th style="text-align:right;padding:8px 12px;color:var(--text-3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px">Revenue</th>
+          <th style="text-align:right;padding:8px 12px;color:var(--text-3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px">Expenses</th>
+          <th style="text-align:right;padding:8px 12px;color:var(--text-3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px">Net Profit</th>
+          <th style="text-align:right;padding:8px 12px;color:var(--text-3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px">VAT Liability</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map(r => `
+          <tr style="border-bottom:1px solid rgba(255,255,255,.04)">
+            <td style="padding:10px 12px;font-weight:700;color:var(--text)">${r.financial_year}</td>
+            <td style="padding:10px 12px;text-align:right;color:var(--green)">${fmtR(r.total_income)}</td>
+            <td style="padding:10px 12px;text-align:right;color:var(--red)">${fmtR(r.total_expenses)}</td>
+            <td style="padding:10px 12px;text-align:right;font-weight:700;color:${r.net_profit>=0?'var(--green)':'var(--red)'}">${fmtR(r.net_profit)}</td>
+            <td style="padding:10px 12px;text-align:right;color:var(--amber)">${fmtR(r.vat_liability)}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
 }
 
 function renderPeriodHistory(data) {
@@ -9489,6 +9666,33 @@ document.addEventListener('click', function(e) {
     </div>
     <button id="clearHistoryConfirmBtn" disabled onclick="_executeClearHistory()" style="display:block;width:100%;background:var(--red);color:#fff;border:none;padding:13px;border-radius:10px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;opacity:.4;transition:opacity .2s">Delete All History</button>
     <button onclick="_closeClearHistoryModal()" style="background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.55);padding:10px 20px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer">Cancel</button>
+  </div>
+</div>
+
+<!-- YEAR-END CLOSE MODAL -->
+<div id="yearCloseModal" style="position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);z-index:9600;display:none;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)_closeYearCloseModal()">
+  <div style="background:#131929;border-radius:16px;max-width:460px;width:100%;padding:32px;box-shadow:0 24px 64px rgba(0,0,0,.9);border:1px solid rgba(212,168,67,.25);animation:fadeUp .3s ease">
+    <div style="font-size:36px;margin-bottom:12px;text-align:center">🗓</div>
+    <div style="font-family:'Syne',sans-serif;font-size:19px;font-weight:700;color:#fff;margin-bottom:6px;text-align:center">Close Financial Year</div>
+    <div id="yearCloseLabel" style="font-size:13px;color:var(--gold);font-weight:700;text-align:center;margin-bottom:18px"></div>
+    <div style="background:rgba(212,168,67,.07);border:1px solid rgba(212,168,67,.2);border-radius:10px;padding:13px 16px;margin-bottom:18px;font-size:12.5px;color:rgba(255,255,255,.7);line-height:1.7">
+      ⚠️ This will permanently delete all invoices, bank transactions, reconciliation sessions, and payroll runs for this financial year.<br><br>
+      <strong style="color:rgba(255,255,255,.9)">Your annual headline figures will be saved for year-on-year comparison. This cannot be undone.</strong>
+    </div>
+    <div style="margin-bottom:18px">
+      <div style="font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px">Confirm you have downloaded:</div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <label style="display:flex;align-items:center;gap:9px;font-size:13px;color:rgba(255,255,255,.7);cursor:pointer"><input type="checkbox" class="yc-check" onchange="_onYearCloseCheck()" style="accent-color:var(--gold);width:15px;height:15px"> Bookkeeper Pack / ITR14 Prep Pack</label>
+        <label style="display:flex;align-items:center;gap:9px;font-size:13px;color:rgba(255,255,255,.7);cursor:pointer"><input type="checkbox" class="yc-check" onchange="_onYearCloseCheck()" style="accent-color:var(--gold);width:15px;height:15px"> VAT201 Summary (if VAT registered)</label>
+        <label style="display:flex;align-items:center;gap:9px;font-size:13px;color:rgba(255,255,255,.7);cursor:pointer"><input type="checkbox" class="yc-check" onchange="_onYearCloseCheck()" style="accent-color:var(--gold);width:15px;height:15px"> Payroll / EMP201 records (if applicable)</label>
+      </div>
+    </div>
+    <div style="margin-bottom:20px">
+      <label style="font-size:11.5px;color:rgba(255,255,255,.5);letter-spacing:.4px;text-transform:uppercase;display:block;margin-bottom:7px">Type the financial year to confirm (e.g. <span id="yearCloseHint" style="color:var(--gold)"></span>)</label>
+      <input id="yearCloseInput" type="text" oninput="_onYearCloseInput()" placeholder="e.g. 2024/25" autocomplete="off" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.06);border:1.5px solid rgba(212,168,67,.35);border-radius:9px;padding:11px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;letter-spacing:1px;outline:none;text-align:center" />
+    </div>
+    <button id="yearCloseConfirmBtn" disabled onclick="_executeYearClose()" style="display:block;width:100%;background:var(--gold);color:#0a0f1e;border:none;padding:13px;border-radius:10px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;opacity:.4;transition:opacity .2s">Close Year & Start Fresh</button>
+    <button onclick="_closeYearCloseModal()" style="display:block;width:100%;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.55);padding:10px 20px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer">Cancel</button>
   </div>
 </div>
 

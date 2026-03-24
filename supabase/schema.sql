@@ -408,3 +408,26 @@ ALTER TABLE invoices ADD COLUMN IF NOT EXISTS line_items       jsonb;
 ALTER TABLE invoices ADD COLUMN IF NOT EXISTS deposit_paid     numeric DEFAULT 0;
 ALTER TABLE invoices ADD COLUMN IF NOT EXISTS deposit_note     text;
 ALTER TABLE invoices ADD COLUMN IF NOT EXISTS recon_match_type text;
+
+-- M11: Annual summaries — stores headline figures per financial year after year-end reset
+-- Safe to re-run (IF NOT EXISTS)
+CREATE TABLE IF NOT EXISTS annual_summaries (
+  id               uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id          uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  financial_year   text NOT NULL,          -- e.g. '2024/25'
+  total_income     numeric DEFAULT 0,
+  total_expenses   numeric DEFAULT 0,
+  net_profit       numeric DEFAULT 0,
+  vat_liability    numeric DEFAULT 0,
+  payroll_total    numeric DEFAULT 0,
+  created_at       timestamptz DEFAULT now()
+);
+
+ALTER TABLE annual_summaries ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE annual_summaries DROP CONSTRAINT IF EXISTS annual_summaries_user_year_unique;
+ALTER TABLE annual_summaries ADD CONSTRAINT annual_summaries_user_year_unique UNIQUE (user_id, financial_year);
+
+DROP POLICY IF EXISTS "Users manage own annual summaries" ON annual_summaries;
+CREATE POLICY "Users manage own annual summaries" ON annual_summaries
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
