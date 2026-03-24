@@ -311,8 +311,11 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
   .cc-bot{grid-template-columns:1fr 1fr}
   .cc-actions{grid-template-columns:repeat(2,1fr)}
 }
+@media(max-width:900px){
+  .mob-signin{display:inline!important}
+}
 @media(max-width:600px){
-  nav{grid-template-columns:1fr auto}
+  nav{grid-template-columns:1fr auto auto}
   .hero{padding:80px 16px 40px}
   .feat-grid{grid-template-columns:1fr}
   .footer-grid{grid-template-columns:1fr}
@@ -337,6 +340,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
     <a href="#faq">FAQ</a>
     <a href="/business.html">Sign In</a>
   </div>
+  <a class="mob-signin" href="/business.html" style="display:none;color:var(--text-2);font-size:13px;font-weight:500;text-decoration:none;padding:9px 12px;white-space:nowrap">Sign In</a>
   <a class="nav-cta" href="/business.html">Start Free →</a>
 </nav>
 
