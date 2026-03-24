@@ -1751,8 +1751,27 @@ body.help-mode .main{padding-top:34px}
               <button onclick="payWithPayFast('full')" style="background:var(--gold);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬆ Upgrade to Full — R499/mo</button>
             </div>
             <div id="cancelSubLink" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
-              <a href="mailto:support@onetouch.net.za?subject=Cancel%20My%20Subscription&body=Please%20cancel%20my%20OneTouch%20TaxApp%20subscription.%20My%20account%20email%20is%3A%20" style="font-size:12px;color:var(--text-3);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-3)'">Cancel subscription →</a>
-              <div style="font-size:11px;color:var(--text-3);margin-top:4px">Your plan reverts to Free at the end of the current billing period. Data is retained.</div>
+              <!-- Step 1: default -->
+              <div id="cancelStep1">
+                <div style="font-size:13px;color:var(--text-2);margin-bottom:10px">Want to cancel your subscription?</div>
+                <button onclick="_showCancelStep2()" style="background:transparent;border:1.5px solid rgba(244,63,94,.4);color:var(--red);padding:8px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s" onmouseover="this.style.borderColor='var(--red)'" onmouseout="this.style.borderColor='rgba(244,63,94,.4)'">Cancel subscription →</button>
+                <div style="font-size:11px;color:var(--text-3);margin-top:6px">Your plan reverts to Free at the end of the current billing period. Data is retained.</div>
+              </div>
+              <!-- Step 2: confirmation -->
+              <div id="cancelStep2" style="display:none;background:rgba(244,63,94,.06);border:1px solid rgba(244,63,94,.2);border-radius:10px;padding:16px">
+                <div style="font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:8px">Are you sure you want to cancel?</div>
+                <div style="font-size:12.5px;color:var(--text-2);line-height:1.65;margin-bottom:14px">Your subscription cancellation request will be sent to our team. Your plan stays active until the end of the current billing period, then reverts to Free. All your data is kept.</div>
+                <div style="font-size:11.5px;color:var(--text-3);margin-bottom:14px">⏱ Cancellations are processed within 24 hours of your request.</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <button onclick="_confirmCancelSub()" style="background:var(--red);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif" id="cancelSubConfirmBtn">Yes, cancel my subscription</button>
+                  <button onclick="_hideCancelStep2()" style="background:transparent;border:1px solid var(--border);color:var(--text-2);padding:9px 16px;border-radius:8px;font-size:12.5px;cursor:pointer;font-family:'DM Sans',sans-serif">Keep my plan</button>
+                </div>
+              </div>
+              <!-- Step 3: done -->
+              <div id="cancelStep3" style="display:none;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:16px">
+                <div style="font-size:13.5px;font-weight:700;color:var(--green);margin-bottom:6px">✅ Cancellation request received</div>
+                <div id="cancelStepDoneMsg" style="font-size:12.5px;color:var(--text-2);line-height:1.65">Your request has been logged. Our team will process it within 24 hours and send a confirmation to your email. Your plan remains active until the end of the billing period.</div>
+              </div>
             </div>
           </div>
         </div>
@@ -2464,11 +2483,63 @@ function canUse(feature) {
 }
 
 function showUpgradePrompt(tier) {
-  document.getElementById('upgradeModalMsg').textContent = 'Upgrade to Full to use this feature. Unlock payroll, WhatsApp, email sending, and more.';
+  const isPro = tier === 'pro';
+  const planName  = isPro ? 'Pro'  : 'Full';
+  const price     = isPro ? 'R299/month' : 'R499/month';
+  const features  = isPro
+    ? 'Unlock unlimited invoices, VAT201 prep, bank reconciliation, IRP6/ITR14, bookkeeper pack, and 10 AI assistant calls per month.'
+    : 'Unlock payroll, WhatsApp invoice delivery, email invoice delivery, EMP201, AI tax-saving tips, and accountant access link.';
+  document.getElementById('upgradeModalMsg').textContent = features;
+  const cta = document.getElementById('upgradeModalCTA');
+  if (cta) {
+    cta.textContent = `Upgrade to ${planName} — ${price}`;
+    cta.onclick = () => { closeUpgrade(); showSection('settings', null); };
+  }
   document.getElementById('upgradeModal').style.display = 'flex';
 }
 function closeUpgrade() {
   document.getElementById('upgradeModal').style.display = 'none';
+}
+
+// ── SUBSCRIPTION CANCELLATION ──
+function _showCancelStep2() {
+  document.getElementById('cancelStep1').style.display = 'none';
+  document.getElementById('cancelStep2').style.display = 'block';
+}
+function _hideCancelStep2() {
+  document.getElementById('cancelStep2').style.display = 'none';
+  document.getElementById('cancelStep1').style.display = 'block';
+}
+async function _confirmCancelSub() {
+  const btn = document.getElementById('cancelSubConfirmBtn');
+  if (btn) { btn.textContent = '⏳ Sending request…'; btn.disabled = true; }
+
+  const email    = currentUser?.email || '';
+  const plan     = userProfile?.plan  || '';
+  const bizName  = userProfile?.biz_name || '';
+  const reqTime  = new Date().toLocaleString('en-ZA', { dateStyle:'medium', timeStyle:'short' });
+
+  // Log request in localStorage
+  try { localStorage.setItem('ot_cancel_requested_' + (currentUser?.id||''), new Date().toISOString()); } catch {}
+
+  // Send notification to support via Resend (best-effort)
+  try {
+    const session = await sb.auth.getSession();
+    const token   = session?.data?.session?.access_token;
+    if (token) {
+      const html = `<p><strong>Cancellation request received</strong></p><p>Account: ${email}<br>Plan: ${plan}<br>Business: ${bizName}<br>Requested: ${reqTime}</p><p>Please process this cancellation in the PayFast merchant portal and confirm via email.</p>`;
+      await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ to: 'support@onetouch.net.za', subject: `Cancellation Request — ${email}`, html })
+      });
+    }
+  } catch {}
+
+  document.getElementById('cancelStep2').style.display = 'none';
+  const doneMsg = document.getElementById('cancelStepDoneMsg');
+  if (doneMsg) doneMsg.textContent = `Your request was logged on ${reqTime}. Our team will process it within 24 hours and send a confirmation to ${email}. Your plan remains active until the end of the billing period.`;
+  document.getElementById('cancelStep3').style.display = 'block';
 }
 
 // ── PAYFAST CHECKOUT ──
@@ -2523,11 +2594,20 @@ async function payWithPayFast(plan) {
   if (status === 'success' && plan) {
     // Clean URL
     window.history.replaceState({}, '', window.location.pathname);
-    // Show success toast after app loads
+    // Show pending toast, then poll until IPN has updated the plan in Supabase
     setTimeout(() => {
-      showToast(`🎉 Payment received! Your ${plan.charAt(0).toUpperCase()+plan.slice(1)} plan is now active.`, 'var(--green)', 6000);
-      // Reload profile so plan badge updates
-      if (currentUser) loadUserProfile();
+      const planLabel = plan.charAt(0).toUpperCase() + plan.slice(1);
+      showToast(`🎉 Payment received — activating your ${planLabel} plan. This may take a moment.`, 'var(--green)', 7000);
+      if (currentUser) {
+        let attempts = 0;
+        const pollPlan = async () => {
+          await loadUserProfile();
+          if ((userProfile?.plan === plan) || attempts >= 10) return;
+          attempts++;
+          setTimeout(pollPlan, 3000);
+        };
+        pollPlan();
+      }
     }, 1500);
   } else if (status === 'cancelled') {
     window.history.replaceState({}, '', window.location.pathname);
@@ -6130,8 +6210,31 @@ async function loadPeriodHistory() {
 // Keep old name as alias so any stale callers don't break
 function loadMonthlyHistory() { return loadPeriodHistory(); }
 
-async function clearAllFinancialHistory() {
-  if (!confirm('This will permanently delete all monthly snapshots, reconciliation sessions, and payroll runs. Your invoices and expenses are NOT deleted.\n\nThis cannot be undone. Continue?')) return;
+function clearAllFinancialHistory() {
+  // Show typed-confirmation modal instead of native confirm()
+  const modal = document.getElementById('clearHistoryModal');
+  const input = document.getElementById('clearHistoryInput');
+  const btn   = document.getElementById('clearHistoryConfirmBtn');
+  if (!modal || !input || !btn) return;
+  input.value = '';
+  btn.disabled = true;
+  btn.style.opacity = '.4';
+  modal.style.display = 'flex';
+}
+function _closeClearHistoryModal() {
+  const modal = document.getElementById('clearHistoryModal');
+  if (modal) modal.style.display = 'none';
+}
+function _onClearHistoryInput() {
+  const input = document.getElementById('clearHistoryInput');
+  const btn   = document.getElementById('clearHistoryConfirmBtn');
+  if (!input || !btn) return;
+  const ok = input.value.trim() === 'DELETE';
+  btn.disabled = !ok;
+  btn.style.opacity = ok ? '1' : '.4';
+}
+async function _executeClearHistory() {
+  _closeClearHistoryModal();
   try {
     const uid = currentUser.id;
     // Delete snapshots, sessions (bank_transactions cascade), and payroll runs
@@ -7061,24 +7164,104 @@ async function saveAndEmail() {
   const vatAmt      = invVATEnabled ? vatOn(subtotal) : 0;
   const total       = rnd(subtotal + vatAmt);
   const bizName     = userProfile?.biz_name || 'Your Business';
+  const bizPhone    = userProfile?.phone || '';
+  const lineItemsSnap = [...lineItems];
+
+  if (!clientEmail) {
+    showToast("Please enter the client's email address before sending", 'var(--amber)');
+    return;
+  }
 
   await saveInvoice();
 
-  // Only open email client if the form closed (save succeeded)
+  // Only proceed if save succeeded (form closed)
   const overlay = document.getElementById('invFormOverlay');
   if (overlay && overlay.style.display !== 'none') return;
 
-  const subject = encodeURIComponent(`Invoice ${invNumber} from ${bizName}`);
-  const body    = encodeURIComponent(
-    `Dear ${clientName},\n\nPlease find your invoice details below.\n\n` +
-    `Invoice No: ${invNumber}\n` +
-    `Amount Due: R ${total.toLocaleString('en-ZA',{minimumFractionDigits:2})}` +
-    (dueDate ? `\nDue Date: ${dueDate}` : '') +
-    `\n\nPlease don't hesitate to get in touch if you have any questions.\n\nKind regards,\n${bizName}`
-  );
+  // Build professional HTML email
+  const liRows = lineItemsSnap.map(li => {
+    const qty = li.qty || 1;
+    const price = li.price || 0;
+    const lt = rnd(qty * price);
+    return `<tr>
+      <td style="padding:9px 14px;border-bottom:1px solid #1e2535;color:#e8edf5">${escHtml(li.desc||'—')}</td>
+      <td style="padding:9px 14px;border-bottom:1px solid #1e2535;text-align:center;color:#99aac8">${qty}</td>
+      <td style="padding:9px 14px;border-bottom:1px solid #1e2535;text-align:right;color:#e8edf5">R&nbsp;${lt.toLocaleString('en-ZA',{minimumFractionDigits:2})}</td>
+    </tr>`;
+  }).join('');
 
-  window.open(`mailto:${clientEmail}?subject=${subject}&body=${body}`, '_blank');
-  await trackEmailSent();
+  const vatRow = vatAmt > 0
+    ? `<tr><td colspan="2" style="padding:7px 14px;text-align:right;color:#99aac8;font-size:12px">VAT (15%)</td><td style="padding:7px 14px;text-align:right;color:#99aac8;font-size:12px">R&nbsp;${vatAmt.toLocaleString('en-ZA',{minimumFractionDigits:2})}</td></tr>`
+    : '';
+  const dueLine = dueDate
+    ? `<p style="margin:0 0 4px;font-size:13px;color:#99aac8">Due date: <strong style="color:#e8edf5">${dueDate}</strong></p>`
+    : '';
+
+  const emailHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:0;background:#070809;font-family:'Helvetica Neue',Arial,sans-serif">
+<div style="max-width:580px;margin:32px auto;background:#0f1520;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.1)">
+  <div style="background:linear-gradient(135deg,#1a2540,#0f1520);padding:28px 32px;border-bottom:1px solid rgba(255,255,255,.08)">
+    <div style="font-size:11px;color:#99aac8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px">${escHtml(bizName)}</div>
+    <div style="font-size:22px;font-weight:700;color:#e8edf5;font-family:'Helvetica Neue',Arial,sans-serif">Invoice #${escHtml(invNumber)}</div>
+  </div>
+  <div style="padding:28px 32px">
+    <p style="margin:0 0 18px;font-size:14px;color:#99aac8;line-height:1.6">Dear <strong style="color:#e8edf5">${escHtml(clientName)}</strong>,<br>Please find your invoice details below.</p>
+    ${dueLine}
+    <table width="100%" style="border-collapse:collapse;margin-top:16px;font-size:13.5px">
+      <thead><tr style="background:rgba(255,255,255,.05)">
+        <th style="padding:10px 14px;text-align:left;color:#99aac8;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px">Description</th>
+        <th style="padding:10px 14px;text-align:center;color:#99aac8;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px">Qty</th>
+        <th style="padding:10px 14px;text-align:right;color:#99aac8;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px">Amount</th>
+      </tr></thead>
+      <tbody>${liRows}</tbody>
+      <tfoot>
+        ${vatRow}
+        <tr style="background:rgba(184,196,216,.06)">
+          <td colspan="2" style="padding:12px 14px;text-align:right;font-weight:700;color:#e8edf5">Total Due</td>
+          <td style="padding:12px 14px;text-align:right;font-weight:700;font-size:17px;color:#b8c4d8">R&nbsp;${total.toLocaleString('en-ZA',{minimumFractionDigits:2})}</td>
+        </tr>
+      </tfoot>
+    </table>
+    <p style="margin:20px 0 0;font-size:13px;color:#5a6a88;line-height:1.6">If you have any questions, please don't hesitate to reach out.</p>
+  </div>
+  <div style="padding:16px 32px;border-top:1px solid rgba(255,255,255,.07);font-size:11.5px;color:#5a6a88">
+    Kind regards, <strong style="color:#99aac8">${escHtml(bizName)}</strong>${bizPhone ? ' · '+escHtml(bizPhone) : ''}<br>
+    <span style="opacity:.55">Sent via OneTouch TaxApp</span>
+  </div>
+</div></body></html>`;
+
+  const session = await sb.auth.getSession();
+  const token = session?.data?.session?.access_token;
+  if (!token) { showToast('Session expired — please sign in again', 'var(--red)'); return; }
+
+  const emailBtn = document.getElementById('emailFormBtn');
+  if (emailBtn) { emailBtn.textContent = '⏳ Sending…'; emailBtn.disabled = true; }
+
+  try {
+    const res = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({
+        to: clientEmail,
+        subject: `Invoice #${invNumber} from ${bizName}`,
+        html: emailHtml
+      })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast('✅ Invoice emailed to ' + clientEmail, 'var(--green)');
+      await trackEmailSent();
+    } else {
+      const msg = (typeof data.error === 'object' ? data.error.message : data.error) || 'Unknown error';
+      showToast('Email failed: ' + msg, 'var(--red)');
+    }
+  } catch(e) {
+    showToast('Email error: ' + e.message, 'var(--red)');
+  } finally {
+    if (emailBtn) {
+      emailBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> Send via Email';
+      emailBtn.disabled = false;
+    }
+  }
 }
 
 // ════════════════════════════════════════════
@@ -9255,13 +9438,28 @@ document.addEventListener('click', function(e) {
 
 </div>
 
+<!-- CLEAR HISTORY CONFIRMATION MODAL -->
+<div id="clearHistoryModal" style="position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(6px);z-index:9600;display:none;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)_closeClearHistoryModal()">
+  <div style="background:#131929;border-radius:16px;max-width:420px;width:100%;padding:32px;box-shadow:0 24px 64px rgba(0,0,0,.8);border:1px solid rgba(244,63,94,.25);text-align:center;animation:fadeUp .3s ease">
+    <div style="font-size:36px;margin-bottom:12px">⚠️</div>
+    <div style="font-family:'Syne',sans-serif;font-size:19px;font-weight:700;color:#fff;margin-bottom:10px">Delete all financial history?</div>
+    <div style="font-size:13px;color:rgba(255,255,255,.6);line-height:1.65;margin-bottom:20px">This will permanently delete all monthly snapshots, reconciliation sessions, and payroll runs.<br><br><strong style="color:rgba(255,255,255,.85)">Your invoices and expenses are NOT deleted.</strong> This cannot be undone.</div>
+    <div style="text-align:left;margin-bottom:20px">
+      <label style="font-size:11.5px;color:rgba(255,255,255,.5);letter-spacing:.4px;text-transform:uppercase;display:block;margin-bottom:7px">Type DELETE to confirm</label>
+      <input id="clearHistoryInput" type="text" oninput="_onClearHistoryInput()" placeholder="DELETE" autocomplete="off" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.06);border:1.5px solid rgba(244,63,94,.35);border-radius:9px;padding:11px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;letter-spacing:1px;outline:none;text-align:center" />
+    </div>
+    <button id="clearHistoryConfirmBtn" disabled onclick="_executeClearHistory()" style="display:block;width:100%;background:var(--red);color:#fff;border:none;padding:13px;border-radius:10px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;opacity:.4;transition:opacity .2s">Delete All History</button>
+    <button onclick="_closeClearHistoryModal()" style="background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.55);padding:10px 20px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer">Cancel</button>
+  </div>
+</div>
+
 <!-- UPGRADE PROMPT MODAL -->
 <div id="upgradeModal" style="position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9500;display:none;align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeUpgrade()">
   <div style="background:#131929;border-radius:16px;max-width:420px;width:100%;padding:32px;box-shadow:0 24px 64px rgba(0,0,0,.8);border:1px solid rgba(255,255,255,.12);text-align:center;animation:fadeUp .3s ease">
     <div style="font-size:38px;margin-bottom:12px">🔒</div>
     <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#fff;margin-bottom:10px">Unlock this feature</div>
     <div id="upgradeModalMsg" style="font-size:13.5px;color:rgba(255,255,255,.65);line-height:1.65;margin-bottom:24px">Upgrade to Full to use this feature. Unlock payroll, WhatsApp, email sending, and more.</div>
-    <button class="upgrade-btn" onclick="closeUpgrade();showSection('settings',null)" style="display:block;width:100%;margin-bottom:10px">Upgrade to Full</button>
+    <button id="upgradeModalCTA" class="upgrade-btn" onclick="closeUpgrade();showSection('settings',null)" style="display:block;width:100%;margin-bottom:10px">Upgrade to Full</button>
     <button class="upgrade-close" onclick="closeUpgrade()">Maybe later</button>
   </div>
 </div>
