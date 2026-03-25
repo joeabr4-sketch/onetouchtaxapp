@@ -681,8 +681,8 @@ body.help-mode .main{padding-top:34px}
    Pure CSS — no logic changes.
    ══════════════════════════════════════════════ */
 
-/* ── Bottom nav bar ── */
-.mob-nav{display:none}
+/* ── Bottom nav bar + drawer — hidden on desktop, shown by media query on mobile ── */
+.mob-nav,.mob-drawer,.mob-drawer-overlay{display:none}
 
 @media(max-width:768px){
 
@@ -777,6 +777,7 @@ body.help-mode .main{padding-top:34px}
   .mob-nav-btn:active{opacity:.7}
 
   /* ── Mobile menu drawer ── */
+  .mob-drawer{display:block}
   .mob-drawer-overlay{
     display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;
   }
