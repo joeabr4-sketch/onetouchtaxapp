@@ -2534,15 +2534,50 @@ function showPDFToast(msg) {
 }
 
 // ── AUTH ──
-async function initApp() {
-  const urlStr = window.location.href;
-  const isOAuthCallback = urlStr.includes('access_token') || urlStr.includes('#refresh_token') || urlStr.includes('?code=') || urlStr.includes('&code=');
 
-  // ── Auth state listener — handles magic link, re-auth, session expiry ──
+// Waits for Supabase to process any OAuth redirect tokens before reading session.
+// On mobile Safari, the implicit-flow token parsing can lag slightly behind
+// page load — the 300ms delay ensures it completes before we check.
+async function handleAuthRedirect() {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  const { data, error } = await sb.auth.getSession();
+  if (error) console.error('Auth redirect error:', error);
+  console.log('Session after redirect:', data?.session);
+  return data?.session || null;
+}
+
+async function initApp() {
+  // Show loading immediately — never redirect to login before session check completes.
+  document.getElementById('loadingScreen').style.display = 'flex';
+  document.getElementById('authScreen').style.display = 'none';
+  _oauthProcessing = true; // Block spurious SIGNED_OUT during token exchange
+
+  // STEP 1: wait for OAuth redirect to be processed, then read session
+  let session = await handleAuthRedirect();
+
+  // STEP 2: fallback — try once more in case first call was too early
+  if (!session) {
+    const { data } = await sb.auth.getSession();
+    session = data?.session || null;
+  }
+
+  _oauthProcessing = false;
+
+  // STEP 3: route
+  if (session?.user) {
+    currentUser = session.user;
+    await loadUserProfile();
+  } else {
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('authScreen').style.display = 'flex';
+  }
+
+  // ── Auth state listener — handles subsequent events only ──
+  // (magic link in same tab, session expiry, sign-out from another device)
   sb.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session?.user) {
-      // Only act when the auth screen is visible — avoids double-loading during
-      // the OAuth callback path (which handles its own session setup below).
+      // Only act when the login screen is showing — avoids double-loading
+      // since the initial session is already handled by handleAuthRedirect above.
       if (document.getElementById('authScreen').style.display === 'none') return;
       currentUser = session.user;
       document.getElementById('authScreen').style.display = 'none';
@@ -2552,7 +2587,7 @@ async function initApp() {
       // Ignore if: explicit sign-out (handled by redirect), profile loading,
       // or mid-OAuth (Supabase fires SIGNED_OUT during implicit token exchange).
       if (_signingOut || _profileLoading || _oauthProcessing) return;
-      // Verify session really gone before resetting — guards against spurious events.
+      // Verify session really gone — guards against spurious events.
       try {
         const { data: { session: check } } = await sb.auth.getSession();
         if (check?.user) return;
@@ -2563,56 +2598,6 @@ async function initApp() {
       resetAuthScreen();
     }
   });
-
-  // ── Initial session check ──
-  if (isOAuthCallback) {
-    // OAuth / magic link callback — show loading immediately and hide auth screen
-    // so the onAuthStateChange SIGNED_IN guard doesn't race with our polling.
-    // Then poll getSession() until Supabase has processed and stored the tokens
-    // (implicit flow stores them async; first call may return null on mobile Safari).
-    _oauthProcessing = true;
-    document.getElementById('loadingScreen').style.display = 'flex';
-    document.getElementById('authScreen').style.display = 'none';
-    let session = null;
-    for (let i = 0; i < 20 && !session; i++) {
-      await new Promise(r => setTimeout(r, 500));
-      try {
-        const { data } = await sb.auth.getSession();
-        if (data?.session?.user) session = data.session;
-      } catch(e) {}
-    }
-    _oauthProcessing = false;
-    if (session?.user) {
-      currentUser = session.user;
-      await loadUserProfile();
-    } else {
-      document.getElementById('loadingScreen').style.display = 'none';
-      document.getElementById('authScreen').style.display = 'flex';
-    }
-  } else {
-    // Normal page load — check existing session, 8s safety guard in case getSession hangs.
-    const guard = setTimeout(() => {
-      if (document.getElementById('loadingScreen').style.display !== 'none') {
-        document.getElementById('loadingScreen').style.display = 'none';
-        document.getElementById('authScreen').style.display = 'flex';
-      }
-    }, 8000);
-    try {
-      const { data: { session } } = await sb.auth.getSession();
-      clearTimeout(guard);
-      if (session?.user) {
-        currentUser = session.user;
-        await loadUserProfile();
-      } else {
-        document.getElementById('loadingScreen').style.display = 'none';
-        document.getElementById('authScreen').style.display = 'flex';
-      }
-    } catch(e) {
-      clearTimeout(guard);
-      document.getElementById('loadingScreen').style.display = 'none';
-      document.getElementById('authScreen').style.display = 'flex';
-    }
-  }
 }
 
 function resetAuthScreen() {
@@ -2630,7 +2615,7 @@ async function signInWithGoogle() {
   const { error } = await sb.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: 'https://www.onetouch.net.za/business.html',
+      redirectTo: window.location.origin + '/business.html',
       queryParams: { access_type: 'offline', prompt: 'select_account' }
     }
   });
