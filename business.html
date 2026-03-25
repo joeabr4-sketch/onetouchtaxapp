@@ -7557,6 +7557,37 @@ function closeWelcomePopup() {
 // ── KICKOFF ──
 initApp();
 
+// ── BFCACHE FIX — mobile Safari OAuth ──
+// When Safari restores this page from the Back-Forward Cache after a Google OAuth
+// redirect, the old JS context resumes and initApp() doesn't re-run. The auth tokens
+// sit in the URL hash but nothing picks them up. Detect the restore and re-poll.
+window.addEventListener('pageshow', function(e) {
+  if (!e.persisted) return; // Normal load — initApp() already handled it
+  const url = window.location.href;
+  const hasTokens = url.includes('access_token') || url.includes('?code=') || url.includes('&code=');
+  if (!hasTokens || currentUser) return; // Nothing to do
+  // Page was bfcache-restored with auth tokens in URL and no logged-in user — re-poll
+  document.getElementById('loadingScreen').style.display = 'flex';
+  document.getElementById('authScreen').style.display = 'none';
+  (async () => {
+    let session = null;
+    for (let i = 0; i < 20 && !session; i++) {
+      await new Promise(r => setTimeout(r, 500));
+      try {
+        const { data } = await sb.auth.getSession();
+        if (data?.session?.user) session = data.session;
+      } catch(e) {}
+    }
+    if (session?.user) {
+      currentUser = session.user;
+      await loadUserProfile();
+    } else {
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('authScreen').style.display = 'flex';
+    }
+  })();
+});
+
 // ── WHATSAPP INVOICE DELIVERY ──
 async function sendInvoiceWhatsApp(inv) {
   if (!canUse('whatsapp')) {
