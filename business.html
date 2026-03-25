@@ -773,6 +773,41 @@ body.help-mode .main{padding-top:34px}
   /* ── Support AI input row ── */
   #supportInput{font-size:16px!important}
 
+  /* ── ISSUE 1: History tabs — scroll only the tab row, not the whole page ── */
+  .hist-tabs-row{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    flex-wrap:nowrap!important;
+    padding-bottom:8px!important;
+  }
+  .hist-tabs-row::-webkit-scrollbar{display:none}
+  .hist-tab{white-space:nowrap}
+
+  /* ── ISSUE 2: Invoice card header — dropdowns wrap below title on narrow screens ── */
+  .card-head{flex-wrap:wrap;gap:8px}
+
+  /* ── ISSUE 3: Invoice/quote/expense form grid — single column on mobile ── */
+  .inv-grid{grid-template-columns:1fr!important}
+
+  /* ── ISSUE 4: Invoice form action buttons — 2-col grid, compact padding ── */
+  .inv-form-footer{flex-direction:column!important;gap:10px!important}
+  .inv-cancel-btn{width:100%!important;text-align:center!important}
+  .inv-form-footer-actions{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    width:100%!important;
+    gap:8px!important;
+  }
+  .inv-form-footer-actions button{
+    padding:11px 8px!important;
+    font-size:13px!important;
+    justify-content:center!important;
+  }
+  /* Save Invoice button spans full width as primary action */
+  .inv-form-footer-actions button:last-child{
+    grid-column:1/-1!important;
+  }
+
   /* ── Bottom nav visible on mobile ── */
   .mob-nav{
     display:flex;
@@ -1276,7 +1311,7 @@ body.help-mode .main{padding-top:34px}
     <div class="section" id="section-history">
       <div class="help-banner"><div class="help-banner-title">💡 Financial History</div><div class="help-banner-body">A month-by-month record of your revenue, expenses, and profit. Snapshots are saved automatically when you close a reconciliation period. Use this to spot trends, compare months, and have a full picture ready when your accountant asks for history.</div><div class="help-banner-actions"><span>Snapshots save automatically when you close a month</span><span>Opening balances set your year-start position</span></div></div>
       <div style="margin-bottom:18px"><h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:3px">📁 Financial History</h2><p style="font-size:13px;color:var(--text-2)">Monthly snapshots, document history, bank transactions and opening balances.</p></div>
-      <div style="display:flex;gap:6px;margin-bottom:16px;border-bottom:1.5px solid var(--border);padding-bottom:0">
+      <div class="hist-tabs-row" style="display:flex;gap:6px;margin-bottom:16px;border-bottom:1.5px solid var(--border);padding-bottom:0">
         <button class="hist-tab active" id="htab-monthly" onclick="switchHistTab('monthly')">📊 Monthly Financials</button>
         <button class="hist-tab" id="htab-docs" onclick="switchHistTab('docs')">📄 Document History</button>
         <button class="hist-tab" id="htab-statements" onclick="switchHistTab('statements')">🏦 Bank Transactions</button>
