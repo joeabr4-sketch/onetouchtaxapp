@@ -5000,6 +5000,7 @@ async function saveStatement(file, result) {
 let reconSession = null;
 let reconTransactions = [];
 let selectedTxId = null;
+let _reconBusy = false;
 
 // ── INIT ──
 async function renderReconciliation() {
@@ -5788,7 +5789,9 @@ function renderUnrecorded() {
 
 // ── CLASSIFY TRANSACTION ──
 async function classifyTx(txId, classification) {
+  if (_reconBusy) return; _reconBusy = true;
   const { error } = await sb.from('bank_transactions').update({ classification, match_status: 'unmatched' }).eq('id', txId);
+  _reconBusy = false;
   if (error) { showToast('Failed to classify transaction: ' + error.message, 'var(--red)'); return; }
   const tx = reconTransactions.find(t => t.id === txId);
   if (tx) tx.classification = classification;
@@ -5802,9 +5805,12 @@ async function classifyTx(txId, classification) {
 
 // ── IGNORE TRANSACTION ──
 async function promptIgnoreTx(txId) {
+  if (_reconBusy) return;
   const reason = prompt('Reason for ignoring this transaction (required):');
   if (!reason || !reason.trim()) return;
+  _reconBusy = true;
   const { error } = await sb.from('bank_transactions').update({ ignored: true, ignore_reason: reason.trim(), match_status: 'unmatched' }).eq('id', txId);
+  _reconBusy = false;
   if (error) { showToast('Failed to ignore transaction: ' + error.message, 'var(--red)'); return; }
   const tx = reconTransactions.find(t => t.id === txId);
   if (tx) { tx.ignored = true; tx.ignore_reason = reason.trim(); }
@@ -5817,7 +5823,9 @@ async function promptIgnoreTx(txId) {
 }
 
 async function unignoreTx(txId) {
+  if (_reconBusy) return; _reconBusy = true;
   const { error } = await sb.from('bank_transactions').update({ ignored: false, ignore_reason: null }).eq('id', txId);
+  _reconBusy = false;
   if (error) { showToast('Failed to update transaction: ' + error.message, 'var(--red)'); return; }
   const tx = reconTransactions.find(t => t.id === txId);
   if (tx) { tx.ignored = false; tx.ignore_reason = null; }
@@ -5877,7 +5885,9 @@ function openAssignPanel(txId, defaultMode) {
 
 // ── MATCH / UNMATCH ──
 async function manualMatchTx(txId, invId) {
+  if (_reconBusy) return; _reconBusy = true;
   const { error } = await sb.from('bank_transactions').update({ match_status: 'matched', matched_invoice_id: invId, match_type: 'manual' }).eq('id', txId);
+  _reconBusy = false;
   if (error) { showToast('Failed to save match: ' + error.message, 'var(--red)'); return; }
   const tx = reconTransactions.find(t => t.id === txId);
   if (tx) { tx.match_status = 'matched'; tx.matched_invoice_id = invId; tx.match_type = 'manual'; }
@@ -5889,9 +5899,12 @@ async function manualMatchTx(txId, invId) {
 }
 
 async function confirmSuggestedMatch(txId) {
+  if (_reconBusy) return;
   const tx = reconTransactions.find(t => t.id === txId);
   if (!tx?.matched_invoice_id) return;
+  _reconBusy = true;
   const { error } = await sb.from('bank_transactions').update({ match_status: 'matched', match_type: 'confirmed' }).eq('id', txId);
+  _reconBusy = false;
   if (error) { showToast('Failed to confirm match: ' + error.message, 'var(--red)'); return; }
   tx.match_status = 'matched'; tx.match_type = 'confirmed';
   await updateInvoiceStatusFromRecon(tx.matched_invoice_id);
@@ -5902,7 +5915,9 @@ async function confirmSuggestedMatch(txId) {
 }
 
 async function rejectSuggestedMatch(txId) {
+  if (_reconBusy) return; _reconBusy = true;
   const { error } = await sb.from('bank_transactions').update({ match_status: 'unmatched', matched_invoice_id: null, match_type: null }).eq('id', txId);
+  _reconBusy = false;
   if (error) { showToast('Failed to reject match: ' + error.message, 'var(--red)'); return; }
   const tx = reconTransactions.find(t => t.id === txId);
   if (tx) { tx.match_status = 'unmatched'; tx.matched_invoice_id = null; }
@@ -5911,9 +5926,11 @@ async function rejectSuggestedMatch(txId) {
 }
 
 async function unmatchTx(txId) {
+  if (_reconBusy) return; _reconBusy = true;
   const tx = reconTransactions.find(t => t.id === txId);
   const invId = tx?.matched_invoice_id;
   const { error } = await sb.from('bank_transactions').update({ match_status: 'unmatched', matched_invoice_id: null, match_type: null }).eq('id', txId);
+  _reconBusy = false;
   if (error) { showToast('Failed to unmatch transaction: ' + error.message, 'var(--red)'); return; }
   if (tx) { tx.match_status = 'unmatched'; tx.matched_invoice_id = null; }
   if (invId) { await updateInvoiceStatusFromRecon(invId); await loadInvoices(); }
@@ -7213,7 +7230,13 @@ async function markNewBusiness() {
 }
 
 async function saveOpeningBalances() {
-  const data = {user_id:currentUser.id,year_start:document.getElementById('ob-yearstart')?.value,verify_date:document.getElementById('ob-verifydate')?.value,accountant_name:document.getElementById('ob-accountant')?.value,ytd_revenue:parseFloat(document.getElementById('ob-revenue')?.value)||0,ytd_expenses:parseFloat(document.getElementById('ob-expenses')?.value)||0,vat_owing:parseFloat(document.getElementById('ob-vat')?.value)||0};
+  const yearStart = document.getElementById('ob-yearstart')?.value;
+  if (!yearStart) { showToast('Please select a financial year start date', 'var(--amber)'); return; }
+  const revenue  = parseFloat(document.getElementById('ob-revenue')?.value)  || 0;
+  const expenses = parseFloat(document.getElementById('ob-expenses')?.value) || 0;
+  const vatOwing = parseFloat(document.getElementById('ob-vat')?.value)       || 0;
+  if (revenue < 0 || expenses < 0 || vatOwing < 0) { showToast('Balances cannot be negative', 'var(--amber)'); return; }
+  const data = {user_id:currentUser.id,year_start:yearStart,verify_date:document.getElementById('ob-verifydate')?.value,accountant_name:document.getElementById('ob-accountant')?.value,ytd_revenue:revenue,ytd_expenses:expenses,vat_owing:vatOwing};
   const {error} = await sb.from('opening_balances').upsert(data, { onConflict: 'user_id' });
   if (error) { showToast('Error: '+error.message,'var(--red)'); return; }
   showToast('✅ Opening balances saved','var(--green)');
