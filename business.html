@@ -2748,33 +2748,61 @@ function _hideCancelStep2() {
 }
 async function _confirmCancelSub() {
   const btn = document.getElementById('cancelSubConfirmBtn');
-  if (btn) { btn.textContent = '⏳ Sending request…'; btn.disabled = true; }
+  if (btn) { btn.textContent = '⏳ Cancelling…'; btn.disabled = true; }
 
-  const email    = currentUser?.email || '';
-  const plan     = userProfile?.plan  || '';
-  const bizName  = userProfile?.biz_name || '';
-  const reqTime  = new Date().toLocaleString('en-ZA', { dateStyle:'medium', timeStyle:'short' });
+  const email   = currentUser?.email || '';
+  const plan    = userProfile?.plan  || '';
+  const bizName = userProfile?.biz_name || '';
+  const reqTime = new Date().toLocaleString('en-ZA', { dateStyle:'medium', timeStyle:'short' });
 
-  // Log request in localStorage
   try { localStorage.setItem('ot_cancel_requested_' + (currentUser?.id||''), new Date().toISOString()); } catch {}
 
-  // Send notification to support via Resend (best-effort)
-  try {
-    const session = await sb.auth.getSession();
-    const token   = session?.data?.session?.access_token;
-    if (token) {
-      const html = `<p><strong>Cancellation request received</strong></p><p>Account: ${email}<br>Plan: ${plan}<br>Business: ${bizName}<br>Requested: ${reqTime}</p><p>Please process this cancellation in the PayFast merchant portal and confirm via email.</p>`;
+  const session = await sb.auth.getSession();
+  const accessToken = session?.data?.session?.access_token;
+  let cancelledViaApi = false;
+
+  // 1 — Try PayFast cancel API
+  if (accessToken) {
+    try {
+      const pfRes = await fetch('/api/payfast-cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` }
+      });
+      const pfData = await pfRes.json();
+      if (pfRes.ok && pfData.method === 'api') {
+        cancelledViaApi = true;
+      } else if (!pfRes.ok) {
+        console.warn('PayFast cancel API error:', pfData);
+      }
+    } catch(e) {
+      console.warn('PayFast cancel fetch error:', e);
+    }
+  }
+
+  // 2 — Always send support email (confirmation if API succeeded, action request if not)
+  if (accessToken) {
+    try {
+      const subject = cancelledViaApi
+        ? `Subscription Cancelled (API) — ${email}`
+        : `Cancellation Request (Manual Required) — ${email}`;
+      const html = cancelledViaApi
+        ? `<p><strong>Subscription cancelled automatically via PayFast API.</strong></p><p>Account: ${email}<br>Plan: ${plan}<br>Business: ${bizName}<br>Cancelled: ${reqTime}</p><p>PayFast will send the user a cancellation confirmation email. Plan stays active until end of billing period.</p>`
+        : `<p><strong>Manual cancellation required</strong> — no subscription token on file.</p><p>Account: ${email}<br>Plan: ${plan}<br>Business: ${bizName}<br>Requested: ${reqTime}</p><p>Please cancel manually in the PayFast merchant portal and confirm via email to the user.</p>`;
       await fetch('/api/send-email', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ to: 'support@onetouch.net.za', subject: `Cancellation Request — ${email}`, html })
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
+        body: JSON.stringify({ to: 'support@onetouch.net.za', subject, html })
       });
-    }
-  } catch {}
+    } catch {}
+  }
 
   document.getElementById('cancelStep2').style.display = 'none';
   const doneMsg = document.getElementById('cancelStepDoneMsg');
-  if (doneMsg) doneMsg.textContent = `Your request was logged on ${reqTime}. Our team will process it within 24 hours and send a confirmation to ${email}. Your plan remains active until the end of the billing period.`;
+  if (doneMsg) {
+    doneMsg.textContent = cancelledViaApi
+      ? `Your subscription has been cancelled. You'll receive a confirmation from PayFast shortly. Your plan stays active until the end of the current billing period, then reverts to Free.`
+      : `Your cancellation request was logged on ${reqTime}. Our team will process it within 24 hours and confirm via email. Your plan remains active until the end of the billing period.`;
+  }
   document.getElementById('cancelStep3').style.display = 'block';
 }
 

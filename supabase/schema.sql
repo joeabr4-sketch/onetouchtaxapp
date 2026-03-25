@@ -431,3 +431,8 @@ ALTER TABLE annual_summaries ADD CONSTRAINT annual_summaries_user_year_unique UN
 DROP POLICY IF EXISTS "Users manage own annual summaries" ON annual_summaries;
 CREATE POLICY "Users manage own annual summaries" ON annual_summaries
   FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+-- ── M12: PayFast subscription token ──
+-- Stores the recurring subscription token from PayFast IPN so we can call
+-- the cancel API on the user's behalf instead of handling it manually.
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS payfast_token text;

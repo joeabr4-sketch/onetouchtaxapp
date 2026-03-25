@@ -60,12 +60,17 @@ export default async function handler(req, res) {
     return res.status(400).send('Invalid custom data');
   }
 
-  // 4 — Update plan in Supabase
+  // 4 — Update plan (and subscription token) in Supabase
   const serviceKey = process.env.SUPABASE_SERVICE_KEY;
   if (!serviceKey) {
     console.error('PayFast IPN: SUPABASE_SERVICE_KEY not set');
     return res.status(500).send('Server config error');
   }
+
+  // Store the subscription token so we can call the PayFast cancel API later.
+  // `token` is only present for recurring/subscription payments.
+  const profileUpdate = { plan };
+  if (data.token) profileUpdate.payfast_token = data.token;
 
   const update = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, {
     method: 'PATCH',
@@ -75,7 +80,7 @@ export default async function handler(req, res) {
       'Authorization': `Bearer ${serviceKey}`,
       'Prefer': 'return=minimal'
     },
-    body: JSON.stringify({ plan })
+    body: JSON.stringify(profileUpdate)
   });
 
   if (!update.ok) {
@@ -84,6 +89,6 @@ export default async function handler(req, res) {
     return res.status(500).send('DB error');
   }
 
-  console.log(`PayFast IPN: ${userId} upgraded to ${plan} — payment ${data.m_payment_id}`);
+  console.log(`PayFast IPN: ${userId} upgraded to ${plan} — payment ${data.m_payment_id}${data.token ? ' — token stored' : ''}`);
   return res.status(200).send('OK');
 }
