@@ -754,6 +754,25 @@ body.help-mode .main{padding-top:34px}
   .help-banner{padding:12px 14px!important}
   .help-banner-actions{display:none!important}
 
+  /* ── iOS zoom prevention — inputs < 16px trigger auto-zoom on Safari ── */
+  input,select,textarea{font-size:16px!important}
+
+  /* ── Onboarding modal — needs max-height so it doesn't clip on small phones ── */
+  .ob-card{max-height:90dvh;overflow-y:auto;padding:24px 20px!important}
+
+  /* ── Auth card — tighter padding on narrow screens ── */
+  .auth-card{padding:28px 20px!important}
+
+  /* ── AI chat — account for mobile nav bar height ── */
+  .chat-wrap{height:calc(100dvh - 220px)!important}
+
+  /* ── Reconciliation items — wrap action buttons on narrow screens ── */
+  .recon-item{flex-wrap:wrap;gap:8px!important}
+  .recon-match-btn,.recon-reject-btn,.recon-manual-btn{font-size:12px!important;padding:7px 14px!important}
+
+  /* ── Support AI input row ── */
+  #supportInput{font-size:16px!important}
+
   /* ── Bottom nav visible on mobile ── */
   .mob-nav{
     display:flex;
@@ -820,6 +839,13 @@ body.help-mode .main{padding-top:34px}
 <body>
 
 <div class="app">
+
+<!-- PRIVATE BROWSING WARNING -->
+<div id="privateBrowsingBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:rgba(212,168,67,.12);border-bottom:1px solid rgba(212,168,67,.3);padding:10px 16px;align-items:center;gap:10px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-2)">
+  <span style="font-size:16px">⚠️</span>
+  <span style="flex:1">You're using private browsing. Login may not work properly. Please switch to a normal browser tab.</span>
+  <button onclick="document.getElementById('privateBrowsingBanner').style.display='none'" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:18px;line-height:1;padding:0 4px">✕</button>
+</div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -2495,6 +2521,19 @@ let logoDataUrl = null;
 let currentSection = 'dashboard';
 let currentAction = null; // Tracks what the user is currently doing (e.g. 'creating_invoice')
 let _dbReconTxCount = -1; // -1 = not yet loaded; populated from Supabase for checklist step 3
+
+// ── PRIVATE BROWSING DETECTION ──
+// Supabase stores sessions in localStorage — private browsing restricts it.
+// Show a non-blocking warning; do NOT block usage.
+(function detectPrivateBrowsing() {
+  try {
+    localStorage.setItem('__ot_pb_test', '1');
+    localStorage.removeItem('__ot_pb_test');
+  } catch(e) {
+    const banner = document.getElementById('privateBrowsingBanner');
+    if (banner) banner.style.display = 'flex';
+  }
+})();
 
 async function _refreshReconTxCount() {
   if (!currentUser) return;
