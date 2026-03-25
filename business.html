@@ -5502,12 +5502,14 @@ function showUploadSummaryOnDashboard() {
 
 async function clearReconStatement() {
   if (!reconSession || !confirm('Remove all bank transactions for this session?')) return;
-  await sb.from('bank_transactions').delete().eq('session_id', reconSession.id);
+  const { error: txErr } = await sb.from('bank_transactions').delete().eq('session_id', reconSession.id);
+  if (txErr) { showToast('Failed to clear transactions: ' + txErr.message, 'var(--red)'); return; }
   reconTransactions = [];
   resetReconDropZone();
   // Un-reconcile invoices that were matched in this session
-  await sb.from('invoices').update({ reconciled: false, status: 'outstanding', status_log: 'Statement cleared — pending re-reconciliation' })
+  const { error: invErr } = await sb.from('invoices').update({ reconciled: false, status: 'outstanding', status_log: 'Statement cleared — pending re-reconciliation' })
     .eq('user_id', currentUser.id).eq('reconciled', true);
+  if (invErr) console.warn('clearReconStatement: invoice reset partial:', invErr.message);
   await loadInvoices();
   addReconAudit('clear', 'Bank transactions cleared');
   updateReconUI();
@@ -5786,7 +5788,8 @@ function renderUnrecorded() {
 
 // ── CLASSIFY TRANSACTION ──
 async function classifyTx(txId, classification) {
-  await sb.from('bank_transactions').update({ classification, match_status: 'unmatched' }).eq('id', txId);
+  const { error } = await sb.from('bank_transactions').update({ classification, match_status: 'unmatched' }).eq('id', txId);
+  if (error) { showToast('Failed to classify transaction: ' + error.message, 'var(--red)'); return; }
   const tx = reconTransactions.find(t => t.id === txId);
   if (tx) tx.classification = classification;
   addReconAudit('manual', `Classified tx as ${classification}: ${tx?.description||txId}`);
@@ -5801,7 +5804,8 @@ async function classifyTx(txId, classification) {
 async function promptIgnoreTx(txId) {
   const reason = prompt('Reason for ignoring this transaction (required):');
   if (!reason || !reason.trim()) return;
-  await sb.from('bank_transactions').update({ ignored: true, ignore_reason: reason.trim(), match_status: 'unmatched' }).eq('id', txId);
+  const { error } = await sb.from('bank_transactions').update({ ignored: true, ignore_reason: reason.trim(), match_status: 'unmatched' }).eq('id', txId);
+  if (error) { showToast('Failed to ignore transaction: ' + error.message, 'var(--red)'); return; }
   const tx = reconTransactions.find(t => t.id === txId);
   if (tx) { tx.ignored = true; tx.ignore_reason = reason.trim(); }
   addReconAudit('ignore', `Ignored: ${tx?.description||txId} — Reason: ${reason.trim()}`);
@@ -5813,7 +5817,8 @@ async function promptIgnoreTx(txId) {
 }
 
 async function unignoreTx(txId) {
-  await sb.from('bank_transactions').update({ ignored: false, ignore_reason: null }).eq('id', txId);
+  const { error } = await sb.from('bank_transactions').update({ ignored: false, ignore_reason: null }).eq('id', txId);
+  if (error) { showToast('Failed to update transaction: ' + error.message, 'var(--red)'); return; }
   const tx = reconTransactions.find(t => t.id === txId);
   if (tx) { tx.ignored = false; tx.ignore_reason = null; }
   addReconAudit('manual', `Un-ignored: ${tx?.description||txId}`);
@@ -5872,7 +5877,8 @@ function openAssignPanel(txId, defaultMode) {
 
 // ── MATCH / UNMATCH ──
 async function manualMatchTx(txId, invId) {
-  await sb.from('bank_transactions').update({ match_status: 'matched', matched_invoice_id: invId, match_type: 'manual' }).eq('id', txId);
+  const { error } = await sb.from('bank_transactions').update({ match_status: 'matched', matched_invoice_id: invId, match_type: 'manual' }).eq('id', txId);
+  if (error) { showToast('Failed to save match: ' + error.message, 'var(--red)'); return; }
   const tx = reconTransactions.find(t => t.id === txId);
   if (tx) { tx.match_status = 'matched'; tx.matched_invoice_id = invId; tx.match_type = 'manual'; }
   await updateInvoiceStatusFromRecon(invId);
@@ -5885,7 +5891,8 @@ async function manualMatchTx(txId, invId) {
 async function confirmSuggestedMatch(txId) {
   const tx = reconTransactions.find(t => t.id === txId);
   if (!tx?.matched_invoice_id) return;
-  await sb.from('bank_transactions').update({ match_status: 'matched', match_type: 'confirmed' }).eq('id', txId);
+  const { error } = await sb.from('bank_transactions').update({ match_status: 'matched', match_type: 'confirmed' }).eq('id', txId);
+  if (error) { showToast('Failed to confirm match: ' + error.message, 'var(--red)'); return; }
   tx.match_status = 'matched'; tx.match_type = 'confirmed';
   await updateInvoiceStatusFromRecon(tx.matched_invoice_id);
   await loadInvoices();
@@ -5895,7 +5902,8 @@ async function confirmSuggestedMatch(txId) {
 }
 
 async function rejectSuggestedMatch(txId) {
-  await sb.from('bank_transactions').update({ match_status: 'unmatched', matched_invoice_id: null, match_type: null }).eq('id', txId);
+  const { error } = await sb.from('bank_transactions').update({ match_status: 'unmatched', matched_invoice_id: null, match_type: null }).eq('id', txId);
+  if (error) { showToast('Failed to reject match: ' + error.message, 'var(--red)'); return; }
   const tx = reconTransactions.find(t => t.id === txId);
   if (tx) { tx.match_status = 'unmatched'; tx.matched_invoice_id = null; }
   addReconAudit('manual', `Rejected suggestion: ${tx?.description||txId}`);
@@ -5905,7 +5913,8 @@ async function rejectSuggestedMatch(txId) {
 async function unmatchTx(txId) {
   const tx = reconTransactions.find(t => t.id === txId);
   const invId = tx?.matched_invoice_id;
-  await sb.from('bank_transactions').update({ match_status: 'unmatched', matched_invoice_id: null, match_type: null }).eq('id', txId);
+  const { error } = await sb.from('bank_transactions').update({ match_status: 'unmatched', matched_invoice_id: null, match_type: null }).eq('id', txId);
+  if (error) { showToast('Failed to unmatch transaction: ' + error.message, 'var(--red)'); return; }
   if (tx) { tx.match_status = 'unmatched'; tx.matched_invoice_id = null; }
   if (invId) { await updateInvoiceStatusFromRecon(invId); await loadInvoices(); }
   addReconAudit('manual', `Unmatched: ${tx?.description||txId}`);
@@ -6483,7 +6492,8 @@ async function resendAccountantLink() {
 }
 async function revokeAccountantLink() {
   if (!confirm('Revoke accountant link?')) return;
-  await sb.from('profiles').update({share_token:null,share_token_email:null,share_token_expiry:null}).eq('id',currentUser.id);
+  const { error } = await sb.from('profiles').update({share_token:null,share_token_email:null,share_token_expiry:null}).eq('id',currentUser.id);
+  if (error) { showToast('Failed to revoke link: ' + error.message, 'var(--red)'); return; }
   userProfile.share_token=null;
   userProfile.share_token_email=null;
   userProfile.share_token_expiry=null;
@@ -7033,10 +7043,14 @@ async function _doAutoSaveSnapshot() {
 }
 
 async function saveMonthlySnapshot() {
-  // Rebuilds all months — consistent with auto-save behaviour
-  await _doAutoSaveSnapshot();
-  showToast('✅ Snapshots saved for all months', 'var(--green)');
-  loadPeriodHistory();
+  try {
+    await _doAutoSaveSnapshot();
+    showToast('✅ Snapshots saved for all months', 'var(--green)');
+    loadPeriodHistory();
+  } catch(e) {
+    showToast('Snapshot save failed — please try again', 'var(--red)');
+    console.error('saveMonthlySnapshot:', e.message);
+  }
 }
 
 async function loadStatementHistory() {
@@ -8294,28 +8308,39 @@ function generatePayslipPDFData(emp) {
 }
 
 function downloadPayslipPDF() {
-  const emp = {
-    name:     document.getElementById('pr-name')?.value?.trim() || 'Employee',
-    id_num:   document.getElementById('pr-id')?.value?.trim() || '',
-    role:     document.getElementById('pr-role')?.value?.trim() || '',
-    emp_type: document.getElementById('pr-type')?.value || 'fulltime',
-    paydate:  document.getElementById('pr-paydate')?.value || '',
-    ...calcPayslip()
-  };
-  const doc = generatePayslipPDFData(emp);
-  doc.save('Payslip_' + emp.name.replace(/\s/g,'_') + '_' + (emp.paydate||'').replace(/-/g,'') + '.pdf');
-  showToast('📄 Payslip downloaded!', 'var(--green)');
+  try {
+    const emp = {
+      name:     document.getElementById('pr-name')?.value?.trim() || 'Employee',
+      id_num:   document.getElementById('pr-id')?.value?.trim() || '',
+      role:     document.getElementById('pr-role')?.value?.trim() || '',
+      emp_type: document.getElementById('pr-type')?.value || 'fulltime',
+      paydate:  document.getElementById('pr-paydate')?.value || '',
+      ...calcPayslip()
+    };
+    const doc = generatePayslipPDFData(emp);
+    doc.save('Payslip_' + emp.name.replace(/\s/g,'_') + '_' + (emp.paydate||'').replace(/-/g,'') + '.pdf');
+    showToast('📄 Payslip downloaded!', 'var(--green)');
+  } catch(e) {
+    showToast('Failed to generate payslip — please try again', 'var(--red)');
+    console.error('downloadPayslipPDF:', e.message);
+  }
 }
 
 function downloadEmployeePayslip(idx) {
-  const emp = employees[idx];
-  if (!emp) return;
-  const doc = generatePayslipPDFData({ ...emp, ...calcEmployeePayslip(emp) });
-  doc.save('Payslip_' + emp.name.replace(/\s/g,'_') + '.pdf');
-  showToast('📄 Payslip downloaded!', 'var(--green)');
+  try {
+    const emp = employees[idx];
+    if (!emp) return;
+    const doc = generatePayslipPDFData({ ...emp, ...calcEmployeePayslip(emp) });
+    doc.save('Payslip_' + emp.name.replace(/\s/g,'_') + '.pdf');
+    showToast('📄 Payslip downloaded!', 'var(--green)');
+  } catch(e) {
+    showToast('Failed to generate payslip — please try again', 'var(--red)');
+    console.error('downloadEmployeePayslip:', e.message);
+  }
 }
 
 function downloadEMP201() {
+  try {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit:'mm', format:'a4' });
   const bizName = userProfile?.business_name || 'Business';
@@ -8382,6 +8407,10 @@ function downloadEMP201() {
 
   doc.save('EMP201_Prep_' + month.replace(/\s/g,'_') + '.pdf');
   showToast('📄 EMP201 prep downloaded!', 'var(--green)');
+  } catch(e) {
+    showToast('Failed to generate EMP201 — please try again', 'var(--red)');
+    console.error('downloadEMP201:', e.message);
+  }
 }
 
 // ── PAYROLL RUNS ──
