@@ -2483,6 +2483,7 @@ let currentUser = null;
 let userProfile = null;
 let invoices = [];
 let _profileLoading = false;
+let _signingOut = false;
 let currentPeriod = '3m';
 let lineItems = [];
 let invVATEnabled = true;
@@ -2532,66 +2533,77 @@ function showPDFToast(msg) {
 
 // ── AUTH ──
 async function initApp() {
-  // Detect OAuth callback — access_token or code in URL means we're mid-redirect.
-  // Stay on loading screen and let onAuthStateChange handle it instead of flashing auth screen.
   const urlStr = window.location.href;
   const isOAuthCallback = urlStr.includes('access_token') || urlStr.includes('#refresh_token') || urlStr.includes('?code=') || urlStr.includes('&code=');
 
-  // Safety net — if anything hangs, never leave user stuck on spinner
-  // Give OAuth callbacks extra time (12s) since they do a token exchange
-  const spinnerGuard = setTimeout(() => {
-    if (document.getElementById('loadingScreen').style.display !== 'none') {
-      document.getElementById('loadingScreen').style.display = 'none';
-      document.getElementById('authScreen').style.display = 'flex';
-    }
-  }, isOAuthCallback ? 12000 : 8000);
-
+  // ── Handle subsequent auth events (not the initial load) ──
   sb.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session?.user) {
-      if (currentUser && currentUser.id === session.user.id && userProfile) return;
+      // Only act when the auth screen is showing — handles magic link in same tab
+      // or a re-auth after session expiry. Initial load is handled by polling below.
+      if (document.getElementById('authScreen').style.display === 'none') return;
       currentUser = session.user;
       document.getElementById('authScreen').style.display = 'none';
       document.getElementById('loadingScreen').style.display = 'flex';
-      document.getElementById('mainWrapper').style.display = 'none';
       await loadUserProfile();
-      clearTimeout(spinnerGuard);
     } else if (event === 'SIGNED_OUT') {
-      // Implicit flow can fire a spurious SIGNED_OUT during token cleanup — wait briefly
-      // then verify with getSession() before tearing down the UI.
+      // _signingOut means signOut() already handles the redirect — do nothing here.
+      if (_signingOut || _profileLoading) return;
+      // For session expiry / sign-out from another device: verify session really gone.
       try {
-        await new Promise(r => setTimeout(r, 800));
         const { data: { session: check } } = await sb.auth.getSession();
-        if (check?.user) return; // Session still valid — spurious event, ignore
+        if (check?.user) return; // Spurious SIGNED_OUT, session still valid
       } catch(e) {
-        // getSession failed — if we still have a currentUser in memory, stay logged in
         if (currentUser) return;
       }
       currentUser = null; userProfile = null; invoices = []; _profileLoading = false;
-      clearTimeout(spinnerGuard);
       resetAuthScreen();
     }
   });
 
-  try {
-    const { data: { session } } = await sb.auth.getSession();
-    if (session?.user && !isOAuthCallback) {
-      // Normal page load with stored session — load profile directly
+  // ── Initial session check ──
+  if (isOAuthCallback) {
+    // OAuth / magic link redirect — poll getSession() until Supabase has stored the session.
+    // Polling is more reliable than onAuthStateChange on mobile Safari with implicit flow.
+    document.getElementById('loadingScreen').style.display = 'flex';
+    let session = null;
+    for (let i = 0; i < 20 && !session; i++) {
+      await new Promise(r => setTimeout(r, 500));
+      try {
+        const { data } = await sb.auth.getSession();
+        if (data?.session?.user) session = data.session;
+      } catch(e) {}
+    }
+    if (session?.user) {
       currentUser = session.user;
-      document.getElementById('loadingScreen').style.display = 'flex';
       await loadUserProfile();
-      clearTimeout(spinnerGuard);
-    } else if (isOAuthCallback || session?.user) {
-      // OAuth redirect in progress — keep loading screen, onAuthStateChange will fire shortly
-      document.getElementById('loadingScreen').style.display = 'flex';
     } else {
-      clearTimeout(spinnerGuard);
       document.getElementById('loadingScreen').style.display = 'none';
       document.getElementById('authScreen').style.display = 'flex';
     }
-  } catch(e) {
-    clearTimeout(spinnerGuard);
-    document.getElementById('loadingScreen').style.display = 'none';
-    document.getElementById('authScreen').style.display = 'flex';
+  } else {
+    // Normal page load — single getSession() check, 8s safety guard
+    const guard = setTimeout(() => {
+      if (document.getElementById('loadingScreen').style.display !== 'none') {
+        document.getElementById('loadingScreen').style.display = 'none';
+        document.getElementById('authScreen').style.display = 'flex';
+      }
+    }, 8000);
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      clearTimeout(guard);
+      if (session?.user) {
+        currentUser = session.user;
+        await loadUserProfile();
+      } else {
+        document.getElementById('loadingScreen').style.display = 'none';
+        document.getElementById('authScreen').style.display = 'flex';
+      }
+    } catch(e) {
+      clearTimeout(guard);
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('authScreen').style.display = 'flex';
+    }
   }
 }
 
@@ -2632,14 +2644,15 @@ async function signInWithEmail() {
 }
 
 async function signOut() {
-  try { await sb.auth.signOut({ scope: 'local' }); } catch(e) {}
-  // Clear all Supabase session data from localStorage
-  Object.keys(localStorage).forEach(key => {
-    if (key.startsWith('sb-') || key.includes('supabase')) {
-      localStorage.removeItem(key);
-    }
-  });
-  window.location.reload();
+  _signingOut = true;
+  try { await sb.auth.signOut(); } catch(e) {}
+  try {
+    Object.keys(localStorage)
+      .filter(k => k.startsWith('sb-') || k.includes('supabase'))
+      .forEach(k => localStorage.removeItem(k));
+  } catch(e) {}
+  // Use href to strip any hash/params from URL — prevents re-triggering isOAuthCallback
+  window.location.href = window.location.pathname;
 }
 
 // ── TERMS ACCEPTANCE ──
