@@ -2485,6 +2485,7 @@ let userProfile = null;
 let invoices = [];
 let _profileLoading = false;
 let _signingOut = false;
+let _oauthProcessing = false;
 let currentPeriod = '3m';
 let lineItems = [];
 let invVATEnabled = true;
@@ -2537,25 +2538,26 @@ async function initApp() {
   const urlStr = window.location.href;
   const isOAuthCallback = urlStr.includes('access_token') || urlStr.includes('#refresh_token') || urlStr.includes('?code=') || urlStr.includes('&code=');
 
-  // ── Handle subsequent auth events (not the initial load) ──
+  // ── Auth state listener — handles magic link, re-auth, session expiry ──
   sb.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session?.user) {
-      // Only act when the auth screen is showing — handles magic link in same tab
-      // or a re-auth after session expiry. Initial load is handled by polling below.
+      // Only act when the auth screen is visible — avoids double-loading during
+      // the OAuth callback path (which handles its own session setup below).
       if (document.getElementById('authScreen').style.display === 'none') return;
       currentUser = session.user;
       document.getElementById('authScreen').style.display = 'none';
       document.getElementById('loadingScreen').style.display = 'flex';
       await loadUserProfile();
     } else if (event === 'SIGNED_OUT') {
-      // _signingOut means signOut() already handles the redirect — do nothing here.
-      if (_signingOut || _profileLoading) return;
-      // For session expiry / sign-out from another device: verify session really gone.
+      // Ignore if: explicit sign-out (handled by redirect), profile loading,
+      // or mid-OAuth (Supabase fires SIGNED_OUT during implicit token exchange).
+      if (_signingOut || _profileLoading || _oauthProcessing) return;
+      // Verify session really gone before resetting — guards against spurious events.
       try {
         const { data: { session: check } } = await sb.auth.getSession();
-        if (check?.user) return; // Spurious SIGNED_OUT, session still valid
+        if (check?.user) return;
       } catch(e) {
-        if (currentUser) return;
+        if (currentUser) return; // Network error — keep user logged in
       }
       currentUser = null; userProfile = null; invoices = []; _profileLoading = false;
       resetAuthScreen();
@@ -2564,9 +2566,13 @@ async function initApp() {
 
   // ── Initial session check ──
   if (isOAuthCallback) {
-    // OAuth / magic link redirect — poll getSession() until Supabase has stored the session.
-    // Polling is more reliable than onAuthStateChange on mobile Safari with implicit flow.
+    // OAuth / magic link callback — show loading immediately and hide auth screen
+    // so the onAuthStateChange SIGNED_IN guard doesn't race with our polling.
+    // Then poll getSession() until Supabase has processed and stored the tokens
+    // (implicit flow stores them async; first call may return null on mobile Safari).
+    _oauthProcessing = true;
     document.getElementById('loadingScreen').style.display = 'flex';
+    document.getElementById('authScreen').style.display = 'none';
     let session = null;
     for (let i = 0; i < 20 && !session; i++) {
       await new Promise(r => setTimeout(r, 500));
@@ -2575,6 +2581,7 @@ async function initApp() {
         if (data?.session?.user) session = data.session;
       } catch(e) {}
     }
+    _oauthProcessing = false;
     if (session?.user) {
       currentUser = session.user;
       await loadUserProfile();
@@ -2583,7 +2590,7 @@ async function initApp() {
       document.getElementById('authScreen').style.display = 'flex';
     }
   } else {
-    // Normal page load — single getSession() check, 8s safety guard
+    // Normal page load — check existing session, 8s safety guard in case getSession hangs.
     const guard = setTimeout(() => {
       if (document.getElementById('loadingScreen').style.display !== 'none') {
         document.getElementById('loadingScreen').style.display = 'none';
@@ -7558,30 +7565,28 @@ function closeWelcomePopup() {
 initApp();
 
 // ── BFCACHE FIX — mobile Safari OAuth ──
-// When Safari restores this page from the Back-Forward Cache after a Google OAuth
-// redirect, the old JS context resumes and initApp() doesn't re-run. The auth tokens
-// sit in the URL hash but nothing picks them up. Detect the restore and re-poll.
+// Safari restores pages from Back-Forward Cache (bfcache) when navigating back.
+// After an OAuth redirect, Supabase immediately cleans the URL via replaceState,
+// stripping the tokens. If bfcache then restores the pre-login page state,
+// currentUser is null and the URL is clean — so we CANNOT rely on URL tokens.
+// Instead, always check getSession() directly whenever bfcache restores with no user.
 window.addEventListener('pageshow', function(e) {
   if (!e.persisted) return; // Normal load — initApp() already handled it
-  const url = window.location.href;
-  const hasTokens = url.includes('access_token') || url.includes('?code=') || url.includes('&code=');
-  if (!hasTokens || currentUser) return; // Nothing to do
-  // Page was bfcache-restored with auth tokens in URL and no logged-in user — re-poll
+  if (currentUser) return;  // Restored with valid logged-in state — nothing to do
+  // Bfcache restored with no user. Session may be in localStorage even if URL is clean.
   document.getElementById('loadingScreen').style.display = 'flex';
   document.getElementById('authScreen').style.display = 'none';
   (async () => {
-    let session = null;
-    for (let i = 0; i < 20 && !session; i++) {
-      await new Promise(r => setTimeout(r, 500));
-      try {
-        const { data } = await sb.auth.getSession();
-        if (data?.session?.user) session = data.session;
-      } catch(e) {}
-    }
-    if (session?.user) {
-      currentUser = session.user;
-      await loadUserProfile();
-    } else {
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session?.user) {
+        currentUser = session.user;
+        await loadUserProfile();
+      } else {
+        document.getElementById('loadingScreen').style.display = 'none';
+        document.getElementById('authScreen').style.display = 'flex';
+      }
+    } catch(e) {
       document.getElementById('loadingScreen').style.display = 'none';
       document.getElementById('authScreen').style.display = 'flex';
     }
