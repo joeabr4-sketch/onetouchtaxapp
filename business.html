@@ -2004,6 +2004,13 @@ body.help-mode .main{padding-top:34px}
                   <div class="toggle-opt" id="set-vat-n" onclick="setSettingsVAT(false)">❌ No</div>
                 </div>
               </div>
+              <div class="set-field">
+                <label>Registered for PAYE</label>
+                <div class="toggle-row" style="margin-top:6px">
+                  <div class="toggle-opt" id="set-paye-y" onclick="setSettingsPAYE(true)">👥 Yes</div>
+                  <div class="toggle-opt" id="set-paye-n" onclick="setSettingsPAYE(false)">🙋 No</div>
+                </div>
+              </div>
             </div>
             <div id="set-vat-fields" style="display:none">
               <div class="set-grid" style="margin-bottom:8px">
@@ -3898,6 +3905,12 @@ function setSettingsVAT(isVat) {
   if (n) n.className = 'toggle-opt' + (!isVat ? ' on' : '');
   if (fields) fields.style.display = isVat ? 'block' : 'none';
 }
+function setSettingsPAYE(isPaye) {
+  const y = document.getElementById('set-paye-y');
+  const n = document.getElementById('set-paye-n');
+  if (y) y.className = 'toggle-opt' + (isPaye ? ' on' : '');
+  if (n) n.className = 'toggle-opt' + (!isPaye ? ' on' : '');
+}
 
 function loadSettings() {
   if (!userProfile) return;
@@ -3912,14 +3925,16 @@ function loadSettings() {
   if(f('set-acc')) f('set-acc').value = userProfile.bank_account||'';
   if(f('set-branch')) f('set-branch').value = userProfile.bank_branch||'';
   if(f('set-acctype')) f('set-acctype').value = userProfile.bank_type||'Current / Cheque';
-  // VAT registration section
+  // VAT + PAYE registration
   setSettingsVAT(isVatRegistered());
+  setSettingsPAYE(!!userProfile.has_paye);
   if(f('set-vat')) f('set-vat').value = userProfile.vat_number||'';
   if(f('set-vat-date')) f('set-vat-date').value = userProfile.vat_registration_date||'';
 }
 
 async function saveSettings() {
-  const isVat = document.getElementById('set-vat-y')?.classList.contains('on') || false;
+  const isVat  = document.getElementById('set-vat-y')?.classList.contains('on')  || false;
+  const isPaye = document.getElementById('set-paye-y')?.classList.contains('on') || false;
   const vatNum = document.getElementById('set-vat')?.value.trim() || '';
   const vatDate = document.getElementById('set-vat-date')?.value || '';
   if (isVat && !vatNum) { showToast('Please enter your VAT number', 'var(--amber)'); return; }
@@ -3933,6 +3948,7 @@ async function saveSettings() {
     vat_registered: isVat,
     vat_number: isVat ? vatNum : '',
     vat_registration_date: isVat ? (vatDate || null) : null,
+    has_paye: isPaye,
     company_phone: document.getElementById('set-phone')?.value.trim()||'',
     company_address: document.getElementById('set-address')?.value.trim()||'',
     bank_name: document.getElementById('set-bank')?.value.trim()||'',
@@ -4037,12 +4053,9 @@ function getDeadlines(today, profile) {
 }
 
 function dimPassedCalMonths() {
-  // SA financial year: March(2)=0 ... February(1)=11 in FY position
-  const fyOrder = [2,3,4,5,6,7,8,9,10,11,0,1];
-  const curFYPos = fyOrder.indexOf(new Date().getMonth());
+  const curMonth = new Date().getMonth();
   document.querySelectorAll('.cal-card[data-month]').forEach(card => {
-    const cardFYPos = fyOrder.indexOf(parseInt(card.dataset.month));
-    card.classList.toggle('cal-past', cardFYPos < curFYPos);
+    card.classList.toggle('cal-past', parseInt(card.dataset.month) < curMonth);
   });
 }
 
