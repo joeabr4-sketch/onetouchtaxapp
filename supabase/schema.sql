@@ -436,3 +436,8 @@ CREATE POLICY "Users manage own annual summaries" ON annual_summaries
 -- Stores the recurring subscription token from PayFast IPN so we can call
 -- the cancel API on the user's behalf instead of handling it manually.
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS payfast_token text;
+
+-- ── M13: Business registration and tax reference ──
+-- Displayed on bookkeeper pack PDFs so the accountant has all the details needed.
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS registration_number text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS tax_reference text;

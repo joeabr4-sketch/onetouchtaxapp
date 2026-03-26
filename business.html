@@ -288,7 +288,8 @@ h1,h2,h3,.logo-text,.stat-value{font-family:'Syne',sans-serif}
 
 /* ── CALENDAR ── */
 .cal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.cal-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden}
+.cal-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden;transition:opacity .2s}
+.cal-card.cal-past{opacity:.35;pointer-events:none}
 .cal-head{padding:11px 14px;background:rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.07);font-family:'Syne',sans-serif;font-size:12px;font-weight:700}
 .cal-body{padding:10px}
 .cal-dl{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;font-size:11px;margin-bottom:5px}
@@ -922,6 +923,11 @@ body.help-mode .main{padding-top:34px}
   <div class="ob-card">
     <div class="ob-title">Set up your business 🏢</div>
     <div class="ob-sub">Let's get you set up.</div>
+    <div class="ob-dots" style="display:flex;justify-content:center;gap:8px;margin-bottom:20px">
+      <div class="ob-dot on" id="od1"></div>
+      <div class="ob-dot" id="od2"></div>
+    </div>
+    <div id="obStepLabel" class="ob-step-label">Step 1 of 2</div>
     <div id="obs1">
       <div class="f-group" style="margin-bottom:18px">
         <label class="f-label" style="margin-bottom:8px">Choose your language</label>
@@ -946,7 +952,22 @@ body.help-mode .main{padding-top:34px}
           <div class="toggle-opt on" id="paye-n" onclick="setToggle('paye','no')">🙋 No</div>
         </div>
       </div>
+      <button class="ob-btn" onclick="obStep()">Next — Banking Details →</button>
+    </div>
+    <div id="obs2" style="display:none">
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:16px;line-height:1.6">These details appear on your invoices so clients know where to pay. You can skip and add them in Settings later.</div>
+      <div class="f-group"><label class="f-label">Bank Name</label><input class="f-input" id="ob-bank" placeholder="e.g. FNB, Standard Bank, Absa" /></div>
+      <div class="f-group"><label class="f-label">Account Number</label><input class="f-input" id="ob-acc" placeholder="XXXXXXXXXX" /></div>
+      <div class="f-group"><label class="f-label">Branch Code</label><input class="f-input" id="ob-branch" placeholder="e.g. 250655" /></div>
+      <div class="f-group"><label class="f-label">Account Type</label>
+        <select class="f-input" id="ob-acctype" style="cursor:pointer">
+          <option>Current / Cheque</option>
+          <option>Savings</option>
+          <option>Business</option>
+        </select>
+      </div>
       <button class="ob-btn" onclick="saveProfile()">Launch My Dashboard →</button>
+      <button type="button" onclick="saveProfile()" style="width:100%;background:none;border:none;color:var(--text-3);font-size:12px;margin-top:8px;cursor:pointer;padding:4px">Skip for now</button>
     </div>
   </div>
 </div>
@@ -972,14 +993,14 @@ body.help-mode .main{padding-top:34px}
       <div class="s-section" data-i18n="nav_overview">Overview</div>
       <button class="s-btn active" onclick="navToggle('dashboard',this)"><span class="s-icon">📊</span><span data-i18n="nav_dashboard">Dashboard</span></button>
       <button class="s-btn" onclick="navToggle('calendar',this)"><span class="s-icon">📅</span><span data-i18n="nav_calendar">Compliance Calendar</span></button>
-      <button class="s-btn" onclick="navToggle('checklist',this)"><span class="s-icon">✅</span><span data-i18n="nav_checklists">Checklists</span></button>
-      <button class="s-btn" onclick="navToggle('history',this)"><span class="s-icon">📁</span><span data-i18n="nav_history">Financial History</span></button>
       <div class="s-section" data-i18n="nav_business_tools">Business Tools</div>
       <button class="s-btn" onclick="navToggle('financials',this)"><span class="s-icon">📈</span><span data-i18n="nav_financials">Financials & P&L</span></button>
       <button class="s-btn" onclick="navToggle('invoices',this)"><span class="s-icon">🧾</span><span data-i18n="nav_invoices">Invoices</span></button>
       <button class="s-btn" onclick="navToggle('reconcile',this)"><span class="s-icon">🔗</span><span data-i18n="nav_reconcile" style="flex:1">Reconciliation<span style="display:block;font-size:9.5px;color:var(--text-3);font-weight:400;margin-top:1px">Match transactions to invoices</span></span><span class="plan-lock nav-lock" id="lock-reconcile">PRO</span></button>
       <button class="s-btn" onclick="navToggle('payroll',this)"><span class="s-icon">👥</span><span data-i18n="nav_payroll">Payroll</span><span class="plan-lock nav-lock" id="lock-payroll">FULL</span></button>
+      <button class="s-btn" onclick="navToggle('checklist',this)"><span class="s-icon">✅</span><span data-i18n="nav_checklists">Accountant Checklist</span></button>
       <button class="s-btn" onclick="navToggle('handoff',this)"><span class="s-icon">📦</span><span data-i18n="nav_bookkeeper">Bookkeeper Pack</span><span class="plan-lock nav-lock" id="lock-handoff">PRO</span></button>
+      <button class="s-btn" onclick="navToggle('history',this)"><span class="s-icon">📁</span><span data-i18n="nav_history">Financial History</span></button>
       <div class="s-section" data-i18n="nav_ai_tools">AI Tools</div>
       <button class="s-btn" onclick="navToggle('assistant',this)"><span class="s-icon">🤖</span><span data-i18n="nav_assistant">Tax Assistant</span></button>
     </nav>
@@ -1234,78 +1255,26 @@ body.help-mode .main{padding-top:34px}
         <p style="font-size:13px;color:var(--text-2)">All SARS deadlines for the year. Plan ahead to stay compliant.</p>
       </div>
       <div class="cal-grid">
-        <div class="cal-card"><div class="cal-head">January</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Dec payroll)<div class="cal-dl-date">7 Jan</div></div><div class="cal-dl amber">VAT201 (Nov–Dec)<div class="cal-dl-date">31 Jan</div></div></div></div>
-        <div class="cal-card"><div class="cal-head">February</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Jan payroll)<div class="cal-dl-date">7 Feb</div></div><div class="cal-dl red">IRP6 2nd Period<div class="cal-dl-date">28 Feb</div></div></div></div>
-        <div class="cal-card"><div class="cal-head">March</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Feb payroll)<div class="cal-dl-date">7 Mar</div></div><div class="cal-dl amber">VAT201 (Jan–Feb)<div class="cal-dl-date">25 Mar</div></div></div></div>
-        <div class="cal-card"><div class="cal-head">April</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Mar payroll)<div class="cal-dl-date">7 Apr</div></div><div class="cal-dl amber">IRP6 1st Period<div class="cal-dl-date">1 Apr</div></div></div></div>
-        <div class="cal-card"><div class="cal-head">May</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Apr payroll)<div class="cal-dl-date">7 May</div></div><div class="cal-dl amber">VAT201 (Mar–Apr)<div class="cal-dl-date">25 May</div></div></div></div>
-        <div class="cal-card"><div class="cal-head">June</div><div class="cal-body"><div class="cal-dl blue">EMP201 (May payroll)<div class="cal-dl-date">7 Jun</div></div><div class="cal-dl green">ITR14 Annual Return<div class="cal-dl-date">30 Jun</div></div></div></div>
-        <div class="cal-card"><div class="cal-head">July</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Jun payroll)<div class="cal-dl-date">7 Jul</div></div><div class="cal-dl amber">VAT201 (May–Jun)<div class="cal-dl-date">25 Jul</div></div></div></div>
-        <div class="cal-card"><div class="cal-head">August</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Jul payroll)<div class="cal-dl-date">7 Aug</div></div><div class="cal-dl amber">IRP6 1st Period<div class="cal-dl-date">31 Aug</div></div></div></div>
-        <div class="cal-card"><div class="cal-head">September</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Aug payroll)<div class="cal-dl-date">7 Sep</div></div><div class="cal-dl amber">VAT201 (Jul–Aug)<div class="cal-dl-date">25 Sep</div></div></div></div>
-        <div class="cal-card"><div class="cal-head">October</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Sep payroll)<div class="cal-dl-date">7 Oct</div></div><div class="cal-dl green">EMP501 Recon<div class="cal-dl-date">31 Oct</div></div></div></div>
-        <div class="cal-card"><div class="cal-head">November</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Oct payroll)<div class="cal-dl-date">7 Nov</div></div><div class="cal-dl amber">VAT201 (Sep–Oct)<div class="cal-dl-date">25 Nov</div></div></div></div>
-        <div class="cal-card"><div class="cal-head">December</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Nov payroll)<div class="cal-dl-date">7 Dec</div></div><div class="cal-dl red">IRP6 2nd Period<div class="cal-dl-date">31 Jan</div></div></div></div>
+        <div class="cal-card" data-month="0"><div class="cal-head">January</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Dec payroll)<div class="cal-dl-date">7 Jan</div></div><div class="cal-dl amber">VAT201 (Nov–Dec)<div class="cal-dl-date">31 Jan</div></div></div></div>
+        <div class="cal-card" data-month="1"><div class="cal-head">February</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Jan payroll)<div class="cal-dl-date">7 Feb</div></div><div class="cal-dl red">IRP6 2nd Period<div class="cal-dl-date">28 Feb</div></div></div></div>
+        <div class="cal-card" data-month="2"><div class="cal-head">March</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Feb payroll)<div class="cal-dl-date">7 Mar</div></div><div class="cal-dl amber">VAT201 (Jan–Feb)<div class="cal-dl-date">25 Mar</div></div></div></div>
+        <div class="cal-card" data-month="3"><div class="cal-head">April</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Mar payroll)<div class="cal-dl-date">7 Apr</div></div><div class="cal-dl amber">IRP6 1st Period<div class="cal-dl-date">1 Apr</div></div></div></div>
+        <div class="cal-card" data-month="4"><div class="cal-head">May</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Apr payroll)<div class="cal-dl-date">7 May</div></div><div class="cal-dl amber">VAT201 (Mar–Apr)<div class="cal-dl-date">25 May</div></div></div></div>
+        <div class="cal-card" data-month="5"><div class="cal-head">June</div><div class="cal-body"><div class="cal-dl blue">EMP201 (May payroll)<div class="cal-dl-date">7 Jun</div></div><div class="cal-dl green">ITR14 Annual Return<div class="cal-dl-date">30 Jun</div></div></div></div>
+        <div class="cal-card" data-month="6"><div class="cal-head">July</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Jun payroll)<div class="cal-dl-date">7 Jul</div></div><div class="cal-dl amber">VAT201 (May–Jun)<div class="cal-dl-date">25 Jul</div></div></div></div>
+        <div class="cal-card" data-month="7"><div class="cal-head">August</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Jul payroll)<div class="cal-dl-date">7 Aug</div></div><div class="cal-dl amber">IRP6 1st Period<div class="cal-dl-date">31 Aug</div></div></div></div>
+        <div class="cal-card" data-month="8"><div class="cal-head">September</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Aug payroll)<div class="cal-dl-date">7 Sep</div></div><div class="cal-dl amber">VAT201 (Jul–Aug)<div class="cal-dl-date">25 Sep</div></div></div></div>
+        <div class="cal-card" data-month="9"><div class="cal-head">October</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Sep payroll)<div class="cal-dl-date">7 Oct</div></div><div class="cal-dl green">EMP501 Recon<div class="cal-dl-date">31 Oct</div></div></div></div>
+        <div class="cal-card" data-month="10"><div class="cal-head">November</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Oct payroll)<div class="cal-dl-date">7 Nov</div></div><div class="cal-dl amber">VAT201 (Sep–Oct)<div class="cal-dl-date">25 Nov</div></div></div></div>
+        <div class="cal-card" data-month="11"><div class="cal-head">December</div><div class="cal-body"><div class="cal-dl blue">EMP201 (Nov payroll)<div class="cal-dl-date">7 Dec</div></div><div class="cal-dl red">IRP6 2nd Period<div class="cal-dl-date">31 Jan</div></div></div></div>
       </div>
     </div>
 
     <!-- ═══ CHECKLISTS ═══ -->
     <div class="section" id="section-checklist">
-      <div class="help-banner"><div class="help-banner-title">💡 Compliance Checklists</div><div class="help-banner-body">Tick-off checklists for VAT, payroll, and year-end compliance. They don't auto-complete — you tick them manually as you do each task. Think of them as a monthly and annual checklist to make sure you haven't missed anything before submitting to SARS.</div><div class="help-banner-actions"><span>Tick items as you complete them</span><span>Progress saves to your account</span></div></div>
-      <div style="margin-bottom:20px"><h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:4px">✅ Compliance Checklists</h2><p style="font-size:13px;color:var(--text-2)">Tick off as you go. Progress saves to your account.</p></div>
-      <div class="g2">
-        <div class="card">
-          <div class="card-head"><div class="card-title">VAT201 Preparation</div><span class="badge b-amber" id="vatCheckBadge">Due 25th</span></div>
-          <div style="padding:14px 20px">
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">All sales invoices captured for the period</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">All supplier invoices captured</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Bank transactions reconciled</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Output VAT calculated (15% on sales)</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Input VAT identified on qualifying purchases</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Zero-rated / exempt supplies noted</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">VAT201 completed and submitted on eFiling</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Payment arranged if VAT payable to SARS</div></div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-head"><div class="card-title">EMP201 Preparation</div><span class="badge b-red" id="empCheckBadge">Due 7th</span></div>
-          <div style="padding:14px 20px">
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Payroll run completed for the month</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">All employee salaries captured correctly</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">PAYE calculated per employee (tax tables)</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">UIF calculated (1% employee + 1% employer)</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">SDL calculated (1% of leviable amount)</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Payslips issued to all employees</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">EMP201 submitted on SARS eFiling</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Payment made to SARS before 7th</div></div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-head"><div class="card-title">IRP6 Provisional Tax</div><span class="badge b-blue">Bi-Annual</span></div>
-          <div style="padding:14px 20px">
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Estimated annual income calculated</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Allowable deductions identified</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Taxable income estimated</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Tax calculated using SARS brackets</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Prior tax payments deducted</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">IRP6 submitted on eFiling by deadline</div></div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-head"><div class="card-title">Year-End Preparation</div><span class="badge b-green">Annual</span></div>
-          <div style="padding:14px 20px">
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">All invoices captured for full financial year</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Bank transactions uploaded and reconciled</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">P&L statement reviewed and accurate</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">All VAT submissions filed and paid</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Bookkeeper pack generated and sent</div></div>
-            <div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">Accountant handed ITR14 prep pack</div></div>
-            <div style="padding:14px 20px 18px;border-top:1px solid var(--border);margin-top:8px">
-              <button onclick="showYearCloseModal()" style="width:100%;background:rgba(212,168,67,.08);border:1.5px solid rgba(212,168,67,.3);color:var(--gold);padding:11px;border-radius:9px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(212,168,67,.14)'" onmouseout="this.style.background='rgba(212,168,67,.08)'">🗓 Close Financial Year & Start Fresh</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div class="help-banner"><div class="help-banner-title">💡 Accountant Checklist</div><div class="help-banner-body">Your checklist for this month — based on what's due on the compliance calendar and your business registration (VAT, PAYE, provisional tax). Some items auto-tick when your books confirm it's done. The rest you tick manually as you go.</div><div class="help-banner-actions"><span>Shows only what's relevant to your business this month</span><span>Auto-ticks when reconciliation or payroll is complete</span></div></div>
+      <div style="margin-bottom:20px"><h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:4px">✅ Accountant Checklist</h2><p style="font-size:13px;color:var(--text-2)" id="checklistSubtitle">This month's submissions and preparation tasks.</p></div>
+      <div class="g2" id="complianceChecklistCards"></div>
     </div>
 
     <!-- ═══ FINANCIAL HISTORY ═══ -->
@@ -1645,14 +1614,13 @@ body.help-mode .main{padding-top:34px}
           <div class="handoff-item"><div class="hi-icon">🧾</div><div><div class="hi-title">Full Invoice Register</div><div class="hi-desc">All income and expense entries with dates</div></div><div class="hi-status" id="hi-inv-status">⏳</div></div>
           <div class="handoff-item"><div class="hi-icon">📋</div><div><div class="hi-title">Tax Liability Summary</div><div class="hi-desc">VAT, PAYE, provisional tax estimates</div></div><div class="hi-status" id="hi-tax-status">⏳</div></div>
         </div>
+        <div id="hi-compliance-items" style="display:none;grid-template-columns:1fr 1fr;gap:10px;border-top:1px solid var(--border);padding:12px 20px 16px"></div>
       </div>
       <!-- FINANCIAL YEAR SELECTOR -->
       <div class="card" style="margin-bottom:16px">
         <div class="card-head"><div class="card-title">Select Financial Year</div></div>
         <div style="padding:14px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-          <select id="packYear" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13.5px;outline:none" onchange="updatePackStatus()">
-            <option>2024/25</option><option>2023/24</option><option>2022/23</option>
-          </select>
+          <select id="packYear" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13.5px;outline:none" onchange="updatePackStatus()"></select>
           <button class="download-pack-btn" onclick="showSarsDisclaimer('downloadFullPack')">📦 Download Full Pack</button>
         </div>
       </div>
@@ -2020,6 +1988,8 @@ body.help-mode .main{padding-top:34px}
             <div class="set-grid">
               <div class="set-field"><label>Business Name</label><input id="set-biz" placeholder="e.g. Nkosi Electrical (Pty) Ltd" /></div>
               <div class="set-field"><label>Owner / Director Name</label><input id="set-owner" placeholder="e.g. Themba Nkosi" /></div>
+              <div class="set-field"><label>Company Registration Number</label><input id="set-reg" placeholder="e.g. 2023/123456/07" /></div>
+              <div class="set-field"><label>Income Tax Reference Number</label><input id="set-taxref" placeholder="e.g. 9XXXXXXXXX" /></div>
               <div class="set-field"><label>Phone Number</label><input id="set-phone" placeholder="+27 82 000 0000" /></div>
               <div class="set-field full"><label>Business Address</label><input id="set-address" placeholder="123 Main Street, Johannesburg, 2001" /></div>
             </div>
@@ -2156,14 +2126,14 @@ body.help-mode .main{padding-top:34px}
     <div class="mob-drawer-section">Overview</div>
     <button class="mob-drawer-item" onclick="mobNav('dashboard');closeMobDrawer()"><span>📊</span> Dashboard</button>
     <button class="mob-drawer-item" onclick="mobNav('calendar');closeMobDrawer()"><span>📅</span> Compliance Calendar</button>
-    <button class="mob-drawer-item" onclick="mobNav('checklist');closeMobDrawer()"><span>✅</span> Checklists</button>
-    <button class="mob-drawer-item" onclick="mobNav('history');closeMobDrawer()"><span>📁</span> Financial History</button>
     <div class="mob-drawer-section">Business Tools</div>
     <button class="mob-drawer-item" onclick="mobNav('financials');closeMobDrawer()"><span>📈</span> Financials &amp; P&amp;L</button>
     <button class="mob-drawer-item" onclick="mobNav('invoices');closeMobDrawer()"><span>🧾</span> Invoices</button>
     <button class="mob-drawer-item" onclick="mobNav('reconcile');closeMobDrawer()"><span>🔗</span> Reconciliation</button>
     <button class="mob-drawer-item" onclick="mobNav('payroll');closeMobDrawer()"><span>👥</span> Payroll</button>
+    <button class="mob-drawer-item" onclick="mobNav('checklist');closeMobDrawer()"><span>✅</span> Accountant Checklist</button>
     <button class="mob-drawer-item" onclick="mobNav('handoff');closeMobDrawer()"><span>📦</span> Bookkeeper Pack</button>
+    <button class="mob-drawer-item" onclick="mobNav('history');closeMobDrawer()"><span>📁</span> Financial History</button>
     <div class="mob-drawer-section">AI Tools</div>
     <button class="mob-drawer-item" onclick="mobNav('assistant');closeMobDrawer()"><span>🤖</span> Tax Assistant</button>
     <div class="mob-drawer-foot">
@@ -3018,7 +2988,11 @@ async function saveProfile() {
     is_provisional: false,
     year_end: 'February',
     plan: 'free',
-    ai_calls: 0
+    ai_calls: 0,
+    bank_name:    document.getElementById('ob-bank')?.value.trim()    || '',
+    bank_account: document.getElementById('ob-acc')?.value.trim()     || '',
+    bank_branch:  document.getElementById('ob-branch')?.value.trim()  || '',
+    bank_type:    document.getElementById('ob-acctype')?.value        || 'Current / Cheque',
   };
 
   // Save profile — guard dashboard init behind successful save
@@ -3081,6 +3055,7 @@ async function initDashboard() {
   await loadPayrollRuns();
   buildDeadlines();
   buildDashChecklist();
+  buildComplianceChecklist();
   renderComplianceScore();
   initPOPIA();
   loadSettings();
@@ -3248,6 +3223,7 @@ function showSection(name, btn) {
   if (btn) btn.classList.add('active');
   document.getElementById('pageTitle').textContent = sec?.querySelector('h2')?.textContent?.replace(/^[^\w]+/, '') || name;
   if (name === 'dashboard') { renderObChecklist(); _refreshReconTxCount(); }
+  if (name === 'checklist') { buildComplianceChecklist(); }
   if (name === 'financials') { renderFinancials(); updateTipsState(); }
   if (name === 'reconcile') renderReconciliation();
   if (name === 'handoff') { updatePackStatus(); updateHandoffReconBanner(); }
@@ -3926,6 +3902,8 @@ function loadSettings() {
   const f = id => { const el=document.getElementById(id); if(el) return el; };
   if(f('set-biz')) f('set-biz').value = userProfile.biz_name||'';
   if(f('set-owner')) f('set-owner').value = userProfile.owner_name||'';
+  if(f('set-reg')) f('set-reg').value = userProfile.registration_number||'';
+  if(f('set-taxref')) f('set-taxref').value = userProfile.tax_reference||'';
   if(f('set-phone')) f('set-phone').value = userProfile.company_phone||'';
   if(f('set-address')) f('set-address').value = userProfile.company_address||'';
   if(f('set-bank')) f('set-bank').value = userProfile.bank_name||'';
@@ -3948,6 +3926,8 @@ async function saveSettings() {
   const updates = {
     biz_name: document.getElementById('set-biz')?.value.trim()||userProfile.biz_name,
     owner_name: document.getElementById('set-owner')?.value.trim()||'',
+    registration_number: document.getElementById('set-reg')?.value.trim()||'',
+    tax_reference: document.getElementById('set-taxref')?.value.trim()||'',
     vat_registered: isVat,
     vat_number: isVat ? vatNum : '',
     vat_registration_date: isVat ? (vatDate || null) : null,
@@ -4054,8 +4034,19 @@ function getDeadlines(today, profile) {
   return dl.sort((a,b) => a.date - b.date);
 }
 
+function dimPassedCalMonths() {
+  // SA financial year: March(2)=0 ... February(1)=11 in FY position
+  const fyOrder = [2,3,4,5,6,7,8,9,10,11,0,1];
+  const curFYPos = fyOrder.indexOf(new Date().getMonth());
+  document.querySelectorAll('.cal-card[data-month]').forEach(card => {
+    const cardFYPos = fyOrder.indexOf(parseInt(card.dataset.month));
+    card.classList.toggle('cal-past', cardFYPos < curFYPos);
+  });
+}
+
 function buildDeadlines() {
   markCalReviewed();
+  dimPassedCalMonths();
   const today = new Date();
   const deadlines = getDeadlines(today, userProfile);
   const list = document.getElementById('deadlineList');
@@ -4172,10 +4163,177 @@ function renderComplianceScore() {
 }
 
 // ── CHECKLIST ──
+// ── Checklist card definitions ──
+const CL_CARDS = {
+  vat201: {
+    title: 'VAT201 Preparation', badge: 'Due 25th', badgeColor: 'b-amber',
+    items: [
+      { text: 'All sales invoices captured for the period',      auto: null },
+      { text: 'All supplier invoices captured',                  auto: null },
+      { text: 'Bank transactions reconciled',                    auto: 'recon' },
+      { text: 'Output VAT calculated (15% on sales)',            auto: null },
+      { text: 'Input VAT identified on qualifying purchases',    auto: null },
+      { text: 'Zero-rated / exempt supplies noted',              auto: null },
+      { text: 'VAT201 completed and submitted on eFiling',       auto: null },
+      { text: 'Payment arranged if VAT payable to SARS',         auto: null },
+    ]
+  },
+  emp201: {
+    title: 'EMP201 Preparation', badge: 'Due 7th', badgeColor: 'b-red',
+    items: [
+      { text: 'Payroll run completed for the month',             auto: 'payroll' },
+      { text: 'All employee salaries captured correctly',        auto: 'payroll' },
+      { text: 'PAYE calculated per employee (tax tables)',       auto: 'payroll' },
+      { text: 'UIF calculated (1% employee + 1% employer)',      auto: 'payroll' },
+      { text: 'SDL calculated (1% of leviable amount)',          auto: 'payroll' },
+      { text: 'Payslips issued to all employees',                auto: null },
+      { text: 'EMP201 submitted on SARS eFiling',                auto: null },
+      { text: 'Payment made to SARS before 7th',                 auto: null },
+    ]
+  },
+  irp6: {
+    title: 'IRP6 Provisional Tax', badge: 'Bi-Annual', badgeColor: 'b-blue',
+    items: [
+      { text: 'Estimated annual income calculated',              auto: null },
+      { text: 'Allowable deductions identified',                 auto: null },
+      { text: 'Taxable income estimated',                        auto: null },
+      { text: 'Tax calculated using SARS brackets',              auto: null },
+      { text: 'Prior tax payments deducted',                     auto: null },
+      { text: 'IRP6 submitted on eFiling by deadline',           auto: null },
+    ]
+  },
+  itr14: {
+    title: 'ITR14 Annual Return', badge: 'Due 30 Jun', badgeColor: 'b-green',
+    items: [
+      { text: 'All invoices captured for full financial year',   auto: null },
+      { text: 'Bank transactions uploaded and reconciled',       auto: 'recon' },
+      { text: 'P&L statement reviewed and accurate',             auto: null },
+      { text: 'All VAT submissions filed and paid',              auto: null },
+      { text: 'Bookkeeper pack generated and sent',              auto: null },
+      { text: 'Accountant handed ITR14 prep pack',               auto: null },
+    ]
+  },
+  yearend: {
+    title: 'Year-End Preparation', badge: 'Annual', badgeColor: 'b-green',
+    yearClose: true,
+    items: [
+      { text: 'All invoices captured for full financial year',   auto: null },
+      { text: 'Bank transactions uploaded and reconciled',       auto: 'recon' },
+      { text: 'P&L statement reviewed and accurate',             auto: null },
+      { text: 'All VAT submissions filed and paid',              auto: null },
+      { text: 'Bookkeeper pack generated and sent',              auto: null },
+      { text: 'Accountant handed ITR14 prep pack',               auto: null },
+    ]
+  },
+  emp501: {
+    title: 'EMP501 Annual Reconciliation', badge: 'Due 31 Oct', badgeColor: 'b-green',
+    items: [
+      { text: 'All monthly EMP201 submissions confirmed',        auto: null },
+      { text: 'Employee IRP5 / IT3(a) certificates prepared',   auto: null },
+      { text: 'Payroll totals reconciled for full tax year',     auto: null },
+      { text: 'EMP501 submitted on SARS eFiling',                auto: null },
+    ]
+  },
+};
+
+// Month → card types (0=Jan … 11=Dec)
+const CL_MONTH_MAP = {
+  0:  ['emp201','vat201'],
+  1:  ['emp201','irp6','yearend'],
+  2:  ['emp201','vat201'],
+  3:  ['emp201','irp6'],
+  4:  ['emp201','vat201'],
+  5:  ['emp201','itr14'],
+  6:  ['emp201','vat201'],
+  7:  ['emp201','irp6'],
+  8:  ['emp201','vat201'],
+  9:  ['emp201','emp501'],
+  10: ['emp201','vat201'],
+  11: ['emp201','irp6'],
+};
+
+function buildComplianceChecklist() {
+  const el = document.getElementById('complianceChecklistCards');
+  if (!el) return;
+
+  const now    = new Date();
+  const month  = now.getMonth();
+  const thisMonth = `${now.getFullYear()}-${String(month + 1).padStart(2,'0')}`;
+  const monthName = now.toLocaleString('en-ZA', { month: 'long' });
+
+  // Auto-check conditions
+  const reconDone  = (reconSession?.confidence || 0) === 100;
+  const payrollDone = !!(payrollRuns || []).find(r => r.period_month === thisMonth);
+
+  // Profile filter: which card types apply to this user
+  const profileAllows = {
+    emp201:  !!userProfile?.has_paye,
+    vat201:  isVatRegistered(),
+    irp6:    !!userProfile?.is_provisional,
+    itr14:   true,
+    yearend: true,
+    emp501:  !!userProfile?.has_paye,
+  };
+
+  const cardTypes = (CL_MONTH_MAP[month] || []).filter(t => profileAllows[t]);
+
+  // Update subtitle
+  const sub = document.getElementById('checklistSubtitle');
+  if (sub) sub.textContent = cardTypes.length
+    ? `${monthName} — ${cardTypes.length} submission${cardTypes.length > 1 ? 's' : ''} due`
+    : `${monthName} — no submissions due this month based on your profile`;
+
+  if (!cardTypes.length) {
+    el.innerHTML = `<div style="grid-column:1/-1;padding:32px 20px;text-align:center;color:var(--text-3);font-size:13px">No submissions due this month for your business. Check back next month.</div>`;
+    return;
+  }
+
+  el.innerHTML = cardTypes.map(type => {
+    const card = CL_CARDS[type];
+    const itemsHtml = card.items.map(item => {
+      const autoChecked = (item.auto === 'recon' && reconDone) || (item.auto === 'payroll' && payrollDone);
+      const checkedClass = autoChecked ? ' checked' : '';
+      const doneClass    = autoChecked ? ' done' : '';
+      const autoTag      = autoChecked ? ' <span style="font-size:10px;color:var(--blue);margin-left:4px">auto ✓</span>' : '';
+      const clickHandler = autoChecked ? '' : ' onclick="toggleCL(this)"';
+      const cursor       = autoChecked ? 'not-allowed' : 'pointer';
+      return `<div class="cl-item"><div class="cl-box${checkedClass}" style="cursor:${cursor}"${clickHandler}></div><div class="cl-text${doneClass}">${item.text}${autoTag}</div></div>`;
+    }).join('');
+
+    const yearCloseBtn = card.yearClose ? `
+      <div style="padding:14px 20px 18px;border-top:1px solid var(--border);margin-top:8px">
+        <button onclick="showYearCloseModal()" style="width:100%;background:rgba(212,168,67,.08);border:1.5px solid rgba(212,168,67,.3);color:var(--gold);padding:11px;border-radius:9px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(212,168,67,.14)'" onmouseout="this.style.background='rgba(212,168,67,.08)'">🗓 Close Financial Year & Start Fresh</button>
+      </div>` : '';
+
+    return `<div class="card">
+      <div class="card-head"><div class="card-title">${card.title}</div><span class="badge ${card.badgeColor}">${card.badge}</span></div>
+      <div style="padding:14px 20px">${itemsHtml}</div>${yearCloseBtn}
+    </div>`;
+  }).join('');
+}
+
 function buildDashChecklist() {
-  const items = ['Invoices captured this month','Bank transactions reconciled','Payroll processed','VAT201 prepared','IRP6 calculated'];
+  const now = new Date();
+  const month = now.getMonth();
+  const thisMonth = `${now.getFullYear()}-${String(month + 1).padStart(2,'0')}`;
+  const reconDone  = (reconSession?.confidence || 0) === 100;
+  const payrollDone = !!(payrollRuns || []).find(r => r.period_month === thisMonth);
+
+  const items = [
+    { text: 'Invoices captured this month',  auto: invoices.length > 0 },
+    { text: 'Bank transactions reconciled',  auto: reconDone },
+    { text: 'Payroll processed',             auto: payrollDone },
+    { text: 'VAT201 prepared',               auto: false },
+    { text: 'IRP6 calculated',               auto: false },
+  ];
   const el = document.getElementById('dashChecklist'); if (!el) return;
-  el.innerHTML = items.map(item => `<div class="cl-item"><div class="cl-box" onclick="toggleCL(this)"></div><div class="cl-text">${item}</div></div>`).join('');
+  el.innerHTML = items.map(item => {
+    const checkedClass = item.auto ? ' checked' : '';
+    const doneClass    = item.auto ? ' done' : '';
+    const clickHandler = item.auto ? '' : ' onclick="toggleCL(this)"';
+    const cursor       = item.auto ? 'not-allowed' : 'pointer';
+    return `<div class="cl-item"><div class="cl-box${checkedClass}" style="cursor:${cursor}"${clickHandler}></div><div class="cl-text${doneClass}">${item.text}</div></div>`;
+  }).join('');
 }
 function toggleCL(box) {
   box.classList.toggle('checked');
@@ -4229,7 +4387,7 @@ function confirmSarsDisclaimer() {
 }
 
 // ── PDF HELPERS ──
-function makePDFHeader(doc, title, subtitle) {
+function makePDFHeader(doc, title, subtitle, bizDetails) {
   const W=210, M=20;
   doc.setFillColor(15,21,32); doc.rect(0,0,W,36,'F');
   doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(255,255,255);
@@ -4238,7 +4396,27 @@ function makePDFHeader(doc, title, subtitle) {
   doc.text(subtitle, M, 24);
   doc.setFontSize(8); doc.text('Generated: '+new Date().toLocaleDateString('en-ZA'), W-M, 24, {align:'right'});
   doc.setFillColor(79,142,247); doc.rect(0,36,W,2,'F');
-  return 48;
+  if (!bizDetails) return 48;
+  // Business details block — shown when called from bookkeeper pack
+  let y = 44;
+  const details = [];
+  if (bizDetails.biz_name)          details.push(['Business', bizDetails.biz_name]);
+  if (bizDetails.owner_name)         details.push(['Owner / Director', bizDetails.owner_name]);
+  if (bizDetails.registration_number) details.push(['Reg. Number', bizDetails.registration_number]);
+  if (bizDetails.tax_reference)      details.push(['Income Tax Ref.', bizDetails.tax_reference]);
+  if (bizDetails.vat_number)         details.push(['VAT Number', bizDetails.vat_number]);
+  if (details.length) {
+    doc.setFontSize(8); doc.setTextColor(80,100,130);
+    details.forEach(([label, value]) => {
+      doc.text(label + ': ', M, y);
+      doc.setFont('helvetica','bold'); doc.setTextColor(15,21,32);
+      doc.text(value, M + 30, y);
+      doc.setFont('helvetica','normal'); doc.setTextColor(80,100,130);
+      y += 6;
+    });
+    doc.setDrawColor(220,225,235); doc.line(M, y, W-M, y); y += 6;
+  }
+  return y;
 }
 function makePDFRow(doc, label, value, y, shade) {
   const W=210, M=20;
@@ -4395,16 +4573,7 @@ function genIRP6() {
   const ded = parseFloat(document.getElementById('p-ded')?.value)||0;
   const taxable = Math.max(0, income-ded);
   const age = document.getElementById('p-age')?.value||'under65';
-  let tax = 0;
-  if (taxable<=237100) tax=taxable*0.18;
-  else if (taxable<=370500) tax=42678+(taxable-237100)*0.26;
-  else if (taxable<=512800) tax=77362+(taxable-370500)*0.31;
-  else if (taxable<=673000) tax=121475+(taxable-512800)*0.36;
-  else if (taxable<=857900) tax=179147+(taxable-673000)*0.39;
-  else if (taxable<=1817000) tax=251258+(taxable-857900)*0.41;
-  else tax=644489+(taxable-1817000)*0.45;
-  const rebate = age==='under65'?17235:age==='65to74'?17235+9444:17235+9444+3145;
-  const netTax = Math.max(0, tax-rebate);
+  const netTax = calcPAYE(taxable, age) * 12;
   const payePaid = parseFloat(document.getElementById('p-paye')?.value)||0;
   const liable = Math.max(0, netTax-payePaid);
   const period = document.getElementById('p-period')?.value||'1st Period';
@@ -4420,9 +4589,7 @@ function genIRP6() {
   y = makePDFRow(doc,'Estimated Annual Income', 'R '+income.toLocaleString('en-ZA',{minimumFractionDigits:2}), y, true);
   y = makePDFRow(doc,'Less: Allowable Deductions', 'R '+ded.toLocaleString('en-ZA',{minimumFractionDigits:2}), y, false);
   y = makePDFRow(doc,'Taxable Income', 'R '+taxable.toLocaleString('en-ZA',{minimumFractionDigits:2}), y, true);
-  y = makePDFRow(doc,'Gross Tax (SARS brackets)', 'R '+tax.toFixed(2), y, false);
-  y = makePDFRow(doc,'Primary Rebate', 'R '+rebate.toLocaleString('en-ZA',{minimumFractionDigits:2}), y, true);
-  y = makePDFRow(doc,'Net Tax After Rebate', 'R '+netTax.toFixed(2), y, false);
+  y = makePDFRow(doc,'Net Tax After Rebates (SARS brackets)', 'R '+netTax.toFixed(2), y, false);
   y = makePDFRow(doc,'Less: PAYE Paid', 'R '+payePaid.toLocaleString('en-ZA',{minimumFractionDigits:2}), y, true);
   y+=10;
   doc.setFillColor(245,158,11); doc.roundedRect(M,y,210-M*2,16,2,2,'F');
@@ -4702,6 +4869,7 @@ async function sendChat() {
   const msg = input.value.trim(); if (!msg) return;
   const canProceed = await checkAICalls(); if (!canProceed) return;
   input.value = '';
+  const priorHistory = getChatHistory();
   addMsg('user', msg);
   document.getElementById('sendBtn').disabled = true;
   addMsg('ai', null, true);
@@ -4709,7 +4877,7 @@ async function sendChat() {
     const screenCtx = buildScreenContext(currentSection);
     const data = await aiCall({model:'claude-sonnet-4-20250514',max_tokens:800,
       system:`You are a South African business tax assistant embedded in OneTouch TaxApp. Specialise in SARS, VAT, PAYE, provisional tax and eFiling. You are an intelligent co-pilot — use the user's current context to give specific, relevant advice rather than generic answers.\n\nUSER CONTEXT:\n${screenCtx}\n\nINSTRUCTIONS:\n- Reference the user's current screen and data in your response where relevant\n- Be concise, practical and actionable\n- Do not make decisions for the user\n- Never guarantee correctness of figures — treat all outputs as estimates for review\n- Never instruct the user to submit to SARS without reviewing first\n- If the user asks about app features or billing, direct them to the "App Help" tab`,
-      messages: getChatHistory().concat([{role:'user',content:msg}])});
+      messages: priorHistory.concat([{role:'user',content:msg}])});
     removeTyping();
     addMsg('ai', data.content?.[0]?.text||'Sorry, please try again.');
     recordAICallUsed();
@@ -6225,11 +6393,49 @@ function updateHandoffReconBanner() {
 }
 
 // ── BOOKKEEPER PACK ──
+function currentFinancialYear() {
+  const now = new Date();
+  const y = now.getFullYear();
+  // SA tax year: March–February. If month >= March (2), we're in year/year+1
+  return now.getMonth() >= 2
+    ? `${y}/${String(y + 1).slice(2)}`
+    : `${y - 1}/${String(y).slice(2)}`;
+}
+
+function initPackYear() {
+  const sel = document.getElementById('packYear');
+  if (!sel) return;
+  const cur = currentFinancialYear();
+  const [startY] = cur.split('/').map(Number);
+  sel.innerHTML = '';
+  for (let i = 0; i < 4; i++) {
+    const y = startY - i;
+    const label = `${y}/${String(y + 1).slice(2)}`;
+    const opt = document.createElement('option');
+    opt.value = label; opt.textContent = label;
+    if (i === 0) opt.selected = true;
+    sel.appendChild(opt);
+  }
+}
+
 function updatePackStatus() {
+  initPackYear();
   const hasInvoices = invoices.length > 0;
   ['hi-pl-status','hi-vat-status','hi-inv-status','hi-tax-status'].forEach(id => {
     const el = document.getElementById(id); if (el) el.textContent = hasInvoices?'✅':'⏳';
   });
+  // Compliance submissions due this financial year
+  const compEl = document.getElementById('hi-compliance-items');
+  if (!compEl) return;
+  const deadlines = getDeadlines(new Date(), userProfile);
+  if (!deadlines.length) { compEl.style.display = 'none'; return; }
+  const icons = { 'PAYE': '👥', 'VAT': '🧾', 'Provisional Tax': '📋', 'Corporate Tax': '🏢' };
+  compEl.style.display = 'grid';
+  compEl.innerHTML = deadlines.map(d => {
+    const icon = icons[d.type] || '📄';
+    const due = d.date.toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' });
+    return `<div class="handoff-item"><div class="hi-icon">${icon}</div><div><div class="hi-title">${d.name}</div><div class="hi-desc">Due ${due}</div></div><div class="hi-status">📅</div></div>`;
+  }).join('');
 }
 
 async function downloadFullPack() {
@@ -6248,9 +6454,16 @@ async function downloadFullPack() {
   try {
     const {jsPDF} = window.jspdf;
     const zip = new JSZip();
-    const year = document.getElementById('packYear')?.value || '2024/25';
+    const year = document.getElementById('packYear')?.value || currentFinancialYear();
     const biz = userProfile?.biz_name || 'Business';
     const genDate = new Date().toLocaleDateString('en-ZA');
+    const bizDetails = {
+      biz_name:            userProfile?.biz_name || '',
+      owner_name:          userProfile?.owner_name || '',
+      registration_number: userProfile?.registration_number || '',
+      tax_reference:       userProfile?.tax_reference || '',
+      vat_number:          userProfile?.vat_number || '',
+    };
     const reconConf = reconSession?.confidence || 0;
     const reconStatus = reconConf === 100 ? 'Fully Reconciled' : reconConf > 0 ? `Partially Reconciled (${reconConf}%)` : 'Not Reconciled';
 
@@ -6263,7 +6476,7 @@ async function downloadFullPack() {
 
     // ── PDF 1: Profit & Loss ──
     const plDoc = new jsPDF();
-    let y = makePDFHeader(plDoc, 'Profit & Loss Statement', `${biz} · FY ${year} · Generated ${genDate}`);
+    let y = makePDFHeader(plDoc, 'Profit & Loss Statement', `FY ${year} · Generated ${genDate}`, bizDetails);
     y = makePDFRow(plDoc, 'Reconciliation Status', reconStatus, y, true);
     y += 6;
     y = makePDFRow(plDoc, 'Total Revenue', fmtR(income), y, true);
@@ -6292,7 +6505,7 @@ async function downloadFullPack() {
 
     // ── PDF 2: VAT Summary ──
     const vatDoc = new jsPDF();
-    y = makePDFHeader(vatDoc, 'VAT Summary Report', `${biz} · FY ${year}`);
+    y = makePDFHeader(vatDoc, 'VAT Summary Report', `FY ${year}`, bizDetails);
     y = makePDFRow(vatDoc, 'VAT Registration Status', isVatRegistered() ? 'VAT Registered' : 'Not VAT Registered', y, false);
     y = makePDFRow(vatDoc, 'Reconciliation Status', reconStatus, y, false);
     y += 6;
@@ -6326,7 +6539,7 @@ async function downloadFullPack() {
 
     // ── PDF 4: Tax Summary ──
     const taxDoc = new jsPDF();
-    y = makePDFHeader(taxDoc, 'Tax Liability Summary', `${biz} · FY ${year}`);
+    y = makePDFHeader(taxDoc, 'Tax Liability Summary', `FY ${year}`, bizDetails);
     y = makePDFRow(taxDoc, 'Financial Year', year, y, false);
     y = makePDFRow(taxDoc, 'Reconciliation Status', reconStatus, y, false);
     y += 6;
@@ -6345,15 +6558,24 @@ async function downloadFullPack() {
       y = makePDFRow(taxDoc, 'Est. Provisional Tax (1st payment)', fmtR(provisional), y, true);
       y = makePDFRow(taxDoc, 'Est. Provisional Tax (2nd payment)', fmtR(provisional), y, false);
       taxDoc.setFontSize(9); taxDoc.setTextColor(120,120,120);
-      taxDoc.text('* Provisional tax estimate based on 28% corporate rate. Consult your tax practitioner.', 20, y+6);
+      taxDoc.text('* Provisional tax estimate based on 27% corporate rate. Consult your tax practitioner.', 20, y+6);
     }
     makePDFFooter(taxDoc);
     zip.file('4_Tax_Summary.pdf', taxDoc.output('arraybuffer'));
 
     // ── README ──
+    const deadlines = getDeadlines(new Date(), userProfile);
+    const complianceLines = deadlines.length
+      ? '\nCompliance submissions due this year:\n' + deadlines.map(d =>
+          `  - ${d.name} — Due ${d.date.toLocaleDateString('en-ZA', {day:'numeric',month:'short',year:'numeric'})}`
+        ).join('\n')
+      : '';
+    const regLine = bizDetails.registration_number ? `\nRegistration Number: ${bizDetails.registration_number}` : '';
+    const taxRefLine = bizDetails.tax_reference ? `\nIncome Tax Reference: ${bizDetails.tax_reference}` : '';
+    const vatLine = bizDetails.vat_number ? `\nVAT Number: ${bizDetails.vat_number}` : '';
     const readme = `OneTouch TaxApp — Bookkeeper Handoff Pack
 Generated: ${genDate}
-Business: ${biz}
+Business: ${biz}${regLine}${taxRefLine}${vatLine}
 Financial Year: ${year}
 Reconciliation: ${reconStatus}
 
@@ -6362,7 +6584,7 @@ Contents:
 2. VAT_Summary.pdf        — Output vs input VAT
 3. Invoice_Register.csv   — Full transaction list
 4. Tax_Summary.pdf        — Tax liability estimates
-
+${complianceLines}
 Generated by OneTouch TaxApp (onetouch.net.za)
 Not a registered tax practitioner — for review purposes only.`;
     zip.file('README.txt', readme);
