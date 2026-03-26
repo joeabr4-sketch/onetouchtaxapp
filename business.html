@@ -903,6 +903,7 @@ body.help-mode .main{padding-top:34px}
     <div style="text-align:center;margin-bottom:22px">
       <div class="auth-pill">Business Edition</div>
     </div>
+    <div id="sessionExpiredMsg" style="display:none;background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.3);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#f43f5e;text-align:center">Your session has expired — please sign in again.</div>
     <div class="auth-h">Sign in or Create Account 👋</div>
     <div class="auth-sub">New here? Entering your email creates your account automatically.</div>
     <button class="g-btn" onclick="signInWithGoogle()">
@@ -2670,13 +2671,20 @@ async function initApp() {
       } catch(e) {
         if (currentUser) return; // Network error — keep user logged in
       }
+      const wasLoggedIn = !!currentUser;
       currentUser = null; userProfile = null; invoices = []; _profileLoading = false;
-      resetAuthScreen();
+      resetAuthScreen(wasLoggedIn); // show expiry notice if kicked out mid-session
+    } else if (event === 'TOKEN_REFRESH_FAILED') {
+      // Refresh token expired or revoked — session cannot be recovered silently.
+      if (_signingOut) return;
+      console.warn('Supabase token refresh failed — session expired');
+      currentUser = null; userProfile = null; invoices = []; _profileLoading = false;
+      resetAuthScreen(true);
     }
   });
 }
 
-function resetAuthScreen() {
+function resetAuthScreen(expired = false) {
   const emailInput = document.getElementById('emailInput');
   const magicBtn = document.querySelector('.magic-btn');
   if (emailInput) emailInput.value = '';
@@ -2684,6 +2692,8 @@ function resetAuthScreen() {
   document.getElementById('mainWrapper').style.display = 'none';
   document.getElementById('loadingScreen').style.display = 'none';
   document.getElementById('authScreen').style.display = 'flex';
+  const expMsg = document.getElementById('sessionExpiredMsg');
+  if (expMsg) expMsg.style.display = expired ? 'block' : 'none';
   sessionStorage.removeItem('ot_welcomed');
 }
 
