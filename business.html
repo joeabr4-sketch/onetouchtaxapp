@@ -142,10 +142,6 @@ h1,h2,h3,.logo-text,.stat-value{font-family:'Syne',sans-serif}
 .ob-card{background:rgba(10,10,12,.95);border:1px solid rgba(255,255,255,.1);border-radius:20px;width:100%;max-width:500px;padding:36px;animation:fadeUp .3s ease;backdrop-filter:blur(16px);box-shadow:0 24px 64px rgba(0,0,0,.7)}
 .ob-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:6px}
 .ob-sub{font-size:13px;color:var(--text-2);margin-bottom:22px}
-.ob-dots{display:flex;gap:6px;margin-bottom:24px}
-.ob-dot{width:8px;height:8px;border-radius:50%;background:var(--border)}
-.ob-dot.on{background:var(--blue);width:24px;border-radius:4px}
-.ob-dot.done{background:var(--blue);opacity:.4}
 .f-group{margin-bottom:14px}
 .f-label{font-size:10px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px}
 .f-input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:11px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13.5px;outline:none;transition:border-color .15s}
@@ -5444,7 +5440,7 @@ function splitCSVLine(line) {
 async function processReconFile(file) {
   if (!file || !reconSession) return;
   const dz = document.getElementById('reconDropZone');
-  if (dz) dz.innerHTML = `<div style="font-size:22px;margin-bottom:8px">⏳</div><div style="font-size:13px;color:var(--text-2)">Reading ${file.name}...</div><input type="file" id="reconFileInput" accept=".csv,.xlsx,.xls,.ofx,.qfx" style="display:none" onchange="handleReconFile(event)">`;
+  if (dz) dz.innerHTML = `<div style="font-size:22px;margin-bottom:8px">⏳</div><div style="font-size:13px;color:var(--text-2)">Reading ${escHtml(file.name)}...</div><input type="file" id="reconFileInput" accept=".csv,.xlsx,.xls,.ofx,.qfx" style="display:none" onchange="handleReconFile(event)">`;
 
   const ext = file.name.split('.').pop().toLowerCase();
   let rows = [];
@@ -5560,10 +5556,10 @@ function showReconPreview(rows, file) {
     const preview = rows.slice(0, 150);
     tbody.innerHTML = preview.map((r,i) => `
       <tr style="border-top:1px solid rgba(255,255,255,.05);${i%2===0?'':'background:rgba(255,255,255,.02)'}">
-        <td style="padding:7px 14px;color:var(--text-2);white-space:nowrap">${r.date}</td>
-        <td style="padding:7px 14px;color:var(--text);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.description}">${r.description}</td>
+        <td style="padding:7px 14px;color:var(--text-2);white-space:nowrap">${escHtml(r.date)}</td>
+        <td style="padding:7px 14px;color:var(--text);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(r.description)}">${escHtml(r.description)}</td>
         <td style="padding:7px 14px;text-align:right;font-weight:600;white-space:nowrap;color:${r.type==='credit'?'var(--green)':'var(--red)'}">${r.type==='credit'?'+':'-'}R ${r.amount.toFixed(2)}</td>
-        <td style="padding:7px 14px;color:var(--text-3);font-size:11px;text-transform:uppercase">${r.type}</td>
+        <td style="padding:7px 14px;color:var(--text-3);font-size:11px;text-transform:uppercase">${escHtml(r.type)}</td>
       </tr>`).join('');
     if (rows.length > 150) {
       tbody.innerHTML += `<tr><td colspan="4" style="padding:12px 14px;text-align:center;color:var(--text-3);font-size:12px">… and ${rows.length - 150} more transactions</td></tr>`;
@@ -9233,7 +9229,7 @@ function processImportFile(file) {
   importData.fileType = ext;
 
   const dz = document.getElementById('importDropZone');
-  dz.innerHTML = `<div style="font-size:28px;margin-bottom:8px">✅</div><div style="font-size:13px;font-weight:600;color:var(--green)">${file.name}</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">${(file.size/1024).toFixed(1)} KB · Reading file...</div>`;
+  dz.innerHTML = `<div style="font-size:28px;margin-bottom:8px">✅</div><div style="font-size:13px;font-weight:600;color:var(--green)">${escHtml(file.name)}</div><div style="font-size:11px;color:var(--text-3);margin-top:4px">${(file.size/1024).toFixed(1)} KB · Reading file...</div>`;
 
   if (ext === 'ofx' || ext === 'qfx') {
     const reader = new FileReader();
