@@ -809,6 +809,12 @@ body.help-mode .main{padding-top:34px}
     grid-column:1/-1!important;
   }
 
+  /* ── Settings grid — single column on mobile ── */
+  .set-grid{grid-template-columns:1fr!important}
+
+  /* ── Compliance checklist cards — single column on mobile ── */
+  #complianceChecklistCards{grid-template-columns:1fr!important}
+
   /* ── Bottom nav visible on mobile ── */
   .mob-nav{
     display:flex;
@@ -1608,13 +1614,13 @@ body.help-mode .main{padding-top:34px}
       </div>
       <div class="card" style="margin-bottom:16px">
         <div class="card-head"><div class="card-title">What's in the pack</div><span class="badge b-green">Auto-generated from your data</span></div>
-        <div style="padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="padding:16px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
           <div class="handoff-item"><div class="hi-icon">📊</div><div><div class="hi-title">Profit & Loss Statement</div><div class="hi-desc">Full income vs expenses by category</div></div><div class="hi-status" id="hi-pl-status">⏳</div></div>
           <div class="handoff-item"><div class="hi-icon">💼</div><div><div class="hi-title">VAT Summary Report</div><div class="hi-desc">Output vs input VAT, net payable</div></div><div class="hi-status" id="hi-vat-status">⏳</div></div>
           <div class="handoff-item"><div class="hi-icon">🧾</div><div><div class="hi-title">Full Invoice Register</div><div class="hi-desc">All income and expense entries with dates</div></div><div class="hi-status" id="hi-inv-status">⏳</div></div>
           <div class="handoff-item"><div class="hi-icon">📋</div><div><div class="hi-title">Tax Liability Summary</div><div class="hi-desc">VAT, PAYE, provisional tax estimates</div></div><div class="hi-status" id="hi-tax-status">⏳</div></div>
         </div>
-        <div id="hi-compliance-items" style="display:none;grid-template-columns:1fr 1fr;gap:10px;border-top:1px solid var(--border);padding:12px 20px 16px"></div>
+        <div id="hi-compliance-items" style="display:none;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;border-top:1px solid var(--border);padding:12px 20px 16px"></div>
       </div>
       <!-- FINANCIAL YEAR SELECTOR -->
       <div class="card" style="margin-bottom:16px">
