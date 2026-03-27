@@ -226,9 +226,9 @@ function renderSharedData() {
   }
   pct.textContent = conf + '%';
 
-  // Stats
-  const income = invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.total||i.amount||0),0);
-  const exp = invoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.total||i.amount||0),0);
+  // Stats — use ex-VAT amount field so VAT-registered businesses show correct revenue
+  const income = invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0);
+  const exp = invoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0);
   const profit = income - exp;
   document.getElementById('statRev').textContent = fmtR(income);
   document.getElementById('statExp').textContent = fmtR(exp);
