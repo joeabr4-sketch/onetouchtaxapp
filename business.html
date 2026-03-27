@@ -2715,7 +2715,7 @@ async function signInWithEmail() {
 async function signOut() {
   _signingOut = true;
   if (typeof Sentry !== 'undefined' && Sentry.setUser) Sentry.setUser(null);
-  try { await sb.auth.signOut(); } catch(e) {}
+  try { await Promise.race([sb.auth.signOut(), new Promise(r => setTimeout(r, 3000))]); } catch(e) {}
   try {
     Object.keys(localStorage)
       .filter(k => k.startsWith('sb-') || k.includes('supabase'))
