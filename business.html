@@ -11,6 +11,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="tax-calc.js"></script>
+<script src="db.js"></script>
 <style>
 :root{
   --bg:#070809;--bg2:#0a0a0c;--surface:rgba(255,255,255,.04);--surface2:rgba(255,255,255,.06);
@@ -915,7 +917,7 @@ body.help-mode .main{padding-top:34px}
     </button>
     <div class="auth-or">or</div>
     <input class="auth-input" id="emailInput" type="email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')signInWithEmail()" />
-    <button class="magic-btn" onclick="signInWithEmail()">Send Magic Link →</button>
+    <button class="magic-btn" id="magicLinkBtn" onclick="signInWithEmail()">Send Magic Link →</button>
     <div class="auth-note">We'll email you a magic link — no password needed. ✉️<br>New users are registered automatically.</div>
   </div>
 </div>
@@ -968,7 +970,7 @@ body.help-mode .main{padding-top:34px}
           <option>Business</option>
         </select>
       </div>
-      <button class="ob-btn" onclick="saveProfile()">Launch My Dashboard →</button>
+      <button class="ob-btn" id="obLaunchBtn" onclick="saveProfile()">Launch My Dashboard →</button>
       <button type="button" onclick="saveProfile()" style="width:100%;background:none;border:none;color:var(--text-3);font-size:12px;margin-top:8px;cursor:pointer;padding:4px">Skip for now</button>
     </div>
   </div>
@@ -1623,7 +1625,7 @@ body.help-mode .main{padding-top:34px}
         <div class="card-head"><div class="card-title">Select Financial Year</div></div>
         <div style="padding:14px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
           <select id="packYear" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13.5px;outline:none" onchange="updatePackStatus()"></select>
-          <button class="download-pack-btn" onclick="showSarsDisclaimer('downloadFullPack')">📦 Download Full Pack</button>
+          <button class="download-pack-btn" id="downloadPackBtn" onclick="showSarsDisclaimer('downloadFullPack')">📦 Download Full Pack</button>
         </div>
       </div>
       <!-- ACCOUNTANT SHARE LINK -->
@@ -2515,12 +2517,7 @@ body.help-mode .main{padding-top:34px}
 
 <script>
 
-const { createClient } = supabase;
-const sb = createClient(
-  'https://stcxldjcagyxjfwfforx.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0Y3hsZGpjYWd5eGpmd2Zmb3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MjI3ODUsImV4cCI6MjA4ODE5ODc4NX0.kGmiqXZ9TYsO58pCSLuZg7kUiwknxFpF14N2i0Q-Wis',
-  { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'implicit' } }
-);
+// Supabase client initialised in db.js
 
 // ── GLOBALS ──
 let currentUser = null;
@@ -2564,15 +2561,9 @@ async function _refreshReconTxCount() {
 }
 
 // ── HELPERS ──
-function fmtR(v) { return 'R ' + (parseFloat(v)||0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+// rnd, vatOn, vatFrom, exclVat, fmtR, fmtRShort, fmtPayroll, parseDateStr,
+// currentFinancialYear, formatPeriodLabel, calcPAYE, calcEmployeePayslip → tax-calc.js
 function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
-function fmtRShort(v) { const n=parseFloat(v)||0; if(n>=1000000) return 'R '+(n/1000000).toFixed(1)+'M'; if(n>=1000) return 'R '+(n/1000).toFixed(0)+'k'; return 'R '+n.toFixed(0); }
-// ── MONEY HELPERS ─────────────────────────────────────────────────────────────
-// All financial arithmetic must go through these to avoid floating-point drift
-function rnd(v) { return Math.round((parseFloat(v) || 0) * 100) / 100; }
-function vatOn(subtotal) { return rnd(subtotal * 0.15); }      // VAT on excl-VAT amount
-function vatFrom(gross) { return rnd(gross * 15 / 115); }       // Extract VAT from incl-VAT amount
-function exclVat(gross) { return rnd(gross - vatFrom(gross)); }  // Strip VAT from incl-VAT amount
 
 function showToast(msg, color, duration) {
   const t = document.getElementById('toast');
@@ -2665,7 +2656,7 @@ async function initApp() {
 
 function resetAuthScreen(expired = false) {
   const emailInput = document.getElementById('emailInput');
-  const magicBtn = document.querySelector('.magic-btn');
+  const magicBtn = document.getElementById('magicLinkBtn');
   if (emailInput) emailInput.value = '';
   if (magicBtn) { magicBtn.textContent = 'Send Magic Link →'; magicBtn.disabled = false; }
   document.getElementById('mainWrapper').style.display = 'none';
@@ -2692,7 +2683,7 @@ async function signInWithEmail() {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     showToast('Please enter a valid email address', 'var(--red)'); return;
   }
-  const btn = document.querySelector('.magic-btn');
+  const btn = document.getElementById('magicLinkBtn');
   btn.textContent = 'Sending...'; btn.disabled = true;
   const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: 'https://www.onetouch.net.za/business.html' } });
   btn.disabled = false;
@@ -2980,7 +2971,7 @@ async function saveProfile() {
   const biz = document.getElementById('ob-biz')?.value.trim() || '';
   if (!biz) { showToast('Please complete business name', 'var(--amber)'); return; }
 
-  const btn = document.querySelector('.ob-btn');
+  const btn = document.getElementById('obLaunchBtn');
   if (btn) { btn.textContent = 'Setting up...'; btn.disabled = true; }
 
   const isVat = obData.vat === 'yes';
@@ -4494,13 +4485,8 @@ function genVAT201() {
   showPDFToast('VAT201 downloaded'); logDocGenerated('VAT201','',_vat201data);
 }
 
-// Auto-calculate UIF and SDL from gross salaries
-// ── SARS 2025/26 CONSTANTS ─────────────────────────────────────────────────
-const UIF_MONTHLY_CAP   = 177.12;  // 1% × R17,712 monthly earnings ceiling (SARS 2025/26)
-const UIF_RATE          = 0.01;    // Employee 1% + Employer 1% (each)
-const SDL_RATE          = 0.01;    // 1% of leviable amount
-const SDL_ANNUAL_THRESHOLD = 500000; // SDL only applies if annual payroll > R500,000
-const CORP_TAX_RATE     = 0.27;    // Corporate income tax 2025/26
+// UIF/SDL/PAYE constants and calc functions → tax-calc.js
+const CORP_TAX_RATE = 0.27; // Corporate income tax 2025/26
 
 // EMP201 form auto-fill helper — named differently from payroll calcPAYE(annualIncome)
 function autofillEMP201() {
@@ -5413,35 +5399,7 @@ function handleReconFile(e) { processReconFile(e.target.files[0]); }
 let _pendingImportRows = null;
 let _pendingImportFile = null;
 
-function parseDateStr(raw) {
-  if (!raw) return '';
-  const d = String(raw).replace(/"/g,'').trim();
-
-  // Already ISO: YYYY-MM-DD
-  if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
-
-  // YYYY/MM/DD (FNB internet banking)
-  if (/^\d{4}\/\d{2}\/\d{2}$/.test(d)) return d.replace(/\//g, '-');
-
-  // DD/MM/YYYY (FNB business / Nedbank) — must detect before any generic replace
-  const dmy = d.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (dmy) return `${dmy[3]}-${dmy[2].padStart(2,'0')}-${dmy[1].padStart(2,'0')}`;
-
-  // DD-MM-YYYY
-  const dmyd = d.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
-  if (dmyd) return `${dmyd[3]}-${dmyd[2].padStart(2,'0')}-${dmyd[1].padStart(2,'0')}`;
-
-  // "5 Jan 2024" / "05 Jan 2024" (FNB app export)
-  const MON = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
-  const dmy3 = d.match(/^(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})$/);
-  if (dmy3) { const m = MON[dmy3[2].toLowerCase()]; if (m) return `${dmy3[3]}-${m}-${dmy3[1].padStart(2,'0')}`; }
-
-  // Last resort: native Date (only safe for unambiguous formats)
-  const p = new Date(d);
-  if (!isNaN(p)) return `${p.getFullYear()}-${String(p.getMonth()+1).padStart(2,'0')}-${String(p.getDate()).padStart(2,'0')}`;
-
-  return '';
-}
+// parseDateStr → tax-calc.js
 
 function splitCSVLine(line) {
   const cols = []; let cur = '', inQ = false;
@@ -6408,14 +6366,7 @@ function updateHandoffReconBanner() {
 }
 
 // ── BOOKKEEPER PACK ──
-function currentFinancialYear() {
-  const now = new Date();
-  const y = now.getFullYear();
-  // SA tax year: March–February. If month >= March (2), we're in year/year+1
-  return now.getMonth() >= 2
-    ? `${y}/${String(y + 1).slice(2)}`
-    : `${y - 1}/${String(y).slice(2)}`;
-}
+// currentFinancialYear → tax-calc.js
 
 function initPackYear() {
   const sel = document.getElementById('packYear');
@@ -6456,14 +6407,14 @@ function updatePackStatus() {
 async function downloadFullPack() {
   if (!canUse('handoff')) { showUpgradePrompt('pro'); return; }
   if (!window.jspdf) { showToast('PDF loading — try again in a moment', 'var(--amber)'); return; }
-  if (!window.JSZip) { showToast('📦 ZIP library still loading — please wait 2 seconds and try again', 'var(--amber)'); setTimeout(() => { const b = document.querySelector('.download-pack-btn'); if(b){b.textContent='📦 Download Full Pack';b.disabled=false;} }, 100); return; }
+  if (!window.JSZip) { showToast('📦 ZIP library still loading — please wait 2 seconds and try again', 'var(--amber)'); setTimeout(() => { const b = document.getElementById('downloadPackBtn'); if(b){b.textContent='📦 Download Full Pack';b.disabled=false;} }, 100); return; }
 
   // Empty state check
   if (!invoices.length) {
     showToast('No data yet — add invoices first', 'var(--amber)'); return;
   }
 
-  const btn = document.querySelector('.download-pack-btn');
+  const btn = document.getElementById('downloadPackBtn');
   if (btn) { btn.textContent = '⏳ Generating...'; btn.disabled = true; }
 
   try {
@@ -6812,12 +6763,7 @@ function switchHistTab(tab) {
 
 let _periodData = [];
 
-function formatPeriodLabel(key) {
-  if (!key) return '—';
-  const [y, m] = key.split('-');
-  const d = new Date(parseInt(y), parseInt(m) - 1, 1);
-  return d.toLocaleString('en-ZA', {month: 'long', year: 'numeric'});
-}
+// formatPeriodLabel → tax-calc.js
 
 async function loadPeriodHistory() {
   const badge = document.getElementById('monthlyHistBadge');
@@ -7958,7 +7904,7 @@ async function sendInvoiceWhatsApp(inv) {
   // Validate: +27 followed by exactly 9 digits
   if (!/^\+27\d{9}$/.test(phone)) {
     showToast('Invalid WhatsApp number. Use format +27 82 123 4567 or 082 123 4567', 'var(--amber)');
-    const b = document.querySelector('[onclick="saveAndWhatsApp()"]') || document.querySelector('[onclick*="WhatsApp"]');
+    const b = document.getElementById('waFormBtn');
     if (b) { b.textContent = '💬 Save & WhatsApp'; b.disabled = false; }
     return;
   }
@@ -7969,7 +7915,7 @@ async function sendInvoiceWhatsApp(inv) {
   const businessName = userProfile?.business_name || 'OneTouch Business';
   const invoiceNumber = inv.invoice_number || '';
 
-  const btn = document.querySelector('[onclick="saveAndWhatsApp()"]') || document.querySelector('[onclick*="WhatsApp"]');
+  const btn = document.getElementById('waFormBtn');
   if (btn) { btn.textContent = 'Sending...'; btn.disabled = true; }
 
   try {
@@ -8144,69 +8090,7 @@ let employees = [];
 let payrollRuns = [];
 let editingEmpIdx = null;
 
-// ── SA PAYE TAX TABLES 2025/2026 ──
-// ageBracket: 'under65' | '65to74' | 'over75'  (SARS 2025/26 rebate thresholds)
-function calcPAYE(annualIncome, ageBracket = 'under65') {
-  // 2025/26 tax brackets
-  const brackets = [
-    { limit: 237100,  base: 0,      rate: 0.18 },
-    { limit: 370500,  base: 42678,  rate: 0.26 },
-    { limit: 512800,  base: 77362,  rate: 0.31 },
-    { limit: 673000,  base: 121475, rate: 0.36 },
-    { limit: 857900,  base: 179147, rate: 0.39 },
-    { limit: 1817000, base: 251258, rate: 0.41 },
-    { limit: Infinity,base: 644489, rate: 0.45 },
-  ];
-  let tax = 0;
-  for (const b of brackets) {
-    if (annualIncome <= b.limit) {
-      const prev = brackets[brackets.indexOf(b) - 1];
-      const prevLimit = prev ? prev.limit : 0;
-      tax = b.base + (annualIncome - prevLimit) * b.rate;
-      break;
-    }
-  }
-  // 2025/26 SARS rebates — all three tiers as applicable
-  const primary   = 17235;
-  const secondary = (ageBracket === '65to74' || ageBracket === 'over75') ? 9444 : 0;
-  const tertiary  = ageBracket === 'over75' ? 3145 : 0;
-  tax = Math.max(0, tax - primary - secondary - tertiary);
-  return tax / 12; // monthly PAYE
-}
-
-function fmtPayroll(v) {
-  return 'R ' + Math.abs(parseFloat(v)||0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2});
-}
-
-// Pure calculation — no DOM access. Called by calcPayslip() and confirmRunPayroll().
-// annualPayrollTotal: total of all employees' monthly gross × 12 (company-wide).
-// If not provided, estimates from this employee's own annual gross (single-employee preview).
-function calcEmployeePayslip(emp, annualPayrollTotal) {
-  const gross    = parseFloat(emp.gross)   || 0;
-  const travel   = parseFloat(emp.travel)  || 0;
-  const housing  = parseFloat(emp.housing) || 0;
-  const bonus    = parseFloat(emp.bonus)   || 0;
-  const medical  = parseFloat(emp.medical) || 0;
-  const pension  = parseFloat(emp.pension) || 0;
-  const uifApplicable = emp.uif_applicable !== false;
-  const sdlApplicable = emp.sdl_applicable !== false;
-
-  const totalGross    = gross + travel + housing + bonus;
-  const taxableIncome = gross + housing + bonus + (travel * 0.8);
-  // PAYE is calculated first, then medical aid tax credit (MATC) is subtracted (SARS rule)
-  const payeGross = calcPAYE(taxableIncome * 12, emp.age_bracket || 'under65');
-  const paye    = Math.max(0, payeGross - medical); // MATC reduces PAYE, never below 0
-  const uifEmp  = uifApplicable ? Math.min(gross * UIF_RATE, UIF_MONTHLY_CAP) : 0;
-  const uifEr   = uifApplicable ? Math.min(gross * UIF_RATE, UIF_MONTHLY_CAP) : 0;
-  // SDL: only applies if company annual payroll > R500,000 (SARS threshold)
-  const estAnnualPayroll = annualPayrollTotal != null ? annualPayrollTotal : gross * 12;
-  const sdlApplies = sdlApplicable && estAnnualPayroll > SDL_ANNUAL_THRESHOLD;
-  const sdl     = sdlApplies ? rnd(gross * SDL_RATE) : 0;
-  // Medical is a tax credit (reduces PAYE above), not a separate income deduction
-  const totalDed = paye + uifEmp + pension;
-  const netPay  = totalGross - totalDed;
-  return { gross, travel, housing, bonus, totalGross, taxableIncome, paye, uifEmp, uifEr, sdl, medical, pension, totalDed, netPay };
-}
+// calcPAYE, fmtPayroll, calcEmployeePayslip → tax-calc.js
 
 function calcPayslip() {
   const emp = {
