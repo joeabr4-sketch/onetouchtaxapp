@@ -2714,7 +2714,7 @@ async function signInWithEmail() {
 
 async function signOut() {
   _signingOut = true;
-  Sentry.setUser(null);
+  if (typeof Sentry !== 'undefined' && Sentry.setUser) Sentry.setUser(null);
   try { await sb.auth.signOut(); } catch(e) {}
   try {
     Object.keys(localStorage)
@@ -2760,7 +2760,7 @@ async function loadUserProfile() {
     userProfile = data;
     _profileLoading = false;
     // Attach user identity to all future Sentry events
-    Sentry.setUser({ id: currentUser.id, email: currentUser.email, plan: userProfile?.plan || 'free' });
+    if (typeof Sentry !== 'undefined' && Sentry.setUser) Sentry.setUser({ id: currentUser.id, email: currentUser.email, plan: userProfile?.plan || 'free' });
     document.getElementById('loadingScreen').style.display = 'none';
     if (!userProfile?.tos_accepted) {
       // New user or existing user who hasn't accepted ToS — show blocking modal
