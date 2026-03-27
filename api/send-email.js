@@ -1,4 +1,5 @@
 // OneTouch Email Proxy — powered by Resend
+import { captureException } from './_sentry.js';
 // Handles: accountant access emails, welcome emails, notifications
 
 export default async function handler(req, res) {
@@ -85,6 +86,7 @@ export default async function handler(req, res) {
       return res.status(response.status).json({ error: data.message || 'Email sending failed' });
     }
   } catch (err) {
+    await captureException(err, { to, subject });
     return res.status(500).json({ error: 'Email proxy error: ' + err.message });
   }
 }

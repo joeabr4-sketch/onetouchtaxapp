@@ -3,6 +3,7 @@
 // token and calls the PayFast cancel API on their behalf.
 
 import crypto from 'crypto';
+import { captureException } from './_sentry.js';
 
 const MERCHANT_ID  = process.env.PAYFAST_MERCHANT_ID;
 const MERCHANT_KEY = process.env.PAYFAST_MERCHANT_KEY;
@@ -88,6 +89,7 @@ export default async function handler(req, res) {
   if (!pfRes.ok) {
     const errText = await pfRes.text();
     console.error(`payfast-cancel: PayFast API error ${pfRes.status}`, errText);
+    await captureException(new Error(`PayFast cancel API error ${pfRes.status}`), { userId, token, detail: errText });
     return res.status(502).json({ error: 'PayFast API error', detail: errText });
   }
 

@@ -7,6 +7,20 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://browser.sentry-cdn.com/8.47.0/bundle.min.js" crossorigin="anonymous"></script>
+<script>
+  Sentry.init({
+    dsn: 'https://4e0916c95559b0d47da8759859e71905@o4511115058085888.ingest.de.sentry.io/4511115062935632',
+    environment: window.location.hostname === 'localhost' ? 'development' : 'production',
+    release: 'onetouch@1.0.0',
+    tracesSampleRate: 0.1,
+    beforeSend(event) {
+      // Don't send errors from browser extensions or localhost dev
+      if (window.location.hostname === 'localhost') return null;
+      return event;
+    }
+  });
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -2696,6 +2710,7 @@ async function signInWithEmail() {
 
 async function signOut() {
   _signingOut = true;
+  Sentry.setUser(null);
   try { await sb.auth.signOut(); } catch(e) {}
   try {
     Object.keys(localStorage)
@@ -2740,6 +2755,8 @@ async function loadUserProfile() {
     if (error && error.code !== 'PGRST116') throw error;
     userProfile = data;
     _profileLoading = false;
+    // Attach user identity to all future Sentry events
+    Sentry.setUser({ id: currentUser.id, email: currentUser.email, plan: userProfile?.plan || 'free' });
     document.getElementById('loadingScreen').style.display = 'none';
     if (!userProfile?.tos_accepted) {
       // New user or existing user who hasn't accepted ToS — show blocking modal

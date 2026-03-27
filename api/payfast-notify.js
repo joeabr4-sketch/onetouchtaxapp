@@ -2,6 +2,7 @@
 // PayFast POSTs here after every payment event — we verify and update the user's plan
 
 import crypto from 'crypto';
+import { captureException } from './_sentry.js';
 
 const MERCHANT_ID  = process.env.PAYFAST_MERCHANT_ID;
 const PASSPHRASE   = process.env.PAYFAST_PASSPHRASE || '';
@@ -143,6 +144,7 @@ export default async function handler(req, res) {
   if (!update.ok) {
     const err = await update.text();
     console.error('PayFast IPN: Supabase update failed', err);
+    await captureException(new Error('PayFast IPN: Supabase plan update failed'), { userId, plan, payment_id: data.m_payment_id, db_error: err });
     await sendAlert('Supabase update failed — plan NOT updated, user paid but still on old plan', {
       userId,
       plan,

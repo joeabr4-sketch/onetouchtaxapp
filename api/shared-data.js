@@ -1,5 +1,6 @@
 // Shared Financials Data Proxy
 // Uses service role key to bypass RLS — returns profile + invoices + recon for a share token
+import { captureException } from './_sentry.js';
 
 const SUPABASE_URL = 'https://stcxldjcagyxjfwfforx.supabase.co';
 
@@ -58,6 +59,7 @@ export default async function handler(req, res) {
       recon_session: reconRows[0] || null
     });
   } catch (err) {
+    await captureException(err, { token: token?.slice(0, 8) + '…' });
     return res.status(500).json({ error: 'Server error: ' + err.message });
   }
 }

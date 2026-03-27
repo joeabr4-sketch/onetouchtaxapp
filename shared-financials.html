@@ -6,6 +6,18 @@
 <title>OneTouch TaxApp — Shared Financials</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://browser.sentry-cdn.com/8.47.0/bundle.min.js" crossorigin="anonymous"></script>
+<script>
+  Sentry.init({
+    dsn: 'https://4e0916c95559b0d47da8759859e71905@o4511115058085888.ingest.de.sentry.io/4511115062935632',
+    environment: window.location.hostname === 'localhost' ? 'development' : 'production',
+    release: 'onetouch@1.0.0',
+    beforeSend(event) {
+      if (window.location.hostname === 'localhost') return null;
+      return event;
+    }
+  });
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
