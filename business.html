@@ -2817,7 +2817,9 @@ async function _confirmCancelSub() {
   const bizName = userProfile?.biz_name || '';
   const reqTime = new Date().toLocaleString('en-ZA', { dateStyle:'medium', timeStyle:'short' });
 
-  try { localStorage.setItem('ot_cancel_requested_' + (currentUser?.id||''), new Date().toISOString()); } catch {}
+  if (currentUser?.id) {
+    await sb.from('profiles').update({ cancel_requested_at: new Date().toISOString() }).eq('id', currentUser.id);
+  }
 
   const session = await sb.auth.getSession();
   const accessToken = session?.data?.session?.access_token;
@@ -2869,8 +2871,11 @@ async function _confirmCancelSub() {
 }
 
 // ── PAYFAST CHECKOUT ──
+let _paying = false;
 async function payWithPayFast(plan) {
   if (!currentUser) { showToast('Please sign in first', 'var(--red)'); return; }
+  if (_paying) return;
+  _paying = true;
   showToast('⏳ Preparing secure checkout...', 'var(--blue)');
   try {
     const resp = await fetch('/api/payfast', {
@@ -2898,6 +2903,7 @@ async function payWithPayFast(plan) {
     document.body.appendChild(form);
     form.submit();
   } catch (e) {
+    _paying = false;
     showToast('❌ ' + e.message, 'var(--red)');
   }
 }
@@ -3561,6 +3567,10 @@ async function saveInvoice(exportPDF) {
   }
   // Validate deposit does not exceed total
   const deposit = parseFloat(document.getElementById('inv-deposit').value) || 0;
+  if (deposit < 0) {
+    showToast('Deposit cannot be negative', 'var(--amber)');
+    return;
+  }
   if (deposit > total) {
     showToast('Deposit cannot exceed the invoice total', 'var(--amber)');
     return;
@@ -4712,7 +4722,7 @@ async function generateSavingTips() {
       system:'You are a South African tax advisor. Give 4 specific actionable tax-saving tips. Each tip on its own line starting with a number. Be concise and specific to SA tax law.',
       messages:[{role:'user',content:`Business: ${userProfile?.biz_name}, VAT registered: ${isVatRegistered()}, Revenue: ${fmtR(income)}, Expenses: ${fmtR(exp)}, Categories: ${cats||'various'}. Give 4 SA-specific tax-saving tips.`}]});
     const tips = data.content?.[0]?.text||'';
-    if (results) results.innerHTML = tips.split('\n').filter(l=>l.trim()).map(l=>`<div style="margin-bottom:8px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;font-size:13px;color:var(--text-2);line-height:1.65">${l}</div>`).join('');
+    if (results) results.innerHTML = tips.split('\n').filter(l=>l.trim()).map(l=>`<div style="margin-bottom:8px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;font-size:13px;color:var(--text-2);line-height:1.65">${escHtml(l)}</div>`).join('');
     recordAICallUsed();
   } catch(e) {
     if (results) results.innerHTML='<div style="color:var(--red);font-size:13px;padding:12px">Failed to generate tips. Please try again.</div>';
@@ -5916,8 +5926,8 @@ function renderUnrecorded() {
     <div style="padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.05)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <div>
-          <div style="font-size:13px;font-weight:600;color:var(--text)">${tx.description}</div>
-          <div style="font-size:11px;color:var(--text-3)">${tx.date} · ${fmtR(tx.amount)}</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">${escHtml(tx.description)}</div>
+          <div style="font-size:11px;color:var(--text-3)">${escHtml(tx.date)} · ${fmtR(tx.amount)}</div>
         </div>
         <span style="background:${isCredit?'rgba(34,197,94,.1)':' rgba(244,63,94,.1)'};color:${isCredit?'var(--green)':' var(--red)'};padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600">${isCredit?'⬆ Credit':'⬇ Debit'}</span>
       </div>
@@ -6003,15 +6013,15 @@ function openAssignPanel(txId, defaultMode) {
       <div style="padding:16px 20px">
         <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:12px;margin-bottom:16px">
           <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">Transaction</div>
-          <div style="font-size:14px;font-weight:600;color:var(--text)">${tx.description}</div>
-          <div style="font-size:12px;color:var(--text-3)">${tx.date} · <span style="color:${tx.type==='credit'?'var(--green)':' var(--red)'};font-weight:700">${tx.type==='debit'?'-':'+'} ${fmtR(tx.amount)}</span></div>
+          <div style="font-size:14px;font-weight:600;color:var(--text)">${escHtml(tx.description)}</div>
+          <div style="font-size:12px;color:var(--text-3)">${escHtml(tx.date)} · <span style="color:${tx.type==='credit'?'var(--green)':' var(--red)'};font-weight:700">${tx.type==='debit'?'-':'+'} ${fmtR(tx.amount)}</span></div>
         </div>
         <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Match to Invoice</div>
         <div style="max-height:200px;overflow-y:auto;margin-bottom:14px">
           ${matchableInvs.length ? matchableInvs.map(inv => `
             <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:7px;margin-bottom:5px">
               <div>
-                <div style="font-size:12px;font-weight:600;color:var(--text)">${inv.invoice_number||'INV'} — ${inv.client_name||'—'}</div>
+                <div style="font-size:12px;font-weight:600;color:var(--text)">${escHtml(inv.invoice_number||'INV')} — ${escHtml(inv.client_name||'—')}</div>
                 <div style="font-size:11px;color:var(--text-3)">${fmtR(inv.total||inv.amount)} · ${inv.date||''}</div>
               </div>
               <button class="recon-match-btn" onclick="manualMatchTx('${tx.id}','${inv.id}');document.getElementById('assignOverlay').remove()">Link</button>
@@ -6157,25 +6167,18 @@ async function resetReconSession() {
 }
 
 // ── AUDIT ──
-function addReconAudit(type, message) {
-  // Write to DB — primary, tamper-evident record
-  if (currentUser?.id) {
-    sb.from('recon_audit').insert({
-      user_id: currentUser.id,
-      session_id: reconSession?.id || null,
-      type, message
-    }).then(({ error }) => {
-      if (error) console.warn('Audit DB write failed:', error.message);
-    });
-  }
-  // Also update localStorage cache for immediate UI refresh
-  const log = JSON.parse(localStorage.getItem('ot_recon_audit_' + currentUser?.id) || '[]');
-  log.unshift({ type, message, time: new Date().toISOString() });
-  localStorage.setItem('ot_recon_audit_' + currentUser?.id, JSON.stringify(log.slice(0, 200)));
-  renderReconAudit(log);
+async function addReconAudit(type, message) {
+  if (!currentUser?.id) return;
+  const { error } = await sb.from('recon_audit').insert({
+    user_id: currentUser.id,
+    session_id: reconSession?.id || null,
+    type, message
+  });
+  if (error) console.warn('Audit DB write failed:', error.message);
+  renderReconAudit();
 }
 
-async function renderReconAudit(cachedLog) {
+async function renderReconAudit() {
   const list = document.getElementById('reconAuditList');
   if (!list) return;
   const colors = { auto:'var(--green)', suggest:'var(--amber)', manual:'var(--blue)', close:'var(--green)', reset:'var(--red)', upload:'var(--blue)', ignore:'var(--text-3)', clear:'var(--red)' };
@@ -6188,17 +6191,14 @@ async function renderReconAudit(cachedLog) {
       <span style="color:var(--text-3);font-size:11px;white-space:nowrap">${new Date(e.time||e.created_at).toLocaleString('en-ZA')}</span>
     </div>`).join('');
   };
-  // Render immediately from cache, then refresh from DB
-  if (cachedLog) { renderLog(cachedLog); }
   try {
     const q = reconSession?.id
       ? sb.from('recon_audit').select('*').eq('session_id', reconSession.id).order('created_at', { ascending: false }).limit(200)
       : sb.from('recon_audit').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(200);
     const { data } = await q;
-    if (data?.length) renderLog(data.map(e => ({ type: e.type, message: e.message, time: e.created_at })));
-    else if (!cachedLog) renderLog(JSON.parse(localStorage.getItem('ot_recon_audit_' + currentUser?.id) || '[]'));
+    renderLog(data || []);
   } catch(e) {
-    if (!cachedLog) renderLog(JSON.parse(localStorage.getItem('ot_recon_audit_' + currentUser?.id) || '[]'));
+    renderLog([]);
   }
 }
 
@@ -6853,10 +6853,7 @@ async function _executeClearHistory() {
     if (s2.error) throw s2.error;
     if (s3.error) throw s3.error;
     // Clear localStorage caches
-    try {
-      localStorage.removeItem('ot_recon_audit_' + uid);
-      localStorage.removeItem('ot_recon_done_' + uid);
-    } catch {}
+    try { localStorage.removeItem('ot_recon_done_' + uid); } catch {}
     // Reset in-memory state
     reconSession = null;
     bankTransactions = [];
@@ -6967,10 +6964,7 @@ async function _executeYearClose() {
     if (d4.error) throw d4.error;
 
     // 4 — Clear localStorage caches
-    try {
-      localStorage.removeItem('ot_recon_audit_' + uid);
-      localStorage.removeItem('ot_recon_done_' + uid);
-    } catch {}
+    try { localStorage.removeItem('ot_recon_done_' + uid); } catch {}
 
     // 5 — Reset in-memory state
     invoices         = [];
@@ -8187,6 +8181,14 @@ async function saveEmployee() {
   if (!name) { showToast('Please enter employee name', 'var(--amber)'); return; }
   const gross = parseFloat(document.getElementById('pr-gross').value) || 0;
   if (!gross) { showToast('Please enter gross salary', 'var(--amber)'); return; }
+  if (gross < 0) { showToast('Gross salary cannot be negative', 'var(--amber)'); return; }
+  const travel  = parseFloat(document.getElementById('pr-travel').value)  || 0;
+  const housing = parseFloat(document.getElementById('pr-housing').value) || 0;
+  const bonus   = parseFloat(document.getElementById('pr-bonus').value)   || 0;
+  const medical = parseFloat(document.getElementById('pr-medical').value) || 0;
+  const pension = parseFloat(document.getElementById('pr-pension').value) || 0;
+  if (travel < 0 || housing < 0 || bonus < 0) { showToast('Allowances cannot be negative', 'var(--amber)'); return; }
+  if (medical < 0 || pension < 0) { showToast('Deduction amounts cannot be negative', 'var(--amber)'); return; }
 
   const empData = {
     user_id:        currentUser.id,
@@ -8194,12 +8196,7 @@ async function saveEmployee() {
     id_num:         document.getElementById('pr-id').value.trim(),
     role:           document.getElementById('pr-role').value.trim(),
     emp_type:       document.getElementById('pr-type').value,
-    gross,
-    travel:         parseFloat(document.getElementById('pr-travel').value)  || 0,
-    housing:        parseFloat(document.getElementById('pr-housing').value) || 0,
-    bonus:          parseFloat(document.getElementById('pr-bonus').value)   || 0,
-    medical:        parseFloat(document.getElementById('pr-medical').value) || 0,
-    pension:        parseFloat(document.getElementById('pr-pension').value) || 0,
+    gross, travel, housing, bonus, medical, pension,
     period:         document.getElementById('pr-period').value,
     uif_applicable: document.getElementById('pr-uif')?.checked ?? true,
     sdl_applicable: document.getElementById('pr-sdl')?.checked ?? true,
