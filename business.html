@@ -1153,6 +1153,8 @@ body.help-mode .main{padding-top:34px}
                 <div class="dp-field"><label>VAT Reg Number</label><input id="v-reg" placeholder="4XXXXXXXXX" /></div>
                 <div class="dp-field"><label>Tax Period</label><input id="v-period" placeholder="Jan–Feb 2025" /></div>
                 <div class="dp-field"><label data-i18n="inv_due">Due Date</label><input id="v-due" placeholder="25 Mar 2025" /></div>
+                <div class="dp-field"><label>Period From</label><input id="v-from" type="date" /></div>
+                <div class="dp-field"><label>Period To</label><input id="v-to" type="date" /></div>
                 <div class="dp-field"><label>Sales (excl. VAT) R</label><input id="v-sales" type="number" min="0" step="0.01" /></div>
                 <div class="dp-field"><label>Output VAT R</label><input id="v-output" type="number" min="0" step="0.01" /></div>
                 <div class="dp-field"><label>Purchases (excl. VAT) R</label><input id="v-purch" type="number" min="0" step="0.01" /></div>
@@ -3230,7 +3232,7 @@ function showSection(name, btn) {
   document.getElementById('pageTitle').textContent = sec?.querySelector('h2')?.textContent?.replace(/^[^\w]+/, '') || name;
   if (name === 'dashboard') { renderObChecklist(); _refreshReconTxCount(); }
   if (name === 'checklist') { buildComplianceChecklist(); }
-  if (name === 'financials') { renderFinancials(); updateTipsState(); }
+  if (name === 'financials') { renderFinancials(); updateTipsState(); initVATPeriodDates(); }
   if (name === 'reconcile') renderReconciliation();
   if (name === 'handoff') { updatePackStatus(); updateHandoffReconBanner(); }
   if (name === 'history') { _doAutoSaveSnapshot(); loadPeriodHistory(); }
@@ -4358,29 +4360,67 @@ function toggleCL(box) {
 }
 
 // ── VAT201 AUTO-FILL ──
+// Pre-fill period dates to current bi-monthly window (only if not already set)
+function initVATPeriodDates() {
+  const fromEl = document.getElementById('v-from');
+  const toEl   = document.getElementById('v-to');
+  if (!fromEl || !toEl || fromEl.value) return; // already set
+  const start = currentVatPeriodStart();
+  const end   = new Date(start.getFullYear(), start.getMonth() + 2, 0); // last day of 2nd month
+  fromEl.value = start.toISOString().split('T')[0];
+  toEl.value   = end.toISOString().split('T')[0];
+}
+
+// Returns the start of the current bi-monthly VAT period (Jan/Mar/May/Jul/Sep/Nov)
+function currentVatPeriodStart() {
+  const now = new Date();
+  const m = now.getMonth(); // 0-based
+  // Bi-monthly periods: Jan-Feb=0, Mar-Apr=2, May-Jun=4, Jul-Aug=6, Sep-Oct=8, Nov-Dec=10
+  const periodStart = m - (m % 2);
+  return new Date(now.getFullYear(), periodStart, 1);
+}
+
 function autoFillVAT201() {
   if (!userProfile?.vat_registration_date) {
-    showToast('⚠ VAT registration date required to calculate VAT correctly. Please set it in Settings → Tax Registration.', 'var(--amber)');
+    showToast('⚠ VAT registration date required. Please set it in Settings → Tax Registration.', 'var(--amber)');
     return;
   }
-  const regDate = new Date(userProfile.vat_registration_date);
+  const f = id => document.getElementById(id);
+  const fromVal = f('v-from')?.value;
+  const toVal   = f('v-to')?.value;
+  if (!fromVal || !toVal) {
+    showToast('⚠ Set Period From and Period To dates before auto-filling.', 'var(--amber)');
+    return;
+  }
+  const periodFrom = new Date(fromVal);
+  const periodTo   = new Date(toVal + 'T23:59:59');
+  const regDate    = new Date(userProfile.vat_registration_date);
+
+  if (periodFrom > periodTo) {
+    showToast('Period From must be before Period To', 'var(--amber)');
+    return;
+  }
+
   const vatInvoices = invoices.filter(i => {
     if (!i.has_vat) return false;
-    if (!i.date) return false; // undated invoices excluded — cannot confirm post-registration
-    return new Date(i.date) >= regDate;
+    if (!i.date) return false;
+    const d = new Date(i.date);
+    return d >= regDate && d >= periodFrom && d <= periodTo;
   });
+
   const income = vatInvoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0);
   const vatOut = vatInvoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.vat||0),0);
   const exp    = vatInvoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0);
   const vatIn  = vatInvoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.vat||0),0);
-  const f = id => document.getElementById(id);
+
   if (f('v-biz') && !f('v-biz').value) f('v-biz').value = userProfile?.biz_name||'';
   if (f('v-reg') && !f('v-reg').value) f('v-reg').value = userProfile?.vat_number||'';
   if (f('v-sales')) f('v-sales').value = income.toFixed(2);
   if (f('v-output')) f('v-output').value = vatOut.toFixed(2);
   if (f('v-purch')) f('v-purch').value = exp.toFixed(2);
   if (f('v-input')) f('v-input').value = vatIn.toFixed(2);
-  showToast('✅ Auto-filled from your invoices', 'var(--green)');
+  const count = vatInvoices.length;
+  showToast(`✅ Auto-filled from ${count} invoice${count===1?'':'s'} in period`, 'var(--green)');
 }
 
 // ── SARS DISCLAIMER ──
@@ -6433,11 +6473,21 @@ async function downloadFullPack() {
     const reconConf = reconSession?.confidence || 0;
     const reconStatus = reconConf === 100 ? 'Fully Reconciled' : reconConf > 0 ? `Partially Reconciled (${reconConf}%)` : 'Not Reconciled';
 
-    const income    = invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0);
-    const exp       = invoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0);
+    // Filter to selected financial year (SA FY: 1 March – last day of February)
+    const [fyStartY] = year.split('/').map(s => parseInt(s));
+    const fyStart = new Date(fyStartY, 2, 1);                          // 1 March
+    const fyEnd   = new Date(fyStartY + 1, 2, 0, 23, 59, 59);         // last day of Feb
+    const fyInvs  = invoices.filter(i => {
+      if (!i.date) return false;
+      const d = new Date(i.date);
+      return d >= fyStart && d <= fyEnd;
+    });
+
+    const income    = fyInvs.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0);
+    const exp       = fyInvs.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0);
     const profit    = income - exp;
-    const vatOut    = invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.vat||0),0);
-    const vatIn     = invoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.vat||0),0);
+    const vatOut    = fyInvs.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.vat||0),0);
+    const vatIn     = fyInvs.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.vat||0),0);
     const vatNet    = vatOut - vatIn;
 
     // ── PDF 1: Profit & Loss ──
@@ -6446,7 +6496,7 @@ async function downloadFullPack() {
     y = makePDFRow(plDoc, 'Reconciliation Status', reconStatus, y, true);
     y += 6;
     y = makePDFRow(plDoc, 'Total Revenue', fmtR(income), y, true);
-    const incomeInvs = invoices.filter(i=>i.type==='income');
+    const incomeInvs = fyInvs.filter(i=>i.type==='income');
     const categories = [...new Set(incomeInvs.map(i=>i.category||'Sales'))];
     categories.forEach(cat => {
       const catTotal = incomeInvs.filter(i=>(i.category||'Sales')===cat).reduce((s,i)=>s+Number(i.amount||0),0);
@@ -6455,7 +6505,7 @@ async function downloadFullPack() {
     });
     y += 4;
     y = makePDFRow(plDoc, 'Total Expenses', fmtR(exp), y, true);
-    const expInvs = invoices.filter(i=>i.type==='expense');
+    const expInvs = fyInvs.filter(i=>i.type==='expense');
     const expCats = [...new Set(expInvs.map(i=>i.category||'Other Expense'))];
     expCats.forEach(cat => {
       const catTotal = expInvs.filter(i=>(i.category||'Other Expense')===cat).reduce((s,i)=>s+Number(i.amount||0),0);
@@ -6488,7 +6538,7 @@ async function downloadFullPack() {
 
     // ── CSV 3: Invoice Register ──
     const headers = ['Invoice Number','Date','Client','Type','Category','Amount (excl VAT)','VAT','Total','Status','Reconciled'];
-    const rows = invoices.map(inv => [
+    const rows = fyInvs.map(inv => [
       inv.invoice_number || '—',
       inv.date || '—',
       inv.client_name || inv.party || '—',
