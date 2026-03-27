@@ -7,18 +7,22 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-<script src="https://browser.sentry-cdn.com/8.47.0/bundle.min.js" crossorigin="anonymous"></script>
+<script
+  src="https://js-de.sentry-cdn.com/4e0916c95559b0d47da8759859e71905.min.js"
+  crossorigin="anonymous"
+></script>
 <script>
-  Sentry.init({
-    dsn: 'https://4e0916c95559b0d47da8759859e71905@o4511115058085888.ingest.de.sentry.io/4511115062935632',
-    environment: window.location.hostname === 'localhost' ? 'development' : 'production',
-    release: 'onetouch@1.0.0',
-    tracesSampleRate: 0.1,
-    beforeSend(event) {
-      // Don't send errors from browser extensions or localhost dev
-      if (window.location.hostname === 'localhost') return null;
-      return event;
-    }
+  Sentry.onLoad(function() {
+    Sentry.init({
+      environment: window.location.hostname === 'localhost' ? 'development' : 'production',
+      release: 'onetouch@1.0.0',
+      tracesSampleRate: 0.1,
+      replaysOnErrorSampleRate: 1.0,
+      beforeSend(event) {
+        if (window.location.hostname === 'localhost') return null;
+        return event;
+      }
+    });
   });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
