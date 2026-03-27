@@ -12,8 +12,11 @@ function getTodayMonthSAST() {
 
 function getCacheKey(body) {
   try {
-    const msg = body.messages?.[0]?.content || '';
-    return (body.model || '') + '_' + msg.substring(0, 200);
+    const msgs = body.messages || [];
+    // Use the last message as cache key — messages[0] is always the same first
+    // history entry, causing every reply in a conversation to return the cached first response
+    const lastMsg = msgs[msgs.length - 1]?.content || '';
+    return (body.model || '') + '_' + lastMsg.substring(0, 200);
   } catch { return null; }
 }
 
