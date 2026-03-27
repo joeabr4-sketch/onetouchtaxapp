@@ -4,29 +4,35 @@
 import crypto from 'crypto';
 import { captureException } from './_sentry.js';
 
+// Disable Vercel's body parser so we can read the raw body for signature verification
+export const config = { api: { bodyParser: false } };
+
 const MERCHANT_ID  = process.env.PAYFAST_MERCHANT_ID;
 const PASSPHRASE   = process.env.PAYFAST_PASSPHRASE || '';
 const SUPABASE_URL = 'https://stcxldjcagyxjfwfforx.supabase.co';
 
-// Matches PHP urlencode() — encodes ! ~ ' ( ) * which encodeURIComponent leaves unencoded
-function pfEncode(val) {
-  return encodeURIComponent(String(val).trim())
-    .replace(/!/g,  '%21')
-    .replace(/'/g,  '%27')
-    .replace(/\(/g, '%28')
-    .replace(/\)/g, '%29')
-    .replace(/\*/g, '%2A')
-    .replace(/~/g,  '%7E')
-    .replace(/%20/g, '+');
+// Read raw body from request stream
+function getRawBody(req) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', chunk => { body += chunk.toString(); });
+    req.on('end', () => resolve(body));
+    req.on('error', reject);
+  });
 }
 
-function generateSignature(data, passphrase) {
-  let str = Object.keys(data)
-    .filter(k => k !== 'signature' && data[k] != null && data[k] !== '')
-    .map(k => `${k}=${pfEncode(data[k])}`)
-    .join('&');
-  if (passphrase) str += `&passphrase=${pfEncode(passphrase)}`;
-  return crypto.createHash('md5').update(str).digest('hex');
+// Verify signature using raw body — same approach as PayFast's PHP SDK
+// Strips the signature param, appends passphrase, MD5s the result
+function verifySignature(rawBody, receivedSig, passphrase) {
+  // Parse into ordered pairs, drop signature field, keep rest as-is
+  const pairs = rawBody.split('&').filter(p => {
+    const key = p.split('=')[0];
+    return key !== 'signature';
+  });
+  let str = pairs.join('&');
+  if (passphrase) str += `&passphrase=${encodeURIComponent(passphrase.trim()).replace(/%20/g, '+')}`;
+  const expected = crypto.createHash('md5').update(str).digest('hex');
+  return { expected, match: expected === receivedSig };
 }
 
 const ALERT_EMAIL   = 'joeabr4@gmail.com';
@@ -64,7 +70,11 @@ async function sendAlert(subject, details) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const data = req.body || {};
+  // Read raw body (bodyParser is disabled above)
+  const rawBody = await getRawBody(req);
+
+  // Parse into object for field access
+  const data = Object.fromEntries(new URLSearchParams(rawBody));
 
   // 1 — Verify merchant
   if (data.merchant_id !== MERCHANT_ID) {
@@ -78,9 +88,9 @@ export default async function handler(req, res) {
     return res.status(400).send('Invalid merchant');
   }
 
-  // 2 — Verify signature
-  const expected = generateSignature(data, PASSPHRASE);
-  if (data.signature !== expected) {
+  // 2 — Verify signature using raw body (preserves original field order + encoding)
+  const { expected, match } = verifySignature(rawBody, data.signature, PASSPHRASE);
+  if (!match) {
     console.error('PayFast IPN: signature mismatch', { received: data.signature, expected });
     await sendAlert('signature mismatch — possible misconfiguration or replay attack', {
       received:   data.signature,
