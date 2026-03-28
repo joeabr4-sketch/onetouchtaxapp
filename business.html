@@ -7706,7 +7706,7 @@ RULES:
     addSupportMsg('ai', reply);
   } catch(e) {
     removeSupportTyping();
-    addSupportMsg('ai', "Sorry, I can't connect right now. Please email <strong>support@onetouch.net.za</strong> and we'll get back to you within 1 business day.");
+    addSupportMsg('ai', "Sorry, I can't connect right now. Please email <strong>support@onetouch.net.za</strong> and our team will follow up as soon as possible.");
   }
 }
 
@@ -7748,9 +7748,9 @@ async function escalateSupportIssue(lastMsg, userEmail, userPlan, bizName, userI
         html: emailHtml
       })
     });
-    addSupportMsg('ai', `I've escalated your issue to our support team and they'll follow up at <strong>${userEmail}</strong> within 1 business day. Is there anything else I can help with in the meantime?`);
+    addSupportMsg('ai', `I've escalated your issue to our support team and they'll follow up at <strong>${userEmail}</strong> as soon as possible. Is there anything else I can help with in the meantime?`);
   } catch(e) {
-    addSupportMsg('ai', "I wasn't able to reach our team automatically. Please email <strong>support@onetouch.net.za</strong> directly and we'll get back to you within 1 business day.");
+    addSupportMsg('ai', "I wasn't able to reach our team automatically. Please email <strong>support@onetouch.net.za</strong> directly and our team will follow up as soon as possible.");
   }
 }
 
