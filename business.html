@@ -1526,8 +1526,7 @@ body.help-mode .main{padding-top:34px}
             ondrop="handleReconDrop(event)">
             <div style="font-size:28px;margin-bottom:8px">📂</div>
             <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">Drop your file here or click to browse</div>
-            <div style="font-size:11.5px;color:var(--text-3);margin-bottom:6px">CSV or Excel exported from your bank's transaction history (not PDF statements)</div>
-            <div style="font-size:11px;color:var(--amber);opacity:.8">Tip: If you downloaded a PDF, go back and export from transaction history instead.</div>
+            <div style="font-size:11.5px;color:var(--text-3)">Export your transactions as CSV or Excel from your online banking — look for a "Download" or "Export" option in your transaction history.</div>
             <input type="file" id="reconFileInput" accept=".csv,.xlsx,.xls,.ofx,.qfx" style="display:none" onchange="handleReconFile(event)">
           </div>
           <div id="reconStatementInfo" style="display:none;margin-top:12px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:8px;padding:12px 16px;align-items:center;justify-content:space-between">
@@ -5694,7 +5693,7 @@ async function commitReconRows(rows, file) {
 
 function resetReconDropZone() {
   const dz = document.getElementById('reconDropZone');
-  if (dz) { dz.style.display = 'block'; dz.innerHTML = `<div style="font-size:28px;margin-bottom:8px">📂</div><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">Drop your file here or click to browse</div><div style="font-size:11.5px;color:var(--text-3);margin-bottom:6px">CSV or Excel exported from your bank's transaction history (not PDF statements)</div><div style="font-size:11px;color:var(--amber);opacity:.8">Tip: If you downloaded a PDF, go back and export from transaction history instead.</div><input type="file" id="reconFileInput" accept=".csv,.xlsx,.xls,.ofx,.qfx" style="display:none" onchange="handleReconFile(event)">`; }
+  if (dz) { dz.style.display = 'block'; dz.innerHTML = `<div style="font-size:28px;margin-bottom:8px">📂</div><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">Drop your file here or click to browse</div><div style="font-size:11.5px;color:var(--text-3)">Export your transactions as CSV or Excel from your online banking — look for a "Download" or "Export" option in your transaction history.</div><input type="file" id="reconFileInput" accept=".csv,.xlsx,.xls,.ofx,.qfx" style="display:none" onchange="handleReconFile(event)">`; }
   const fi = document.getElementById('reconFileInput');
   if (fi) fi.value = '';
 }
