@@ -5914,16 +5914,17 @@ function renderTxTable() {
     const invAmt = inv ? parseFloat(inv.total || inv.amount || 0) : 0;
     const hasMismatch = inv && Math.abs(txAmt - invAmt) > 0.01;
 
+    const isResolved = tx.classification || tx.ignored;
     const statusBadge = tx.ignored
       ? '<span style="background:rgba(255,255,255,.06);color:var(--text-3);padding:3px 9px;border-radius:6px;font-size:11px">🚫 Ignored</span>'
       : tx.match_status === 'matched' ? '<span class="tx-status-matched">🟢 Matched</span>'
       : tx.match_status === 'suggested' ? '<span class="tx-status-suggested">🟡 Suggested</span>'
-      : tx.classification ? `<span style="background:rgba(184,196,216,.08);color:var(--text-2);padding:3px 9px;border-radius:6px;font-size:11px">📋 ${escHtml(tx.classification)}</span>`
+      : tx.classification ? `<span class="tx-status-matched">🟢 ${escHtml(tx.classification)}</span>`
       : '<span class="tx-status-unmatched">🔴 Unmatched</span>';
 
     const linkedLabel = tx.ignored ? '<span style="font-size:11px;color:var(--text-3)">Ignored</span>'
       : inv ? `<div><span style="font-size:11px;color:${hasMismatch?'var(--amber)':' var(--green)'}">${escHtml(inv.invoice_number||'INV')} — ${escHtml(inv.client_name||'')}</span>${hasMismatch?`<button onclick="editInvoice('${inv.id}')" style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:var(--amber);padding:2px 6px;border-radius:4px;font-size:10px;cursor:pointer;margin-left:4px;font-family:'DM Sans',sans-serif">Edit ⚠️</button>`:''}</div>`
-      : tx.classification ? `<span style="font-size:11px;color:var(--text-3)">${escHtml(tx.classification)}</span>`
+      : tx.classification ? `<span style="font-size:11px;color:var(--green)">${escHtml(tx.classification)}</span>`
       : '<span style="font-size:11px;color:var(--text-3)">—</span>';
 
     const actionBtns = tx.ignored
@@ -5932,12 +5933,14 @@ function renderTxTable() {
       ? `<button onclick="unmatchTx('${tx.id}')" style="background:none;border:none;color:var(--text-3);font-size:11px;cursor:pointer">↩ Unmatch</button>`
       : tx.match_status === 'suggested'
       ? `<button class="recon-match-btn" onclick="confirmSuggestedMatch('${tx.id}')">✓</button> <button class="recon-reject-btn" onclick="rejectSuggestedMatch('${tx.id}')">✕</button>`
+      : tx.classification
+      ? `<button onclick="openAssignPanel('${tx.id}')" style="background:none;border:none;color:var(--text-3);font-size:11px;cursor:pointer">↩ Reclassify</button>`
       : `<button class="recon-manual-btn" onclick="openAssignPanel('${tx.id}')">Assign →</button>`;
 
-    return `<tr style="${tx.ignored?'opacity:.5':''}">
+    return `<tr style="${tx.ignored?'opacity:.5':''}${isResolved && tx.type==='debit' ? ';background:rgba(34,197,94,.03)' : ''}">
       <td style="color:var(--text-3);font-size:12px">${escHtml(tx.date||'—')}</td>
       <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px">${escHtml(tx.description||'—')}</td>
-      <td style="font-family:'Syne',sans-serif;font-weight:700;color:${tx.type==='debit'?'var(--red)':' var(--green)'}">${tx.type==='debit'?'-':'+'} ${fmtR(txAmt)}</td>
+      <td style="font-family:'Syne',sans-serif;font-weight:700;color:${tx.type==='debit' ? (isResolved ? 'var(--green)' : 'var(--red)') : 'var(--green)'}">${tx.type==='debit'?'-':'+'} ${fmtR(txAmt)}</td>
       <td style="font-size:11px;color:var(--text-3)">${tx.type||'credit'}</td>
       <td>${linkedLabel}</td>
       <td>${statusBadge}</td>
