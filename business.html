@@ -3312,8 +3312,8 @@ async function loadInvoices() {
     if (invoices.length === 0) { finEmpty.style.display = 'block'; finContent.style.display = 'none'; }
     else { finEmpty.style.display = 'none'; finContent.style.display = 'block'; }
   }
-  // Rebuild all monthly snapshots from fresh invoice data — runs after every successful load
-  await _doAutoSaveSnapshot();
+  // Rebuild all monthly snapshots from fresh invoice data — fire and forget so invoice save feels instant
+  _doAutoSaveSnapshot();
 }
 
 function getInvStatus(inv) {
