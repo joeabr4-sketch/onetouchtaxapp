@@ -3829,16 +3829,19 @@ function exportInvoicePDF(inv) {
   if (!items.length) items = [{ desc: inv.description||'Service', qty:1, price:inv.amount||0 }];
   doc.setFont('helvetica','normal');
   doc.setFontSize(9);
+  const descColW = W - M*2 - 72; // description column ends before Qty column
   items.forEach((li, i) => {
-    if (i%2===0) { doc.setFillColor(252,253,255); doc.rect(M, y-3, W-M*2, 10, 'F'); }
+    const descLines = doc.splitTextToSize(li.desc||'Item', descColW);
+    const rowH = Math.max(10, descLines.length * 5 + 4);
+    if (i%2===0) { doc.setFillColor(252,253,255); doc.rect(M, y-3, W-M*2, rowH, 'F'); }
     doc.setTextColor(15,21,32);
-    doc.text(li.desc||'Item', M+4, y+4);
+    doc.text(descLines, M+4, y+4);
     doc.text(String(li.qty||1), W-M-64, y+4);
     doc.text(fmtR(li.price||0), W-M-44, y+4);
     doc.setFont('helvetica','bold');
     doc.text(fmtR((li.qty||1)*(li.price||0)), W-M-4, y+4, {align:'right'});
     doc.setFont('helvetica','normal');
-    y += 10;
+    y += rowH;
   });
 
   y += 4;
