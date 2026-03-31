@@ -6165,6 +6165,11 @@ function openAssignPanel(txId, defaultMode) {
     </div>
   </div>`;
   document.body.insertAdjacentHTML('beforeend', panel);
+  // Pre-fill saved category if reclassifying
+  if (tx.expense_category) {
+    const sel = document.getElementById('expCatSelect');
+    if (sel) sel.value = tx.expense_category;
+  }
 }
 
 // ── MATCH / UNMATCH ──
