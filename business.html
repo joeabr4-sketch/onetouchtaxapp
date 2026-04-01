@@ -6438,6 +6438,15 @@ function showReconBlockModal(unmatched, flagged, unclassified) {
   modal.style.display = 'flex';
 }
 
+function updateNotifCount() {
+  const dropdown = document.getElementById('notifDropdown');
+  const badge = document.getElementById('notifCount');
+  if (!badge) return;
+  const count = dropdown ? dropdown.querySelectorAll('.notif-item').length : 0;
+  badge.textContent = count;
+  badge.style.display = count ? 'flex' : 'none';
+}
+
 function checkReconReminders() {
   if (!reconSession || reconSession.locked) return;
   const day = new Date().getDate();
