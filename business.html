@@ -3620,6 +3620,8 @@ let _savingInvoice = false;
 async function saveInvoice(exportPDF) {
   if (_savingInvoice) return;
   _savingInvoice = true;
+  const saveBtn = [...document.querySelectorAll('button')].find(b => b.textContent.includes('Save Invoice'));
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '⏳ Saving...'; }
   try {
   const subtotal = rnd(lineItems.reduce((s,li)=>s+(li.qty||1)*(li.price||0),0));
   const vatAmt = invVATEnabled ? vatOn(subtotal) : 0;
@@ -3707,14 +3709,20 @@ async function saveInvoice(exportPDF) {
   const isQuote = invData.doc_type === 'quote';
   if (error) { showToast('Error saving: ' + error.message, 'var(--red)'); return; }
   showToast(editingInvId ? `✅ ${isQuote?'Quote':'Invoice'} updated!` : `✅ ${isQuote?'Quote':'Invoice'} saved!`, 'var(--green)');
-  await loadInvoices();
+  // Close form immediately — don't block on reload
+  const savedId = editingInvId;
   if (exportPDF && !isQuote) {
     closeInvForm();
-    exportInvoicePDF({ ...invData, id: editingInvId });
+    exportInvoicePDF({ ...invData, id: savedId });
   } else {
     closeInvForm();
   }
-  } finally { _savingInvoice = false; }
+  // Refresh data in background
+  loadInvoices();
+  } finally {
+    _savingInvoice = false;
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 Save Invoice'; }
+  }
 }
 
 async function saveInvAndPDF() { await saveInvoice(true); }
