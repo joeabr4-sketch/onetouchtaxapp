@@ -122,6 +122,24 @@
 /* Cards general */
 [data-theme="light"] .card{background:var(--surface);border-color:var(--border)}
 [data-theme="light"] .card-head{border-bottom-color:var(--border)}
+/* Import invoices modal */
+[data-theme="light"] #importModal>div{background:var(--surface)!important;border-color:var(--border2)!important;box-shadow:0 24px 64px rgba(15,23,42,.15)!important}
+[data-theme="light"] #importModal>div>div:first-child{background:var(--surface)!important;border-bottom-color:var(--border)!important}
+[data-theme="light"] #importModal>div>div:first-child button{color:var(--text-3)!important}
+[data-theme="light"] #importDropZone{background:var(--surface2)!important;border-color:var(--border2)!important}
+/* Invoice/expense/quote form scrollbar — clip to card border-radius */
+.inv-form-card::-webkit-scrollbar-track{border-radius:0 20px 20px 0;background:transparent}
+.inv-form-card::-webkit-scrollbar-thumb{border-radius:20px}
+.payslip-card::-webkit-scrollbar-track{border-radius:0 20px 20px 0;background:transparent}
+.payslip-card::-webkit-scrollbar-thumb{border-radius:20px}
+/* Employee (payslip) form light mode */
+[data-theme="light"] .payslip-modal{background:rgba(15,23,42,.4)!important}
+[data-theme="light"] .payslip-card{background:var(--surface)!important;border-color:var(--border2)!important;box-shadow:0 24px 64px rgba(15,23,42,.15)!important}
+[data-theme="light"] .payslip-head{background:var(--surface)!important;border-bottom-color:var(--border)!important}
+[data-theme="light"] .payslip-preview{background:var(--surface2)!important}
+[data-theme="light"] .pr-field input,[data-theme="light"] .pr-field select,[data-theme="light"] .pr-field textarea{background:var(--surface2)!important;color:var(--text)!important;border-color:var(--border)!important}
+/* Page title — same gradient as clock */
+[data-theme="light"] .page-title{background:linear-gradient(135deg,#1e3a8a,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;color:unset}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
@@ -1474,7 +1492,7 @@ body.help-mode .main{padding-top:34px}
           <button class="add-inv-btn" onclick="openInvForm()">+ Create Invoice</button>
           <button onclick="openQuoteForm()" style="background:var(--gold-dim);color:var(--gold);border:1px solid rgba(212,168,67,.3);padding:10px 16px;border-radius:9px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s">📋 Add Quote</button>
           <button onclick="openExpenseForm()" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:10px 16px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s">💸 Add Expense</button>
-          <button onclick="openImportModal()" style="background:rgba(184,196,216,.08);color:var(--text-2);border:1px solid rgba(184,196,216,.2);padding:10px 16px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s">📥 Import Transactions <span style="background:rgba(184,196,216,.15);color:var(--blue);font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:4px">PRO</span></button>
+          <button onclick="openImportModal()" style="background:rgba(184,196,216,.08);color:var(--text-2);border:1px solid rgba(184,196,216,.2);padding:10px 16px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s">📥 Import Invoices <span style="background:rgba(184,196,216,.15);color:var(--blue);font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:4px">PRO</span></button>
         </div>
       </div>
       <div class="inv-stats">
@@ -2372,7 +2390,7 @@ body.help-mode .main{padding-top:34px}
         <!-- Header -->
         <div style="padding:22px 28px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#1a1d24;z-index:10">
           <div>
-            <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700">📥 Import Transactions</div>
+            <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700">📥 Import Invoices</div>
             <div style="font-size:12px;color:var(--text-3);margin-top:2px">CSV, Excel (.xlsx) or OFX — from any accounting system or bank</div>
           </div>
           <button onclick="closeImportModal()" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:20px;cursor:pointer;padding:4px 8px">✕</button>
