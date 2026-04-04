@@ -2368,10 +2368,10 @@ body.help-mode .main{padding-top:34px}
       <div class="inv-form-section" data-i18n="inv_section_invoice">Invoice Details</div>
       <div class="inv-grid">
         <div class="inv-field"><label data-i18n="inv_number">Invoice Number</label><input id="inv-number" placeholder="e.g. INV-001" /></div>
-        <div class="inv-field"><label data-i18n="inv_date">Invoice Date</label><input type="date" id="inv-date" /></div>
+        <div class="inv-field"><label data-i18n="inv_date">Invoice Date</label><input type="date" id="inv-date" onchange="calcDueDate()" /></div>
         <div class="inv-field"><label data-i18n="inv_due">Due Date</label><input type="date" id="inv-due" /></div>
         <div class="inv-field"><label data-i18n="inv_terms">Payment Terms</label>
-          <select id="inv-terms">
+          <select id="inv-terms" onchange="calcDueDate()">
             <option value="immediate">Immediate</option>
             <option value="net7">Net 7 days</option>
             <option value="net14">Net 14 days</option>
@@ -3470,9 +3470,8 @@ function openInvForm() {
   document.getElementById('invFormTitle').textContent = '🧾 Create Invoice';
   document.getElementById('inv-number').value = genInvNumber();
   document.getElementById('inv-date').value = new Date().toISOString().split('T')[0];
-  const due = new Date(); due.setDate(due.getDate() + 30);
-  document.getElementById('inv-due').value = due.toISOString().split('T')[0];
   document.getElementById('inv-terms').value = 'net30';
+  calcDueDate();
   document.getElementById('inv-client').value = '';
   document.getElementById('inv-email').value = '';
   document.getElementById('inv-whatsapp').value = '';
@@ -3527,6 +3526,19 @@ async function convertQuoteToInvoice(id) {
 function closeInvForm() {
   document.getElementById('invFormOverlay').style.display = 'none';
   editingInvId = null;
+}
+
+function calcDueDate() {
+  const terms = document.getElementById('inv-terms')?.value;
+  if (!terms || terms === 'custom') return; // let user set manually
+  const daysMap = { immediate: 0, net7: 7, net14: 14, net30: 30, net60: 60 };
+  const days = daysMap[terms];
+  if (days === undefined) return;
+  const baseDate = document.getElementById('inv-date')?.value;
+  const base = baseDate ? new Date(baseDate) : new Date();
+  base.setDate(base.getDate() + days);
+  const dueField = document.getElementById('inv-due');
+  if (dueField) dueField.value = base.toISOString().split('T')[0];
 }
 
 function genInvNumber() {
