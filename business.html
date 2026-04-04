@@ -5380,7 +5380,15 @@ async function updateInvoiceStatusFromRecon(invoiceId) {
   const inv = invoices.find(i => String(i.id) === String(invoiceId));
   if (!inv) return;
   const total = parseFloat(inv.total || inv.amount || 0);
-  const paid = calcAmountPaid(invoiceId);
+  // Query DB across ALL sessions — in-memory reconTransactions is session-scoped
+  const { data: allMatched } = await sb.from('bank_transactions')
+    .select('amount')
+    .eq('user_id', currentUser.id)
+    .eq('matched_invoice_id', invoiceId)
+    .eq('match_status', 'matched')
+    .eq('type', 'credit')
+    .eq('ignored', false);
+  const paid = (allMatched || []).reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
 
   let newStatus, newReconciled;
   if (paid <= 0) {
