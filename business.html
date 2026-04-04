@@ -5696,9 +5696,9 @@ async function confirmImportPreview() {
 
 async function commitReconRows(rows, file) {
   try {
-    // Dedup: skip transactions already in this session
+    // Dedup: skip transactions already uploaded by this user (across all sessions)
     const { data: existing } = await sb.from('bank_transactions')
-      .select('date,amount,type,description').eq('session_id', reconSession.id);
+      .select('date,amount,type,description').eq('user_id', currentUser.id);
     const existingKeys = new Set((existing||[]).map(t =>
       `${t.date}|${t.amount}|${t.type}|${String(t.description||'').substring(0,30)}`
     ));
