@@ -42,6 +42,17 @@
   --gold:#d4a843;--gold-dim:rgba(212,168,67,.12);
   --text:#e8edf5;--text-2:#99aac8;--text-3:#5a6a88;
 }
+[data-theme="light"]{
+  --bg:#f0f2f7;--bg2:#e4e8f0;--surface:rgba(0,0,0,.04);--surface2:rgba(0,0,0,.06);
+  --border:rgba(0,0,0,.1);--border2:rgba(0,0,0,.16);
+  --blue:#3d5a8a;--blue-dim:rgba(61,90,138,.1);--blue-glow:rgba(61,90,138,.15);
+  --cyan:#0d9488;--green:#16a34a;--green-dim:rgba(22,163,74,.1);
+  --amber:#d97706;--amber-dim:rgba(217,119,6,.1);
+  --red:#e11d48;--red-dim:rgba(225,29,72,.1);
+  --gold:#b45309;--gold-dim:rgba(180,83,9,.12);
+  --text:#1a2235;--text-2:#4a5a78;--text-3:#8a9ab8;
+}
+[data-theme="light"] body::before{background:radial-gradient(ellipse 80% 50% at 50% -5%,rgba(61,90,138,.05),transparent)}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
@@ -1054,6 +1065,7 @@ body.help-mode .main{padding-top:34px}
         <span class="badge b-red" id="tb-overdue" style="display:none">🔴 Overdue</span>
         <span class="badge b-amber" id="tb-due-soon" style="display:none">🟡 Due Soon</span>
         <button id="tbUpgradeBtn" onclick="showSection('settings',null)" style="display:none;background:linear-gradient(135deg,#d4a843,#b8872e);color:#fff;border:none;padding:5px 14px;border-radius:7px;font-family:'Syne',sans-serif;font-size:11.5px;font-weight:700;cursor:pointer;letter-spacing:.2px;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">⬆ Upgrade</button>
+        <div id="themeToggleBtn" onclick="toggleTheme()" title="Toggle light/dark mode" style="width:36px;height:36px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all .15s;margin-right:6px" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='rgba(255,255,255,.1)'">🌙</div>
         <div class="notif-wrap">
           <div class="notif-bell" onclick="toggleNotifs()" id="notifBell">🔔
             <div class="notif-badge" id="notifCount" style="display:none">0</div>
@@ -1949,18 +1961,15 @@ body.help-mode .main{padding-top:34px}
       <div class="help-banner"><div class="help-banner-title">💡 Settings</div><div class="help-banner-body">Set up your business profile here — name, owner, VAT number, bank details for invoices, and your logo. The more complete your profile, the more accurate your SARS deadlines, VAT calculations, and invoice PDFs. You can also change your display language and restart the setup guide from here.</div><div class="help-banner-actions"><span>Business Profile — used on all invoice PDFs</span><span>Language — English, Afrikaans, isiZulu, isiXhosa, Setswana</span><span>Restart Setup Guide — relaunches the orientation tour</span></div></div>
       <div style="max-width:700px">
         <div style="margin-bottom:20px"><h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:3px">⚙ Settings</h2><p style="font-size:13px;color:var(--text-2)">Manage your business profile, invoice branding and account.</p></div>
-        <!-- HELP & ONBOARDING -->
+        <!-- DISPLAY MODE -->
         <div class="card" style="margin-bottom:16px">
-          <div class="card-head"><div class="card-title">🚀 Help &amp; Onboarding</div></div>
+          <div class="card-head"><div class="card-title">🎨 Display Mode</div></div>
           <div style="padding:16px 20px">
-            <p style="font-size:13px;color:var(--text-2);margin-bottom:14px">Want to walk through the setup guide again? Restart it any time — it won't delete any of your data.</p>
-            <button onclick="restartObWizard();showSection('dashboard',document.querySelector('.s-btn[onclick*=dashboard]'))" style="background:var(--blue);color:#0f1520;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">↺ Restart Setup Guide</button>
-            <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border)">
-              <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">💡 Guided Mode</div>
-              <p style="font-size:12.5px;color:var(--text-2);margin-bottom:12px">Show helpful tips at the top of every section to guide you through the app.</p>
-              <div style="display:flex;align-items:center;gap:12px">
-                <button id="helpModeToggle" onclick="toggleHelpMode()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 18px;color:var(--text-2);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s">💡 Guided Mode: Off</button>
-              </div>
+            <p style="font-size:13px;color:var(--text-2);margin-bottom:16px">Switch between dark and light mode — your preference is saved automatically.</p>
+            <div style="display:flex;align-items:center;gap:12px">
+              <button onclick="toggleTheme()" id="themeSettingsBtn" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 20px;color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;display:flex;align-items:center;gap:8px">
+                <span id="themeSettingsIcon">🌙</span><span id="themeSettingsLabel">Dark Mode</span>
+              </button>
             </div>
           </div>
         </div>
@@ -3293,7 +3302,7 @@ function showSection(name, btn) {
   if (name !== currentSection) currentAction = null;
   currentSection = name;
   if (name === 'assistant') { refreshAIContext(prevSection); switchAssistantTab('tax'); }
-  if (name === 'settings') _syncHelpModeBtn();
+  if (name === 'settings') { _syncHelpModeBtn(); applyTheme(localStorage.getItem('ot_theme') || 'dark'); }
   document.getElementById('notifDropdown').classList.remove('open');
   _syncMobNav(name);
 }
@@ -10372,6 +10381,36 @@ function markReconDone() {
 }
 
 // ── HELP MODE TOGGLE ─────────────────────────────────────────────
+
+// ── THEME TOGGLE ──────────────────────────────────────────────────
+function toggleTheme() {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const newTheme = isLight ? 'dark' : 'light';
+  applyTheme(newTheme);
+  localStorage.setItem('ot_theme', newTheme);
+}
+
+function applyTheme(theme) {
+  const isLight = theme === 'light';
+  document.documentElement.setAttribute('data-theme', isLight ? 'light' : '');
+  // Header toggle button
+  const headerBtn = document.getElementById('themeToggleBtn');
+  if (headerBtn) {
+    headerBtn.textContent = isLight ? '☀️' : '🌙';
+    headerBtn.style.borderColor = isLight ? 'rgba(0,0,0,.15)' : 'rgba(255,255,255,.1)';
+    headerBtn.onmouseout = () => { headerBtn.style.borderColor = isLight ? 'rgba(0,0,0,.15)' : 'rgba(255,255,255,.1)'; };
+  }
+  // Settings button
+  const icon = document.getElementById('themeSettingsIcon');
+  const label = document.getElementById('themeSettingsLabel');
+  if (icon) icon.textContent = isLight ? '☀️' : '🌙';
+  if (label) label.textContent = isLight ? 'Light Mode' : 'Dark Mode';
+}
+
+(function initTheme() {
+  const saved = localStorage.getItem('ot_theme') || 'dark';
+  applyTheme(saved);
+})();
 
 function toggleHelpMode() {
   const active = document.body.classList.toggle('help-mode');
