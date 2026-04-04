@@ -53,6 +53,33 @@
   --text:#0f172a;--text-2:#334155;--text-3:#64748b;
 }
 [data-theme="light"] body::before{background:radial-gradient(ellipse 100% 60% at 60% -20%,rgba(37,99,235,.06),transparent 60%)}
+
+/* ── LIGHT MODE COMPONENT OVERRIDES ── */
+/* 1. Topbar matches sidebar footer */
+[data-theme="light"] .topbar{background:rgba(255,255,255,.95);border-bottom-color:var(--border)}
+/* 2. Bell icon — light grey */
+[data-theme="light"] .notif-bell{background:#e8edf5;border-color:var(--border2)}
+/* 3. "Touch" in logo — darker blue */
+[data-theme="light"] .logo-text span{background:linear-gradient(135deg,#1e3a8a,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+/* 4. Page title + clock — same blue as logo "Touch" */
+[data-theme="light"] .page-title{color:#1e3a8a}
+[data-theme="light"] #clockTime{background:linear-gradient(135deg,#1e3a8a,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+/* 5. Sidebar nav section headings */
+[data-theme="light"] .s-section{color:#64748b;border-top-color:var(--border)}
+/* 6. Active + hover nav item */
+[data-theme="light"] .s-btn:hover{background:var(--blue-dim);color:var(--blue)}
+[data-theme="light"] .s-btn.active{background:var(--blue-dim);color:#2563eb}
+/* 7. Welcome / onboarding popup */
+[data-theme="light"] .ob-card{background:var(--surface);border-color:var(--border2);box-shadow:0 24px 64px rgba(15,23,42,.15)}
+[data-theme="light"] .ob-overlay{background:rgba(15,23,42,.4)}
+/* 8. Sidebar scrollbar */
+[data-theme="light"] ::-webkit-scrollbar-track{background:#f0f4ff}
+[data-theme="light"] ::-webkit-scrollbar-thumb{background:#c7d7fa}
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover{background:#93b4f0}
+/* Sidebar footer + user pill */
+[data-theme="light"] .s-foot{border-top-color:var(--border)}
+[data-theme="light"] .s-user{background:var(--surface2);border-color:var(--border)}
+[data-theme="light"] .s-out{border-color:var(--border2);color:var(--text-3)}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
