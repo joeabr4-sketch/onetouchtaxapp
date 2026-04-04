@@ -69,9 +69,10 @@
 /* 6. Active + hover nav item */
 [data-theme="light"] .s-btn:hover{background:var(--blue-dim);color:var(--blue)}
 [data-theme="light"] .s-btn.active{background:var(--blue-dim);color:#2563eb}
-/* 7. Welcome / onboarding popup */
+/* 7. Onboarding wizard */
 [data-theme="light"] .ob-card{background:var(--surface);border-color:var(--border2);box-shadow:0 24px 64px rgba(15,23,42,.15)}
 [data-theme="light"] .ob-overlay{background:rgba(15,23,42,.4)}
+[data-theme="light"] .ob-wiz-pill{background:var(--surface);border-color:var(--border2);box-shadow:0 8px 32px rgba(15,23,42,.12)}
 /* 8. Sidebar scrollbar */
 [data-theme="light"] ::-webkit-scrollbar-track{background:#f0f4ff}
 [data-theme="light"] ::-webkit-scrollbar-thumb{background:#c7d7fa}
@@ -80,6 +81,47 @@
 [data-theme="light"] .s-foot{border-top-color:var(--border)}
 [data-theme="light"] .s-user{background:var(--surface2);border-color:var(--border)}
 [data-theme="light"] .s-out{border-color:var(--border2);color:var(--text-3)}
+/* Welcome popup — overrides hardcoded dark inline styles */
+[data-theme="light"] #welcomePopup>div{background:var(--surface)!important;border-color:var(--border2)!important;box-shadow:0 24px 64px rgba(15,23,42,.15)!important}
+[data-theme="light"] #welcomePopup>div>div:first-child{background:var(--surface2)!important;border-bottom-color:var(--border)!important}
+[data-theme="light"] #welcomePopup>div>div:first-child div[style*="color:#fff"]{color:var(--text)!important}
+[data-theme="light"] #welcomePopup>div>div:first-child div[style*="rgba(255,255,255,.7)"]{color:var(--text-2)!important}
+[data-theme="light"] #welcomePopup>div>div:first-child button{background:var(--border)!important;color:var(--text)!important}
+[data-theme="light"] #welcomePopupBody{background:var(--surface)!important;color:var(--text-2)!important}
+[data-theme="light"] #welcomePopup>div>div:last-child{background:var(--surface2)!important;border-top-color:var(--border)!important}
+/* Support widget — App Help tab */
+[data-theme="light"] .sq-btn{background:var(--surface2);border-color:var(--border)}
+[data-theme="light"] .sup-msg-ai{background:var(--surface2);border-color:var(--border)}
+/* AI tab switcher container */
+[data-theme="light"] .chat-hd [style*="rgba(255,255,255,.06)"]{background:var(--surface2)!important}
+/* Add employees empty state */
+[data-theme="light"] #emp201Prep{background:var(--surface2)!important;border-color:var(--border)!important}
+/* Invoice form */
+[data-theme="light"] .inv-form-card{background:var(--surface)!important}
+[data-theme="light"] .inv-form-header{background:var(--surface)!important;border-bottom-color:var(--border)!important}
+[data-theme="light"] .inv-form-footer{background:var(--surface)!important;border-top-color:var(--border)!important}
+[data-theme="light"] .inv-field input,[data-theme="light"] .inv-field select,[data-theme="light"] .inv-field textarea{background:var(--surface2)!important;color:var(--text)!important;border-color:var(--border)!important}
+[data-theme="light"] .inv-field input:focus,[data-theme="light"] .inv-field select:focus,[data-theme="light"] .inv-field textarea:focus{background:var(--surface)!important;border-color:var(--blue)!important}
+[data-theme="light"] .line-item-head{background:var(--surface2)!important}
+[data-theme="light"] .line-item-row{background:var(--surface)!important}
+[data-theme="light"] .line-item-row input{background:var(--surface2)!important;color:var(--text)!important}
+/* Payroll form */
+[data-theme="light"] .payslip-card{background:var(--surface)!important}
+[data-theme="light"] .payslip-head{background:var(--surface)!important;border-bottom-color:var(--border)!important}
+[data-theme="light"] .pr-field input,[data-theme="light"] .pr-field select{background:var(--surface2)!important;color:var(--text)!important;border-color:var(--border)!important}
+[data-theme="light"] .split-amt-input{background:var(--surface2)!important;color:var(--text)!important}
+/* Toasts */
+[data-theme="light"] .toast{background:var(--surface)!important;border-color:var(--border2)!important;color:var(--text)!important;box-shadow:0 8px 24px rgba(15,23,42,.12)!important}
+/* SARS modal */
+[data-theme="light"] .sars-modal-card{background:var(--surface)!important;box-shadow:0 24px 64px rgba(15,23,42,.15)!important}
+/* POPIA banner */
+[data-theme="light"] .popia-banner{background:var(--surface2)!important;border-color:var(--border)!important}
+[data-theme="light"] .popia-decline{background:var(--surface)!important;border-color:var(--border)!important;color:var(--text-2)!important}
+/* Dropdown options */
+[data-theme="light"] select option{background:var(--surface)!important;color:var(--text)!important}
+/* Cards general */
+[data-theme="light"] .card{background:var(--surface);border-color:var(--border)}
+[data-theme="light"] .card-head{border-bottom-color:var(--border)}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
