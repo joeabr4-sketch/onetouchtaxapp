@@ -140,9 +140,6 @@
 [data-theme="light"] .pr-field input,[data-theme="light"] .pr-field select,[data-theme="light"] .pr-field textarea{background:var(--surface2)!important;color:var(--text)!important;border-color:var(--border)!important}
 /* Payslip form footer (sticky bottom) */
 [data-theme="light"] .payslip-card>div[style*="background:#1a1d24"]{background:var(--surface)!important;border-top-color:var(--border)!important}
-/* Payslip form — section headings (white rgba text + dividers) */
-[data-theme="light"] .payslip-card [style*="rgba(255,255,255,.3)"]{color:var(--text-3)!important;border-bottom-color:var(--border)!important}
-[data-theme="light"] .payslip-card [style*="rgba(255,255,255,.07)"]{border-bottom-color:var(--border)!important}
 /* Payslip form — close button */
 [data-theme="light"] .payslip-head button[style*="rgba(255,255,255,.4)"]{color:var(--text-3)!important}
 /* Payslip preview — make it look like a real document in light mode */
@@ -1923,7 +1920,7 @@ body.help-mode .main{padding-top:34px}
         </div>
         <div style="padding:24px 28px">
           <!-- Employee Details -->
-          <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.07)">Employee Details</div>
+          <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)">Employee Details</div>
           <div class="pr-grid" style="margin-bottom:16px">
             <div class="pr-field"><label>Full Name</label><input id="pr-name" placeholder="e.g. Sipho Nkosi" /></div>
             <div class="pr-field"><label>ID Number (optional)</label><input id="pr-id" placeholder="e.g. 9001015009087" /></div>
@@ -1946,7 +1943,7 @@ body.help-mode .main{padding-top:34px}
             <div class="pr-field"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding-top:6px"><input type="checkbox" id="pr-sdl" checked onchange="calcPayslip()" style="accent-color:var(--blue);width:15px;height:15px;flex-shrink:0"> SDL Applicable</label></div>
           </div>
           <!-- Salary & Period -->
-          <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.07)">Salary & Period</div>
+          <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)">Salary & Period</div>
           <div class="pr-grid" style="margin-bottom:16px">
             <div class="pr-field"><label>Gross Monthly Salary (R)</label><input id="pr-gross" type="number" min="0" step="0.01" placeholder="e.g. 20000" oninput="calcPayslip()" /></div>
             <div class="pr-field"><label>Pay Period</label>
@@ -1960,7 +1957,7 @@ body.help-mode .main{padding-top:34px}
             <div class="pr-field"><label>Medical Aid Tax Credit / MATC (R) <span title="Primary member: R364/mo. First dependant: R364/mo. Each additional: R246/mo. This credit reduces PAYE — not a deduction from salary." style="cursor:help;opacity:.6;font-size:11px">ⓘ</span></label><input id="pr-medical" type="number" min="0" step="0.01" placeholder="0 (e.g. R364, R728)" oninput="calcPayslip()" /></div>
           </div>
           <!-- Allowances -->
-          <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.07)">Allowances (optional)</div>
+          <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)">Allowances (optional)</div>
           <div class="pr-grid" style="margin-bottom:20px">
             <div class="pr-field"><label>Travel Allowance (R)</label><input id="pr-travel" type="number" min="0" step="0.01" placeholder="0" oninput="calcPayslip()" /></div>
             <div class="pr-field"><label>Housing Allowance (R)</label><input id="pr-housing" type="number" min="0" step="0.01" placeholder="0" oninput="calcPayslip()" /></div>
@@ -1968,7 +1965,7 @@ body.help-mode .main{padding-top:34px}
             <div class="pr-field"><label>Pension Fund Contribution (R)</label><input id="pr-pension" type="number" min="0" step="0.01" placeholder="0" oninput="calcPayslip()" /></div>
           </div>
           <!-- Live Payslip Preview -->
-          <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.07)">Live Payslip Preview</div>
+          <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)">Live Payslip Preview</div>
           <div class="payslip-preview" id="payslipPreview">
             <div class="payslip-preview-logo" id="ps-biz-name">Your Business</div>
             <div style="font-size:11px;color:rgba(255,255,255,.35);margin-bottom:4px">PAYSLIP</div>
