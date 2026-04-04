@@ -61,9 +61,6 @@
 [data-theme="light"] .notif-bell{background:#e8edf5;border-color:var(--border2)}
 /* 3. "Touch" in logo — darker blue */
 [data-theme="light"] .logo-text span{background:linear-gradient(135deg,#1e3a8a,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-/* 4. Page title + clock — same blue as logo "Touch" */
-[data-theme="light"] .page-title{color:#1e3a8a}
-[data-theme="light"] #clockTime{background:linear-gradient(135deg,#1e3a8a,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 /* 5. Sidebar nav section headings */
 [data-theme="light"] .s-section{color:#64748b;border-top-color:var(--border)}
 /* 6. Active + hover nav item */
@@ -106,8 +103,6 @@
 [data-theme="light"] .line-item-row{background:var(--surface)!important}
 [data-theme="light"] .line-item-row input{background:var(--surface2)!important;color:var(--text)!important}
 /* Payroll form */
-[data-theme="light"] .payslip-card{background:var(--surface)!important}
-[data-theme="light"] .payslip-head{background:var(--surface)!important;border-bottom-color:var(--border)!important}
 [data-theme="light"] .split-amt-input{background:var(--surface2)!important;color:var(--text)!important}
 /* Toasts */
 [data-theme="light"] .toast{background:var(--surface)!important;border-color:var(--border2)!important;color:var(--text)!important;box-shadow:0 8px 24px rgba(15,23,42,.12)!important}
@@ -135,7 +130,6 @@
 [data-theme="light"] .payslip-modal{background:rgba(15,23,42,.4)!important}
 [data-theme="light"] .payslip-card{background:var(--surface)!important;border-color:var(--border2)!important;box-shadow:0 24px 64px rgba(15,23,42,.15)!important}
 [data-theme="light"] .payslip-head{background:var(--surface)!important;border-bottom-color:var(--border)!important}
-[data-theme="light"] .payslip-preview{background:var(--surface2)!important}
 [data-theme="light"] .pr-field label{color:var(--text-3)!important}
 [data-theme="light"] .pr-field input,[data-theme="light"] .pr-field select,[data-theme="light"] .pr-field textarea{background:var(--surface2)!important;color:var(--text)!important;border-color:var(--border)!important;}
 /* Payslip form footer (sticky bottom) */
@@ -6441,6 +6435,30 @@ async function closeReconSession() {
   loadReconStatusBar();
   markReconDone();
   showToast(`🔒 ${getCheckpointLabel()} closed!`, 'var(--green)');
+}
+
+// ── EXPORT RECON REPORT ──
+function genReconReport() {
+  if (!reconTransactions.length) { showToast('No transactions to export', 'var(--amber)'); return; }
+  const rows = [['Date','Description','Type','Amount (R)','Status','Matched Invoice']];
+  reconTransactions.forEach(t => {
+    const status = t.ignored ? 'Ignored' : (t.match_status === 'matched' ? 'Matched' : 'Unmatched');
+    rows.push([
+      t.date || '',
+      (t.description || '').replace(/,/g, ' '),
+      t.type || '',
+      parseFloat(t.amount || 0).toFixed(2),
+      status,
+      t.matched_invoice_id || ''
+    ]);
+  });
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'recon-report-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 // ── RE-RUN ──
