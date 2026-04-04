@@ -143,7 +143,13 @@
 /* Import invoices modal footer (sticky bottom) */
 [data-theme="light"] #importModal>div>div[style*="background:#1a1d24"]{background:var(--surface)!important;border-top-color:var(--border)!important}
 /* Page title — same gradient as clock */
-[data-theme="light"] .page-title{background:linear-gradient(135deg,#1e3a8a,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;color:unset}
+[data-theme="light"] .page-title{background:linear-gradient(135deg,#1e3a8a,#2563eb)!important;-webkit-background-clip:text!important;-webkit-text-fill-color:transparent!important;background-clip:text!important;color:unset}
+/* Clock — force dark gradient (inline style override) */
+[data-theme="light"] #clockTime{background:linear-gradient(135deg,#1e3a8a,#2563eb)!important;-webkit-background-clip:text!important;-webkit-text-fill-color:transparent!important;background-clip:text!important}
+/* Transparent-border buttons in light mode */
+[data-theme="light"] .inv-form-footer-actions button[style*="rgba(255,255,255"]{border-color:var(--border2)!important;color:var(--text-2)!important}
+[data-theme="light"] .payslip-card button[style*="rgba(255,255,255"]{background:var(--surface2)!important;border-color:var(--border2)!important;color:var(--text-2)!important}
+[data-theme="light"] #importModal button[style*="rgba(255,255,255"]{background:var(--surface2)!important;border-color:var(--border2)!important;color:var(--text-2)!important}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
@@ -2578,7 +2584,7 @@ body.help-mode .main{padding-top:34px}
       <button class="inv-cancel-btn" onclick="closeInvForm()">Cancel</button>
       <div class="inv-form-footer-actions">
         <button onclick="saveInvAndPDF()" style="background:transparent;border:1px solid rgba(255,255,255,.15);color:var(--text-2);padding:11px 18px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13.5px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='var(--text-2)'">📥 Download PDF</button>
-        <button onclick="saveInvoice()" style="background:transparent;border:1px solid rgba(255,255,255,.2);color:var(--text);padding:11px 20px;border-radius:9px;font-family:'Syne',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='rgba(255,255,255,.4)'" onmouseout="this.style.borderColor='rgba(255,255,255,.2)'">💾 Save Invoice</button>
+        <button id="invSaveBtn" onclick="saveInvoice()" style="background:transparent;border:1px solid rgba(255,255,255,.2);color:var(--text);padding:11px 20px;border-radius:9px;font-family:'Syne',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='rgba(255,255,255,.4)'" onmouseout="this.style.borderColor='rgba(255,255,255,.2)'">💾 Save Invoice</button>
         <button id="emailFormBtn" onclick="saveAndEmail()" style="background:var(--blue);color:#fff;border:none;padding:12px 20px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(79,142,247,.3)" onmouseover="this.style.background='#3a7ae0'" onmouseout="this.style.background='var(--blue)'">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
           Send via Email
@@ -3570,6 +3576,7 @@ function openInvForm() {
   editingInvId = null;
   lineItems = [{ desc: '', qty: 1, price: 0 }];
   document.getElementById('invFormTitle').textContent = '🧾 Create Invoice';
+  const _sb = document.getElementById('invSaveBtn'); if (_sb) _sb.textContent = '💾 Save Invoice';
   document.getElementById('inv-number').value = genInvNumber();
   document.getElementById('inv-date').value = new Date().toISOString().split('T')[0];
   document.getElementById('inv-terms').value = 'net30';
@@ -3602,6 +3609,7 @@ function openQuoteForm() {
   document.getElementById('inv-number').value = genQuoteNumber();
   document.getElementById('inv-status').value = 'outstanding';
   document.getElementById('invFormOverlay').setAttribute('data-is-quote','true');
+  const _sb = document.getElementById('invSaveBtn'); if (_sb) _sb.textContent = '💾 Save Quote';
 }
 
 function genQuoteNumber() {
@@ -3722,7 +3730,8 @@ let _savingInvoice = false;
 async function saveInvoice(exportPDF) {
   if (_savingInvoice) return;
   _savingInvoice = true;
-  const saveBtn = [...document.querySelectorAll('button')].find(b => b.textContent.includes('Save Invoice'));
+  const saveBtn = document.getElementById('invSaveBtn');
+  const saveBtnOrigText = saveBtn?.textContent || '💾 Save Invoice';
   if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '⏳ Saving...'; }
   try {
   const subtotal = rnd(lineItems.reduce((s,li)=>s+(li.qty||1)*(li.price||0),0));
@@ -3823,7 +3832,7 @@ async function saveInvoice(exportPDF) {
   loadInvoices();
   } finally {
     _savingInvoice = false;
-    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = '💾 Save Invoice'; }
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = saveBtnOrigText; }
   }
 }
 
@@ -9191,6 +9200,7 @@ function openExpenseForm() {
     const typeEl = document.getElementById('inv-type');
     if (typeEl) { typeEl.value = 'expense'; updateInvFormType(); }
     document.getElementById('invFormTitle').textContent = '💸 Add Expense';
+    const _sb = document.getElementById('invSaveBtn'); if (_sb) _sb.textContent = '💾 Save Expense';
     // Expenses: only allow VAT input-claim toggle if user is VAT registered
     if (!isVatRegistered()) {
       invVATEnabled = false;
