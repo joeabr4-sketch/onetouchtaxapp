@@ -2028,6 +2028,7 @@ body.help-mode .main{padding-top:34px}
               <div class="q-chip" onclick="sendQ(this)">How do I register for VAT?</div>
               <div class="q-chip" onclick="sendQ(this)">What is the corporate tax rate?</div>
             </div>
+            <div style="font-size:10px;color:var(--text-3);text-align:center;padding:4px 8px 2px;line-height:1.4">Your financial summary is shared with Claude (Anthropic) to personalise responses. No data is stored by Anthropic.</div>
             <div class="chat-row">
               <textarea class="chat-in" id="chatInput" placeholder="Ask about VAT, PAYE, eFiling, SARS..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
               <button class="send-btn" id="sendBtn" onclick="sendChat()">➤</button>
@@ -3038,12 +3039,13 @@ async function payWithPayFast(plan) {
   _paying = true;
   showToast('⏳ Preparing secure checkout...', 'var(--blue)');
   try {
+    const session = await sb.auth.getSession();
+    const accessToken = session?.data?.session?.access_token;
     const resp = await fetch('/api/payfast', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
       body: JSON.stringify({
         plan,
-        userId:    currentUser.id,
         email:     currentUser.email,
         firstName: userProfile?.owner_name?.split(' ')[0] || ''
       })
@@ -3435,7 +3437,7 @@ function closeMobDrawer() {
 
 // ── INVOICES LOAD ──
 async function loadInvoices() {
-  const { data, error } = await sb.from('invoices').select('*').eq('user_id', currentUser.id).order('date', { ascending: false });
+  const { data, error } = await sb.from('invoices').select('*').eq('user_id', currentUser.id).is('deleted_at', null).order('date', { ascending: false });
   if (error) { console.error('Load invoices error:', error); return; }
   invoices = data || [];
   renderInvoices();
@@ -3744,7 +3746,7 @@ async function saveInvoice(exportPDF) {
       showToast('Line item amounts cannot be negative', 'var(--amber)'); return;
     }
   }
-  if (subtotal <= 0) {
+  if (!Number.isFinite(subtotal) || subtotal <= 0) {
     showToast('Invoice total must be greater than zero', 'var(--amber)'); return;
   }
   // Validate deposit does not exceed total
@@ -3863,8 +3865,8 @@ async function editInvoice(id) {
 }
 
 async function deleteInvoice(id) {
-  if (!confirm('Delete this invoice? It will be permanently removed.')) return;
-  const { error } = await sb.from('invoices').delete().eq('id', id).eq('user_id', currentUser.id);
+  if (!confirm('Delete this invoice? It will be removed from your records.')) return;
+  const { error } = await sb.from('invoices').update({ deleted_at: new Date().toISOString() }).eq('id', id).eq('user_id', currentUser.id);
   if (error) { showToast('Error: ' + error.message, 'var(--red)'); return; }
   // Remove from reconciliation transactions too
   reconTransactions = reconTransactions.filter(t => String(t.inv_id) !== String(id));
@@ -9311,14 +9313,13 @@ function toggleAllInvoices(master) {
 async function bulkDeleteInvoices() {
   const selected = [...document.querySelectorAll('.inv-select-cb:checked')].map(cb => cb.getAttribute('data-id'));
   if (!selected.length) return;
-  if (!confirm(`Delete ${selected.length} invoice${selected.length>1?'s':''}? This cannot be undone but they will appear in Recently Deleted.`)) return;
+  if (!confirm(`Delete ${selected.length} invoice${selected.length>1?'s':''}? They will be removed from your records.`)) return;
 
-  // Hard delete only — no soft save
-
-  // Delete from Supabase
+  // Delete from Supabase (soft delete)
   let count = 0;
+  const deletedAt = new Date().toISOString();
   for (const id of selected) {
-    const { error } = await sb.from('invoices').delete().eq('id', id).eq('user_id', currentUser.id);
+    const { error } = await sb.from('invoices').update({ deleted_at: deletedAt }).eq('id', id).eq('user_id', currentUser.id);
     if (!error) count++;
   }
 
