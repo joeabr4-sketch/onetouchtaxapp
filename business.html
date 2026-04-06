@@ -1196,6 +1196,24 @@ body.help-mode .main{padding-top:34px}
         <div class="stat red"><div class="stat-label">Overdue</div><div class="stat-value" id="statOverdue">—</div><div class="stat-sub" id="statOverdueSub">Check calendar</div></div>
         <div class="stat green"><div class="stat-label">Invoices Logged</div><div class="stat-value" id="statCount">0</div><div class="stat-sub">this financial year</div></div>
       </div>
+      <!-- QUICK START GUIDE (hidden once user has invoices) -->
+      <div id="quickStartCard" style="display:none;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.18);border-radius:12px;padding:16px 20px;margin-bottom:16px">
+        <div style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px">Get started in 3 steps</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <div style="display:flex;align-items:flex-start;gap:10px;flex:1;min-width:160px">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+            <div><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px">Create your first invoice</div><div style="font-size:12px;color:var(--text-3)">Go to Invoices → Add Invoice</div></div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;flex:1;min-width:160px">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+            <div><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px">Upload your bank transactions</div><div style="font-size:12px;color:var(--text-3)">Go to Reconciliation → Upload CSV</div></div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;flex:1;min-width:160px">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+            <div><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px">Review matched results</div><div style="font-size:12px;color:var(--text-3)">Fix unmatched items in a few clicks</div></div>
+          </div>
+        </div>
+      </div>
       <!-- FREE PLAN BANNER -->
       <div id="freePlanBanner" style="display:none;background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.25);border-radius:10px;padding:12px 16px;margin-bottom:16px;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
         <div style="font-size:13px;color:rgba(255,255,255,.8)">⚡ You're on the <strong style="color:#d4a843">Free plan</strong> — upgrade to unlock payroll, WhatsApp, email sending, and full automation.</div>
@@ -1277,8 +1295,8 @@ body.help-mode .main{padding-top:34px}
           <!-- VAT201 PANEL -->
           <div class="doc-panel" id="panel-vat">
             <div class="dp-wrap">
-              <div class="dp-title">VAT201 Preparation</div>
-              <div class="dp-desc">Auto-filled from your invoices. Verify before submitting to SARS eFiling.</div>
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px"><div class="dp-title" style="margin-bottom:0">VAT201 Preparation</div><span style="font-size:10px;font-weight:700;background:rgba(5,150,105,.12);color:var(--green);border:1px solid rgba(5,150,105,.25);border-radius:20px;padding:2px 9px;letter-spacing:.4px">2025/2026</span></div>
+              <div class="dp-desc">Auto-filled from your invoices. Verify before submitting to SARS eFiling. Built to assist — not replace professional review.</div>
               <div style="margin:8px 0 12px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:9px 12px;font-size:11.5px;color:rgba(245,158,11,.85);line-height:1.55">⚠ Preparation aid only. These figures are derived from your invoice data and must be verified before submission. OneTouch is not a registered tax practitioner and accepts no liability for VAT penalties or assessments.</div>
               <div class="dp-grid">
                 <div class="dp-field"><label>Business Name</label><input id="v-biz" placeholder="Your business name" /></div>
@@ -1301,8 +1319,8 @@ body.help-mode .main{padding-top:34px}
           <!-- EMP201 PANEL -->
           <div class="doc-panel" id="panel-emp">
             <div class="dp-wrap">
-              <div class="dp-title">EMP201 Payroll Summary</div>
-              <div class="dp-desc">Monthly payroll submission to SARS. UIF capped at R17,712/year (R1,476/month).</div>
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px"><div class="dp-title" style="margin-bottom:0">EMP201 Payroll Summary</div><span style="font-size:10px;font-weight:700;background:rgba(5,150,105,.12);color:var(--green);border:1px solid rgba(5,150,105,.25);border-radius:20px;padding:2px 9px;letter-spacing:.4px">2025/2026</span></div>
+              <div class="dp-desc">Monthly payroll submission to SARS. UIF capped at R17,712/year (R1,476/month). Built to assist — not replace professional review.</div>
               <div style="margin:8px 0 12px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:9px 12px;font-size:11.5px;color:rgba(245,158,11,.85);line-height:1.55">⚠ Preparation aid only. Verify all PAYE, UIF, and SDL figures before submitting your EMP201 on SARS eFiling. OneTouch accepts no liability for penalties or interest arising from incorrect submissions.</div>
               <div class="dp-grid">
                 <div class="dp-field"><label>Business Name</label><input id="e-biz" /></div>
@@ -1558,7 +1576,13 @@ body.help-mode .main{padding-top:34px}
       <div class="help-banner"><div class="help-banner-title">💡 Business Financials &amp; P&amp;L</div><div class="help-banner-body">Your live profit &amp; loss report, built from the invoices you've logged. This is where you generate your VAT201 (quarterly VAT return), IRP6 (provisional tax), and ITR14 (annual return) pre-fill data. The numbers here are only as accurate as what you've logged in Invoices.</div><div class="help-banner-actions"><span>VAT201 — quarterly VAT submission (Pro+)</span><span>IRP6 — provisional tax every 6 months (Pro+)</span><span>ITR14 — annual company tax return (Pro+)</span><span>AI Tips — personalised tax-saving advice (Full)</span></div></div>
       <div id="finEmptyState" style="display:none;text-align:center;padding:60px 20px;min-height:calc(100vh - 200px);flex-direction:column;align-items:center;justify-content:center"><div style="font-size:48px;margin-bottom:14px">📈</div><div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:8px">No financial data yet</div><div style="font-size:13px;color:var(--text-2);margin-bottom:22px">Add invoices to see your P&L, charts and tax estimates.</div><button onclick="showSection('invoices',document.querySelector('.s-btn[onclick*=invoices]'))" style="background:var(--blue);color:#0f1520;border:none;padding:11px 22px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">+ Add First Invoice</button></div>
       <div id="finContent">
-        <div style="margin-bottom:18px"><h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:3px">📈 Business Financials</h2><p style="font-size:13px;color:var(--text-2)">Monthly income vs expenses, profit/loss, and AI saving tips.</p></div>
+        <div style="margin-bottom:18px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:3px">
+            <h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700">📈 Business Financials</h2>
+            <span style="font-size:10px;font-weight:700;background:rgba(5,150,105,.12);color:var(--green);border:1px solid rgba(5,150,105,.25);border-radius:20px;padding:2px 9px;letter-spacing:.4px">SARS-aligned · 2025/2026 tax year</span>
+          </div>
+          <p style="font-size:13px;color:var(--text-2)">Monthly income vs expenses, profit/loss, and AI saving tips. Built to assist — not replace professional review.</p>
+        </div>
         <div class="fin-period-bar">
           <button class="fin-period-btn active" onclick="setPeriod('3m',this)">3 Months</button>
           <button class="fin-period-btn" onclick="setPeriod('6m',this)">6 Months</button>
@@ -1832,7 +1856,7 @@ body.help-mode .main{padding-top:34px}
       <div id="lock-section-payroll" style="display:none;position:absolute;pointer-events:all;inset:0;background:rgba(7,8,9,.85);backdrop-filter:blur(4px);border-radius:inherit;z-index:10;align-items:center;justify-content:center;padding:20px"><div style="background:var(--gold-dim);border:1px solid rgba(212,168,67,.25);border-radius:16px;padding:32px;text-align:center;max-width:380px"><div style="font-size:36px;margin-bottom:12px">🔒</div><div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Unlock this feature</div><div style="font-size:13px;color:var(--text-2);margin-bottom:6px;line-height:1.6">Upgrade to Full to use this feature.</div><div style="font-size:12px;color:var(--text-3);margin-bottom:20px">Unlock payroll, payslips, PAYE/UIF/SDL and EMP201 prep.</div><button onclick="showSection('settings',null)" style="background:var(--gold);color:#fff;border:none;padding:11px 24px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer">⬆ Upgrade to Full — R499/mo</button></div></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px">
         <div>
-          <div class="ot-tip-wrap"><h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px">👥 Payroll</h2><button class="ot-tip-btn" onclick="showTip(this,'payroll')">?</button></div>
+          <div class="ot-tip-wrap" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px"><h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700">👥 Payroll</h2><span style="font-size:10px;font-weight:700;background:rgba(5,150,105,.12);color:var(--green);border:1px solid rgba(5,150,105,.25);border-radius:20px;padding:2px 9px;letter-spacing:.4px">SARS 2025/2026 tables</span><button class="ot-tip-btn" onclick="showTip(this,'payroll')">?</button></div>
           <div class="ot-tip-popup" id="tip-payroll" style="display:none"><button class="ot-close" onclick="hideTip('payroll')">✕</button><strong>Payroll</strong>Add each employee once with their gross salary. OneTouch calculates PAYE (tax tables), UIF (1% capped at R177/mo) and SDL (1% if payroll &gt; R500k/yr). Run payroll to post salary expenses automatically and generate your EMP201 for SARS.</div>
           <p style="font-size:13px;color:var(--text-2)">Generate payslips, calculate PAYE/UIF/SDL and produce EMP201 prep documents.</p>
           <div style="margin-top:10px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:9px 12px;font-size:11.5px;color:rgba(245,158,11,.85);line-height:1.55">⚠ PAYE, UIF, and SDL figures are estimates based on SARS 2025/26 tables. OneTouch is not a registered payroll service provider. The employer remains solely responsible for verifying figures and submitting EMP201 returns to SARS.</div>
@@ -2098,13 +2122,15 @@ body.help-mode .main{padding-top:34px}
           <div class="card-head"><div class="card-title">📋 Current Plan</div><span class="badge b-blue" id="settingsPlanBadge">Free</span></div>
           <div style="padding:16px 20px">
             <div id="planFreeMsg" style="font-size:13px;color:var(--text-2);margin-bottom:14px">You're on the <strong style="color:var(--text)">Free plan</strong>. Upgrade to Pro to unlock VAT201, bank analysis, reconciliation, IRP6/ITR14 and bookkeeper pack.</div>
-            <div id="upgradeButtons" style="display:flex;gap:8px;flex-wrap:wrap">
+            <div id="upgradeButtons" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
               <button onclick="payWithPayFast('pro')" style="background:var(--blue);color:#0f1520;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬆ Upgrade to Pro — R299/mo</button>
               <button onclick="payWithPayFast('full')" style="background:var(--gold);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬆ Upgrade to Full — R499/mo</button>
             </div>
+            <div id="upgradeValueMsg" style="font-size:11.5px;color:var(--text-3);margin-bottom:4px">From R299/month — vs R3,000+ in monthly accountant fees. Built for South African small businesses.</div>
             <div id="proUpgradeBtn" style="display:none">
               <div style="font-size:13px;color:var(--text-2);margin-bottom:14px">You're on the <strong style="color:var(--text)">⭐ Pro plan</strong>. Upgrade to Full to unlock WhatsApp delivery, payroll, EMP201, AI saving tips and accountant access link.</div>
               <button onclick="payWithPayFast('full')" style="background:var(--gold);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer">⬆ Upgrade to Full — R499/mo</button>
+              <div style="font-size:11.5px;color:var(--text-3);margin-top:8px">R499/month — vs R3,000+ in monthly accountant fees.</div>
             </div>
             <div id="cancelSubLink" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
               <!-- Step 1: default -->
@@ -2129,6 +2155,27 @@ body.help-mode .main{padding-top:34px}
                 <div id="cancelStepDoneMsg" style="font-size:12.5px;color:var(--text-2);line-height:1.65">Your request has been logged. Our team will process it within 24 hours and send a confirmation to your email. Your plan remains active until the end of the billing period.</div>
               </div>
             </div>
+          </div>
+        </div>
+        <!-- TRUST SIGNALS -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-head"><div class="card-title">🇿🇦 Built for South Africa</div></div>
+          <div style="padding:14px 20px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <div style="flex:1;min-width:140px;background:rgba(255,255,255,.04);border-radius:10px;padding:12px 14px">
+                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Tax Tables</div>
+                <div style="font-size:13px;color:var(--text);font-weight:600">SARS 2025/2026</div>
+              </div>
+              <div style="flex:1;min-width:140px;background:rgba(255,255,255,.04);border-radius:10px;padding:12px 14px">
+                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Payments</div>
+                <div style="font-size:13px;color:var(--text);font-weight:600">PayFast · Rand (ZAR)</div>
+              </div>
+              <div style="flex:1;min-width:140px;background:rgba(255,255,255,.04);border-radius:10px;padding:12px 14px">
+                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Delivery</div>
+                <div style="font-size:13px;color:var(--text);font-weight:600">WhatsApp + Email</div>
+              </div>
+            </div>
+            <div style="font-size:11.5px;color:var(--text-3);line-height:1.55;padding-top:4px">OneTouch is designed for South African sole traders, freelancers and small businesses. All PAYE, UIF, SDL and VAT calculations follow current SARS guidelines. Always verify submissions with a registered tax practitioner before filing.</div>
           </div>
         </div>
         <!-- USAGE THIS MONTH -->
@@ -3566,6 +3613,8 @@ async function updateInvStats() {
 
 function updateDashStats() {
   document.getElementById('statCount').textContent = invoices.length;
+  const qs = document.getElementById('quickStartCard');
+  if (qs) qs.style.display = invoices.length === 0 ? 'block' : 'none';
 }
 
 // ── INVOICE BUILDER ──
