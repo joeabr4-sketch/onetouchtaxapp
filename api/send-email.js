@@ -29,15 +29,19 @@ export default async function handler(req, res) {
       if (!authRes.ok) return res.status(401).json({ error: 'Unauthorised' });
       const user = await authRes.json();
 
-      // Check plan — email delivery requires Full plan
+      // Check plan — email delivery requires Full plan or trial (trial capped at 5)
       const profRes = await fetch(
-        `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=plan`,
+        `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=plan,email_sent`,
         { headers: { 'Authorization': `Bearer ${token}`, 'apikey': supabaseAnon, 'Accept': 'application/json' } }
       );
       if (profRes.ok) {
         const rows = await profRes.json();
         const plan = rows[0]?.plan || 'free';
-        if (plan !== 'full') {
+        const emailSent = rows[0]?.email_sent || 0;
+        if (plan === 'trial' && emailSent >= 5) {
+          return res.status(429).json({ error: { type: 'rate_limit', message: 'You\'ve used all 5 trial email sends. Upgrade to continue.', used: emailSent, limit: 5 } });
+        }
+        if (plan !== 'full' && plan !== 'trial') {
           return res.status(403).json({ error: { type: 'plan_required', message: 'Email delivery requires a Full plan.' } });
         }
       }

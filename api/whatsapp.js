@@ -20,15 +20,19 @@ export default async function handler(req, res) {
       if (!authRes.ok) return res.status(401).json({ error: 'Unauthorised' });
       const user = await authRes.json();
 
-      // WhatsApp delivery requires Full plan
+      // WhatsApp delivery requires Full plan or trial (trial capped at 5)
       const profRes = await fetch(
-        `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=plan`,
+        `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=plan,whatsapp_sent`,
         { headers: { 'Authorization': `Bearer ${token}`, 'apikey': supabaseAnon, 'Accept': 'application/json' } }
       );
       if (profRes.ok) {
         const rows = await profRes.json();
         const plan = rows[0]?.plan || 'free';
-        if (plan !== 'full') {
+        const waSent = rows[0]?.whatsapp_sent || 0;
+        if (plan === 'trial' && waSent >= 5) {
+          return res.status(429).json({ error: { type: 'rate_limit', message: 'You\'ve used all 5 trial WhatsApp sends. Upgrade to continue.', used: waSent, limit: 5 } });
+        }
+        if (plan !== 'full' && plan !== 'trial') {
           return res.status(403).json({ error: { type: 'plan_required', message: 'WhatsApp delivery requires a Full plan.' } });
         }
       }
