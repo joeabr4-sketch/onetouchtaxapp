@@ -2974,11 +2974,47 @@ function isVatRegistered() {
   return ['true', '1'].includes(v);
 }
 function isPlan(p) {
-  const plan = userProfile?.plan || 'free';
+  const plan = userProfile?.plan || 'trial';
   if (p === 'free') return true;
-  if (p === 'pro') return ['pro','full'].includes(plan);
-  if (p === 'full') return ['full'].includes(plan);
+  if (p === 'pro') return ['pro','full','trial'].includes(plan);
+  if (p === 'full') return ['full','trial'].includes(plan);
   return false;
+}
+
+function getTrialDaysLeft() {
+  if (!userProfile?.trial_start) return 7;
+  const start = new Date(userProfile.trial_start);
+  const diff = Math.floor((Date.now() - start.getTime()) / 86400000);
+  return Math.max(0, 7 - diff);
+}
+
+function isTrialExpired() {
+  return (userProfile?.plan === 'trial') && getTrialDaysLeft() <= 0;
+}
+
+function checkTrialExpiry() {
+  if (!isTrialExpired()) return;
+  const modal = document.getElementById('trialExpiredModal');
+  if (modal) modal.style.display = 'flex';
+}
+
+async function submitTrialFeedback() {
+  const text = (document.getElementById('trialFeedbackText')?.value || '').trim();
+  const btn = document.querySelector('#trialExpiredModal button[onclick="submitTrialFeedback()"]');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+  if (text && currentUser?.id && supabase) {
+    try {
+      await supabase.from('profiles').update({ trial_feedback: text }).eq('id', currentUser.id);
+    } catch (e) {
+      console.warn('Trial feedback save failed:', e.message);
+    }
+  }
+
+  const section = document.getElementById('trialFeedbackSection');
+  const thanks = document.getElementById('trialFeedbackThanks');
+  if (section) { section.querySelector('textarea').style.display = 'none'; if (btn) btn.style.display = 'none'; }
+  if (thanks) thanks.style.display = 'block';
 }
 
 function canUse(feature) {
@@ -3206,7 +3242,8 @@ async function saveProfile() {
     has_paye: obData.paye === 'yes',
     is_provisional: false,
     year_end: 'February',
-    plan: 'free',
+    plan: 'trial',
+    trial_start: new Date().toISOString(),
     ai_calls: 0,
     bank_name:    document.getElementById('ob-bank')?.value.trim()    || '',
     bank_account: document.getElementById('ob-acc')?.value.trim()     || '',
@@ -3264,7 +3301,7 @@ async function initDashboard() {
 
   // If user arrived from a pricing card (plan=pro/full), trigger PayFast after dashboard loads
   const pendingPlan = localStorage.getItem('ot_pending_plan');
-  if (pendingPlan && userProfile?.plan === 'free') {
+  if (pendingPlan && (userProfile?.plan === 'trial' || userProfile?.plan === 'free')) {
     localStorage.removeItem('ot_pending_plan');
     setTimeout(() => payWithPayFast(pendingPlan), 1200);
   }
@@ -3289,6 +3326,7 @@ async function initDashboard() {
   if (savedLogo && canUse('branding')) { logoDataUrl = savedLogo; showLogoPreview(savedLogo); }
   showWelcomePopup();
   initOnboarding();
+  checkTrialExpiry();
 }
 
 function updateUserUI() {
@@ -3298,17 +3336,19 @@ function updateUserUI() {
   document.getElementById('userAvatar').textContent = initials;
   document.getElementById('userName').textContent = name;
   document.getElementById('welcomeName').textContent = name.split(' ')[0];
-  const plan = userProfile.plan || 'free';
-  const planLabel = plan === 'free' ? 'Free Plan' : plan === 'pro' ? '⭐ Pro Plan' : '🏢 Full Plan';
+  const plan = userProfile.plan || 'trial';
+  const trialDays = plan === 'trial' ? getTrialDaysLeft() : 0;
+  const planLabel = plan === 'trial' ? `🎯 Trial (${trialDays} day${trialDays===1?'':'s'} left)` : plan === 'pro' ? '⭐ Pro Plan' : '🏢 Full Plan';
   document.getElementById('planBadge').textContent = planLabel;
-  const aiLeft = plan === 'free' ? 0 : plan === 'pro' ? Math.max(0, 10 - (userProfile.ai_calls||0)) : '∞';
-  const aiLabel = plan === 'full' ? '∞ AI calls' : plan === 'pro' ? `${aiLeft}/10 AI calls` : '0 AI calls';
+  const aiLeft = plan === 'trial' ? Math.max(0, USAGE_LIMITS.ai.trial - (userProfile.ai_calls||0)) : plan === 'pro' ? Math.max(0, 10 - (userProfile.ai_calls||0)) : '∞';
+  const aiLabel = plan === 'full' ? '∞ AI calls' : plan === 'pro' ? `${aiLeft}/10 AI calls` : plan === 'trial' ? `${aiLeft}/5 trial AI calls` : '0 AI calls';
   document.getElementById('aiCallsBadge').textContent = aiLabel;
   // Settings plan badge
   const settBadge = document.getElementById('settingsPlanBadge');
-  if (settBadge) { settBadge.textContent = planLabel; settBadge.className = 'badge ' + (plan==='free'?'b-blue':plan==='pro'?'b-amber':'b-gold'); }
+  if (settBadge) { settBadge.textContent = planLabel; settBadge.className = 'badge ' + (plan==='trial'?'b-green':plan==='pro'?'b-amber':'b-gold'); }
   const freeMsg = document.getElementById('planFreeMsg');
-  if (freeMsg && plan !== 'free') freeMsg.style.display = 'none';
+  if (freeMsg) freeMsg.style.display = plan === 'trial' ? 'block' : 'none';
+  if (freeMsg && plan === 'trial') freeMsg.textContent = `You're on a 7-day trial — ${trialDays} day${trialDays===1?'':'s'} remaining. Upgrade to Pro or Full to keep access after your trial ends.`;
   // Accountant link visibility
   const locked = document.getElementById('accLinkLocked');
   const form = document.getElementById('accLinkForm');
@@ -3323,9 +3363,9 @@ function updateUserUI() {
   document.body.classList.add('plan-' + plan);
   // Show lock overlays on sections based on plan
   const sectionLocks = {
-    'lock-section-reconcile':    plan === 'free',
-    'lock-section-handoff':      plan === 'free',
-    'lock-section-payroll':      plan === 'free' || plan === 'pro',
+    'lock-section-reconcile':    false,
+    'lock-section-handoff':      false,
+    'lock-section-payroll':      plan === 'pro',
   };
   Object.entries(sectionLocks).forEach(([id, isLocked]) => {
     const el = document.getElementById(id);
@@ -3341,15 +3381,15 @@ function updateUserUI() {
   // pro:  FULL on full-features only
   // full: nothing
   const navLocks = {
-    'lock-reconcile': { free: 'PRO',  pro: null,   full: null },
-    'lock-handoff':   { free: 'PRO',  pro: null,   full: null },
-    'lock-payroll':   { free: 'FULL', pro: 'FULL', full: null },
+    'lock-reconcile': { trial: null, free: 'PRO',  pro: null,   full: null },
+    'lock-handoff':   { trial: null, free: 'PRO',  pro: null,   full: null },
+    'lock-payroll':   { trial: null, free: 'FULL', pro: 'FULL', full: null },
   };
   // Apply dead/live state to nav buttons
   const navDeadMap = {
-    'reconcile':    plan === 'free',
-    'handoff':      plan === 'free',
-    'payroll':      plan === 'free' || plan === 'pro',
+    'reconcile':    false,
+    'handoff':      false,
+    'payroll':      plan === 'pro',
   };
   Object.entries(navDeadMap).forEach(([section, isDead]) => {
     const btn = document.querySelector(`.s-btn[onclick*="'${section}'"]`);
@@ -3373,13 +3413,13 @@ function updateUserUI() {
   });
   // Hide all other plan-lock badges (inside sections) for paying users
   document.querySelectorAll('.plan-lock:not(.nav-lock)').forEach(el => {
-    el.style.display = (plan === 'pro' || plan === 'full') ? 'none' : '';
+    el.style.display = (plan === 'pro' || plan === 'full' || plan === 'trial') ? 'none' : '';
   });
   // Hide upgrade buttons in settings for paying users — they can see what they have
   const upgradeButtons = document.getElementById('upgradeButtons');
-  if (upgradeButtons) upgradeButtons.style.display = plan === 'free' ? 'flex' : 'none';
-  const planFreeMsg = document.getElementById('planFreeMsg');
-  if (planFreeMsg) planFreeMsg.style.display = plan === 'free' ? 'block' : 'none';
+  if (upgradeButtons) upgradeButtons.style.display = (plan === 'trial') ? 'flex' : 'none';
+  const planFreeMsg2 = document.getElementById('planFreeMsg');
+  if (planFreeMsg2) planFreeMsg2.style.display = plan === 'trial' ? 'block' : 'none';
   const sidebarUpgradeBtn = document.getElementById('sidebarUpgradeBtn');
   if (sidebarUpgradeBtn) sidebarUpgradeBtn.style.display = plan !== 'full' ? 'block' : 'none';
   const tbUpgradeBtn = document.getElementById('tbUpgradeBtn');
@@ -3387,11 +3427,23 @@ function updateUserUI() {
   const aiFloatBtn = document.getElementById('aiFloatBtn');
   if (aiFloatBtn) aiFloatBtn.style.display = 'flex';
   const freePlanBanner = document.getElementById('freePlanBanner');
-  if (freePlanBanner) freePlanBanner.style.display = (plan === 'free' && !localStorage.getItem('freeBannerDismissed')) ? 'flex' : 'none';
+  if (freePlanBanner) {
+    if (plan === 'trial' && !localStorage.getItem('trialBannerDismissed')) {
+      freePlanBanner.style.display = 'flex';
+      const bannerText = freePlanBanner.querySelector('div');
+      if (bannerText) bannerText.innerHTML = `🎯 <strong style="color:#d4a843">${trialDays} day${trialDays===1?'':'s'} left on your trial</strong> — upgrade to Pro or Full to keep full access.`;
+      const dismissBtn = freePlanBanner.querySelector('button[onclick*="freeBannerDismissed"]');
+      if (dismissBtn) dismissBtn.setAttribute('onclick', `this.closest('#freePlanBanner').style.display='none';localStorage.setItem('trialBannerDismissed','1')`);
+    } else if (plan !== 'trial') {
+      freePlanBanner.style.display = 'none';
+    }
+  }
   const proUpgradeBtn = document.getElementById('proUpgradeBtn');
   if (proUpgradeBtn) proUpgradeBtn.style.display = plan === 'pro' ? 'block' : 'none';
   const cancelSubLink = document.getElementById('cancelSubLink');
   if (cancelSubLink) cancelSubLink.style.display = (plan === 'pro' || plan === 'full') ? 'block' : 'none';
+  const upgradeValueMsg = document.getElementById('upgradeValueMsg');
+  if (upgradeValueMsg) upgradeValueMsg.style.display = plan === 'trial' ? 'block' : 'none';
   const brandingLocked = document.getElementById('brandingLocked');
   const brandingActive = document.getElementById('brandingActive');
   if (brandingLocked) brandingLocked.style.display = plan === 'full' ? 'none' : 'block';
@@ -5035,9 +5087,9 @@ async function generateSavingTips() {
 const AI_ENDPOINT = '/api/claude';
 
 const USAGE_LIMITS = {
-  whatsapp: { soft: 50, warn: 100, hard: null },
-  ai:       { pro: 10, fullSoft: 200, fullHard: null },
-  email:    { soft: null, hard: null }
+  whatsapp: { trial: 5, soft: 50, warn: 100, hard: null },
+  ai:       { trial: 5, pro: 10, fullSoft: 200, fullHard: null },
+  email:    { trial: 5, soft: null, hard: null }
 };
 
 // Resets all usage counters when the calendar month rolls over.
@@ -5101,11 +5153,16 @@ async function aiCall(payload) {
 
 async function checkAICalls() {
   if (!await requireAIConsent()) return false;
-  const plan = userProfile?.plan||'free';
+  const plan = userProfile?.plan||'trial';
   if (plan==='free') { showUpgradePrompt('pro'); return false; }
   await ensureMonthlyReset();
   const calls = userProfile.ai_calls||0;
-  if (plan==='pro') {
+  if (plan==='trial') {
+    if (calls >= USAGE_LIMITS.ai.trial) {
+      showToast('You\'ve used all 5 trial AI calls. Upgrade to Pro to continue.','var(--amber)');
+      return false;
+    }
+  } else if (plan==='pro') {
     if (calls >= USAGE_LIMITS.ai.pro) {
       showToast('You\'ve used all 10 AI calls this month. Resets on the 1st. Upgrade to Full for unlimited.','var(--amber)');
       return false;
@@ -5113,7 +5170,7 @@ async function checkAICalls() {
   } else {
     // Full plan: soft warning at 200
     if (calls === USAGE_LIMITS.ai.fullSoft) {
-      showToast('You\'ve made 200 AI calls this month — heavy usage! We\'ll keep going, but consider if you need all of these.','var(--amber)');
+      showToast('You\'ve made 200 AI calls this month — heavy usage!','var(--amber)');
     }
   }
   return true;
@@ -5152,14 +5209,14 @@ async function trackEmailSent() {
 }
 
 function updateUsageBadges() {
-  const plan = userProfile?.plan || 'free';
+  const plan = userProfile?.plan || 'trial';
   const aiCalls  = userProfile?.ai_calls       || 0;
   const waCount  = userProfile?.whatsapp_sent   || 0;
   const emCount  = userProfile?.email_sent      || 0;
 
-  // Sidebar AI badge (already exists)
-  const aiLeft = plan === 'free' ? 0 : plan === 'pro' ? Math.max(0, USAGE_LIMITS.ai.pro - aiCalls) : '∞';
-  const aiLabel = plan === 'full' ? '∞ AI calls' : plan === 'pro' ? `${aiLeft}/10 AI calls` : '0 AI calls';
+  // Sidebar AI badge
+  const aiLeft = plan === 'trial' ? Math.max(0, USAGE_LIMITS.ai.trial - aiCalls) : plan === 'pro' ? Math.max(0, USAGE_LIMITS.ai.pro - aiCalls) : '∞';
+  const aiLabel = plan === 'full' ? '∞ AI calls' : plan === 'pro' ? `${aiLeft}/10 AI calls` : plan === 'trial' ? `${aiLeft}/5 trial AI calls` : '0 AI calls';
   const aiCallsBadge = document.getElementById('aiCallsBadge');
   if (aiCallsBadge) aiCallsBadge.textContent = aiLabel;
 
@@ -5168,12 +5225,12 @@ function updateUsageBadges() {
   const usageWA = document.getElementById('usageWA');
   const usageEM = document.getElementById('usageEM');
   if (usageAI) {
-    if (plan === 'free') usageAI.textContent = '0 / 0';
+    if (plan === 'trial') usageAI.textContent = `${aiCalls} / ${USAGE_LIMITS.ai.trial}`;
     else if (plan === 'pro') usageAI.textContent = `${aiCalls} / ${USAGE_LIMITS.ai.pro}`;
     else usageAI.textContent = `${aiCalls} (unlimited)`;
   }
-  if (usageWA) usageWA.textContent = plan === 'full' ? `${waCount}` : '—';
-  if (usageEM) usageEM.textContent = plan === 'full' ? `${emCount}` : '—';
+  if (usageWA) usageWA.textContent = (plan === 'full' || plan === 'trial') ? `${waCount}${plan==='trial'?' / '+USAGE_LIMITS.whatsapp.trial:''}` : '—';
+  if (usageEM) usageEM.textContent = (plan === 'full' || plan === 'trial') ? `${emCount}${plan==='trial'?' / '+USAGE_LIMITS.email.trial:''}` : '—';
 }
 
 async function sendChat() {
@@ -8296,6 +8353,10 @@ async function sendInvoiceWhatsApp(inv) {
     showToast('📲 WhatsApp delivery is a Full Plan feature', 'var(--gold)');
     return;
   }
+  if (userProfile?.plan === 'trial' && (userProfile.whatsapp_sent||0) >= USAGE_LIMITS.whatsapp.trial) {
+    showToast(`📲 You've used all ${USAGE_LIMITS.whatsapp.trial} trial WhatsApp sends. Upgrade to continue.`, 'var(--amber)');
+    return;
+  }
   const clientPhone = inv.whatsapp || inv.client_whatsapp;
   if (!clientPhone) {
     showToast('No WhatsApp number on this invoice', 'var(--amber)');
@@ -8378,6 +8439,10 @@ async function saveAndWhatsApp() {
 async function saveAndEmail() {
   if (!canUse('email')) {
     showUpgradePrompt('full');
+    return;
+  }
+  if (userProfile?.plan === 'trial' && (userProfile.email_sent||0) >= USAGE_LIMITS.email.trial) {
+    showToast(`📧 You've used all ${USAGE_LIMITS.email.trial} trial email sends. Upgrade to continue.`, 'var(--amber)');
     return;
   }
   // Capture form values before saveInvoice() closes the form
@@ -10696,6 +10761,30 @@ document.addEventListener('click', function(e) {
     <div id="upgradeModalMsg" style="font-size:13.5px;color:rgba(255,255,255,.65);line-height:1.65;margin-bottom:24px">Upgrade to Full to use this feature. Unlock payroll, WhatsApp, email sending, and more.</div>
     <button id="upgradeModalCTA" class="upgrade-btn" onclick="closeUpgrade();showSection('settings',null)" style="display:block;width:100%;margin-bottom:10px">Upgrade to Full</button>
     <button class="upgrade-close" onclick="closeUpgrade()">Maybe later</button>
+  </div>
+</div>
+
+<!-- TRIAL EXPIRED MODAL — blocking, no dismiss without action -->
+<div id="trialExpiredModal" style="position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(10px);z-index:9800;display:none;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#131929;border-radius:18px;max-width:460px;width:100%;padding:36px 32px;box-shadow:0 32px 80px rgba(0,0,0,.9);border:1px solid rgba(255,255,255,.12);animation:fadeUp .3s ease">
+    <div style="font-size:40px;margin-bottom:14px;text-align:center">⏰</div>
+    <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:10px;text-align:center">Your trial has ended</div>
+    <div style="font-size:13.5px;color:rgba(255,255,255,.6);line-height:1.7;margin-bottom:24px;text-align:center">You've had 7 days of full access to OneTouch. Upgrade to keep your data and continue growing your business.</div>
+
+    <!-- Feedback section -->
+    <div id="trialFeedbackSection" style="margin-bottom:24px">
+      <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.75);margin-bottom:8px">Before you go — how was your experience? 👇</div>
+      <textarea id="trialFeedbackText" placeholder="What did you like? What could be better? (optional)" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13.5px;padding:12px;resize:vertical;min-height:80px;box-sizing:border-box;outline:none"></textarea>
+      <button onclick="submitTrialFeedback()" style="width:100%;margin-top:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.8);padding:10px;border-radius:9px;font-size:13px;font-family:inherit;cursor:pointer">Submit feedback</button>
+      <div id="trialFeedbackThanks" style="display:none;text-align:center;font-size:13px;color:#22c55e;margin-top:8px">Thanks for your feedback! 🙌</div>
+    </div>
+
+    <!-- Upgrade buttons -->
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button onclick="payWithPayFast('full')" style="background:linear-gradient(135deg,#d4a843,#f0c060);color:#0a0f1e;border:none;padding:14px 20px;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif">🏢 Upgrade to Full — R499/month</button>
+      <button onclick="payWithPayFast('pro')" style="background:linear-gradient(135deg,#4f8ef7,#3b7de8);color:#fff;border:none;padding:14px 20px;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif">⭐ Upgrade to Pro — R299/month</button>
+      <div style="text-align:center;font-size:11.5px;color:rgba(255,255,255,.35);margin-top:4px">Cancel anytime · Secure payment via PayFast</div>
+    </div>
   </div>
 </div>
 

@@ -108,6 +108,11 @@ export default async function handler(req, res) {
         error: { type: 'plan_required', message: 'AI assistant requires a Pro or Full plan.' }
       });
     }
+    if (plan === 'trial' && aiCallsUsed >= 5) {
+      return res.status(429).json({
+        error: { type: 'rate_limit', message: 'You\'ve used all 5 trial AI calls. Upgrade to Pro to continue.', used: aiCallsUsed, limit: 5 }
+      });
+    }
     if (plan === 'pro' && aiCallsUsed >= 10) {
       return res.status(429).json({
         error: { type: 'rate_limit', message: 'You\'ve used all 10 AI calls this month. Resets on the 1st.', used: aiCallsUsed, limit: 10 }
