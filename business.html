@@ -1216,7 +1216,7 @@ body.help-mode .main{padding-top:34px}
       </div>
       <!-- FREE PLAN BANNER -->
       <div id="freePlanBanner" style="display:none;background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.25);border-radius:10px;padding:12px 16px;margin-bottom:16px;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
-        <div style="font-size:13px;color:rgba(255,255,255,.8)">⚡ You're on the <strong style="color:#d4a843">Free plan</strong> — upgrade to unlock payroll, WhatsApp, email sending, and full automation.</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.8)">⚡ You're replacing hours of manual work with a few clicks — <strong style="color:#d4a843">upgrade to unlock the full experience.</strong></div>
         <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
           <button onclick="showSection('settings',null)" style="background:#d4a843;color:#0a0f1e;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">Upgrade to Full</button>
           <button onclick="this.closest('#freePlanBanner').style.display='none';localStorage.setItem('freeBannerDismissed','1')" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:16px;cursor:pointer;padding:0 4px;line-height:1">✕</button>
@@ -1436,7 +1436,7 @@ body.help-mode .main{padding-top:34px}
     <!-- ═══ FINANCIAL HISTORY ═══ -->
     <div class="section" id="section-history">
       <div class="help-banner"><div class="help-banner-title">💡 Financial History</div><div class="help-banner-body">A month-by-month record of your revenue, expenses, and profit. Snapshots are saved automatically when you close a reconciliation period. Use this to spot trends, compare months, and have a full picture ready when your accountant asks for history.</div><div class="help-banner-actions"><span>Snapshots save automatically when you close a month</span><span>Opening balances set your year-start position</span></div></div>
-      <div style="margin-bottom:18px"><h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:3px">📁 Financial History</h2><p style="font-size:13px;color:var(--text-2)">Monthly snapshots, document history, bank transactions and opening balances.</p></div>
+      <div style="margin-bottom:18px"><h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:3px">📁 Financial History</h2><p style="font-size:13px;color:var(--text-2)">Everything stored and ready for your accountant or SARS submissions — monthly snapshots, transactions and opening balances.</p></div>
       <div class="hist-tabs-row" style="display:flex;gap:6px;margin-bottom:16px;border-bottom:1.5px solid var(--border);padding-bottom:0">
         <button class="hist-tab active" id="htab-monthly" onclick="switchHistTab('monthly')">📊 Monthly Financials</button>
         <button class="hist-tab" id="htab-docs" onclick="switchHistTab('docs')">📄 Document History</button>
@@ -1581,7 +1581,7 @@ body.help-mode .main{padding-top:34px}
             <h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700">📈 Business Financials</h2>
             <span style="font-size:10px;font-weight:700;background:rgba(5,150,105,.12);color:var(--green);border:1px solid rgba(5,150,105,.25);border-radius:20px;padding:2px 9px;letter-spacing:.4px">SARS-aligned · 2025/2026 tax year</span>
           </div>
-          <p style="font-size:13px;color:var(--text-2)">Monthly income vs expenses, profit/loss, and AI saving tips. Built to assist — not replace professional review.</p>
+          <p style="font-size:13px;color:var(--text-2)">See exactly how your business is performing — no spreadsheets needed. Built to assist, not replace professional review.</p>
         </div>
         <div class="fin-period-bar">
           <button class="fin-period-btn active" onclick="setPeriod('3m',this)">3 Months</button>
@@ -1623,7 +1623,8 @@ body.help-mode .main{padding-top:34px}
         <div>
           <div class="ot-tip-wrap"><h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px">🔗 Bank Reconciliation</h2><button class="ot-tip-btn" onclick="showTip(this,'recon')">?</button></div>
           <div class="ot-tip-popup" id="tip-recon" style="display:none"><button class="ot-close" onclick="hideTip('recon')">✕</button><strong>Bank Reconciliation</strong>Upload your bank transactions CSV, then match each transaction to your invoices. When you hit 80%+ match rate you can lock the month. This is your audit trail and catches any missing entries.</div>
-          <p style="font-size:13px;color:var(--text-2)" id="reconSessionLabel">Loading...</p>
+          <p style="font-size:13px;color:var(--text-2)">Match your bank transactions automatically — no more manual matching every month.</p>
+          <p style="font-size:13px;color:var(--text-3);margin-top:2px" id="reconSessionLabel">Loading...</p>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
           <span id="reconSessionBadge" style="font-size:11px;padding:4px 12px;border-radius:20px;font-weight:600;background:rgba(245,158,11,.12);color:var(--amber)">Loading...</span>
@@ -1858,7 +1859,7 @@ body.help-mode .main{padding-top:34px}
         <div>
           <div class="ot-tip-wrap" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px"><h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:700">👥 Payroll</h2><span style="font-size:10px;font-weight:700;background:rgba(5,150,105,.12);color:var(--green);border:1px solid rgba(5,150,105,.25);border-radius:20px;padding:2px 9px;letter-spacing:.4px">SARS 2025/2026 tables</span><button class="ot-tip-btn" onclick="showTip(this,'payroll')">?</button></div>
           <div class="ot-tip-popup" id="tip-payroll" style="display:none"><button class="ot-close" onclick="hideTip('payroll')">✕</button><strong>Payroll</strong>Add each employee once with their gross salary. OneTouch calculates PAYE (tax tables), UIF (1% capped at R177/mo) and SDL (1% if payroll &gt; R500k/yr). Run payroll to post salary expenses automatically and generate your EMP201 for SARS.</div>
-          <p style="font-size:13px;color:var(--text-2)">Generate payslips, calculate PAYE/UIF/SDL and produce EMP201 prep documents.</p>
+          <p style="font-size:13px;color:var(--text-2)">Automatically calculate PAYE, UIF, and SDL — no manual tax calculations.</p>
           <div style="margin-top:10px;background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:9px 12px;font-size:11.5px;color:rgba(245,158,11,.85);line-height:1.55">⚠ PAYE, UIF, and SDL figures are estimates based on SARS 2025/26 tables. OneTouch is not a registered payroll service provider. The employer remains solely responsible for verifying figures and submitting EMP201 returns to SARS.</div>
         </div>
         <button onclick="openPayslipForm()" style="background:linear-gradient(135deg,#c0c8d8,#8a9ab8);border:none;color:#0f1520;padding:10px 20px;border-radius:9px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px">+ Add Employee</button>
@@ -2041,7 +2042,7 @@ body.help-mode .main{padding-top:34px}
           <div class="chat-msgs" id="chatMsgs">
             <div class="msg ai">
               <div class="msg-av ai">🤖</div>
-              <div><div class="msg-bub" id="aiWelcomeBub">Hi there! I'm your South African tax assistant. Ask me anything about VAT, PAYE, provisional tax, eFiling, or SARS deadlines. How can I help?</div><div class="msg-time">Now</div></div>
+              <div><div class="msg-bub" id="aiWelcomeBub">Ask anything about your business finances — get instant, context-aware answers. I know your VAT status, income, expenses and SARS deadlines. How can I help?</div><div class="msg-time">Now</div></div>
             </div>
           </div>
           <div class="chat-foot">
@@ -2200,7 +2201,8 @@ body.help-mode .main{padding-top:34px}
         <!-- BUSINESS PROFILE -->
         <div class="card" style="margin-bottom:16px">
           <div class="card-head"><div class="card-title">🏢 Business Profile</div></div>
-          <div style="padding:18px 20px">
+          <div style="padding:14px 20px 0;font-size:12px;color:var(--text-3)">You're setting up your business system — this powers your invoices, tracking, and tax calculations.</div>
+          <div style="padding:10px 20px 18px">
             <div class="set-section-title">Company Details</div>
             <div class="set-grid">
               <div class="set-field"><label>Business Name</label><input id="set-biz" placeholder="e.g. Nkosi Electrical (Pty) Ltd" /></div>
@@ -2517,6 +2519,7 @@ body.help-mode .main{padding-top:34px}
       <div class="inv-form-title" id="invFormTitle">🧾 Create Invoice</div>
       <button class="inv-form-close" onclick="closeInvForm()">✕</button>
     </div>
+    <div style="padding:8px 28px 0;font-size:12px;color:var(--text-3)">Create and send professional invoices in one place — no more manual templates or switching apps.</div>
     <div class="inv-form-body">
       <div class="inv-form-section" data-i18n="inv_section_invoice">Invoice Details</div>
       <div class="inv-grid">
@@ -2627,6 +2630,7 @@ body.help-mode .main{padding-top:34px}
     </div>
     <div class="inv-form-footer">
       <button class="inv-cancel-btn" onclick="closeInvForm()">Cancel</button>
+      <div style="font-size:11px;color:var(--text-3);display:flex;align-items:center">Send directly to your client — get paid faster.</div>
       <div class="inv-form-footer-actions">
         <button onclick="saveInvAndPDF()" style="background:transparent;border:1px solid rgba(255,255,255,.15);color:var(--text-2);padding:11px 18px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13.5px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='rgba(255,255,255,.15)';this.style.color='var(--text-2)'">📥 Download PDF</button>
         <button id="invSaveBtn" onclick="saveInvoice()" style="background:transparent;border:1px solid rgba(255,255,255,.2);color:var(--text);padding:11px 20px;border-radius:9px;font-family:'Syne',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='rgba(255,255,255,.4)'" onmouseout="this.style.borderColor='rgba(255,255,255,.2)'">💾 Save Invoice</button>
@@ -3867,7 +3871,7 @@ async function saveInvoice(exportPDF) {
   }
   const isQuote = invData.doc_type === 'quote';
   if (error) { showToast('Error saving: ' + error.message, 'var(--red)'); return; }
-  showToast(editingInvId ? `✅ ${isQuote?'Quote':'Invoice'} updated!` : `✅ ${isQuote?'Quote':'Invoice'} saved!`, 'var(--green)');
+  showToast(editingInvId ? `✅ ${isQuote?'Quote':'Invoice'} updated!` : `✅ ${isQuote?'Quote':'Invoice'} created — ready to send and track.`, 'var(--green)');
   // Close form immediately — don't block on reload
   const savedId = editingInvId;
   if (exportPDF && !isQuote) {
@@ -6125,7 +6129,7 @@ async function runReconciliationEngine() {
     detectConflicts();
     await saveConfidence();
     if (btn) { btn.disabled = false; btn.textContent = '⚡ Auto-Match'; }
-    showToast(`✅ ${exactCount + debitCount} matched · 🟡 ${fuzzyCount} suggested`, 'var(--green)');
+    showToast(fuzzyCount > 0 ? `✅ Transactions matched — ${fuzzyCount} item${fuzzyCount>1?'s':''} need your review to finalise.` : `✅ Transactions matched — records complete.`, 'var(--green)');
   } catch(e) {
     if (btn) { btn.disabled = false; btn.textContent = '⚡ Auto-Match'; }
     showToast('Auto-match error: ' + e.message, 'var(--red)');
