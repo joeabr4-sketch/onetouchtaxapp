@@ -288,6 +288,42 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
 .footer-legal a:hover{color:var(--text-2)}
 .sars-note{text-align:center;padding:14px 20px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:8px;font-size:11.5px;color:var(--text-3);margin-bottom:32px;max-width:700px;margin-left:auto;margin-right:auto;line-height:1.65}
 
+/* ── VS ACCOUNTANT ── */
+.vs-section{padding:100px 0;background:linear-gradient(180deg,transparent,rgba(11,14,26,.7),transparent)}
+.vs-inner{text-align:center;margin-bottom:52px}
+.vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:860px;margin:0 auto}
+.vs-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px;position:relative;overflow:hidden}
+.vs-card.ot{border-color:rgba(79,142,247,.4);background:linear-gradient(135deg,rgba(79,142,247,.07),var(--surface))}
+.vs-card.ot::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--blue),var(--cyan))}
+.vs-card.ac::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:rgba(255,255,255,.1)}
+.vs-label{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-3);margin-bottom:10px}
+.vs-price{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:38px;font-weight:800;line-height:1;margin-bottom:4px}
+.vs-price-note{font-size:12px;color:var(--text-3);margin-bottom:24px}
+.vs-list{list-style:none;display:flex;flex-direction:column;gap:11px;margin-bottom:28px}
+.vs-list li{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;color:var(--text-2);line-height:1.5}
+.vs-list li .vi{font-size:14px;flex-shrink:0;margin-top:1px}
+.vs-saving{text-align:center;margin-top:32px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:12px;padding:20px 28px;max-width:860px;margin-left:auto;margin-right:auto}
+.vs-saving-text{font-size:15px;color:var(--text-2);line-height:1.7}
+.vs-saving-text strong{color:var(--green)}
+
+/* ── TRIAL STRIP ── */
+.trial-strip{padding:70px 0}
+.trial-strip-inner{max-width:760px;margin:0 auto;text-align:center;background:linear-gradient(135deg,rgba(79,142,247,.08),rgba(45,212,191,.05));border:1px solid rgba(79,142,247,.2);border-radius:20px;padding:48px 40px}
+.trial-features{display:flex;justify-content:center;gap:32px;flex-wrap:wrap;margin:28px 0}
+.trial-feat{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--text-2)}
+.trial-feat span{font-size:17px}
+
+/* ── FINAL CTA STRIP ── */
+.cta-strip{padding:80px 0;text-align:center}
+.cta-strip h2{font-size:clamp(26px,4vw,38px);font-weight:800;letter-spacing:-1px;margin-bottom:12px}
+.cta-strip p{font-size:15px;color:var(--text-2);margin-bottom:32px;max-width:480px;margin-left:auto;margin-right:auto}
+
+@media(max-width:700px){
+  .vs-grid{grid-template-columns:1fr}
+  .trial-strip-inner{padding:32px 20px}
+  .trial-features{gap:16px}
+}
+
 /* ── SCROLL ANIMATIONS ── */
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
 .reveal.visible{opacity:1;transform:translateY(0)}
@@ -360,7 +396,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
     <a href="#pricing">Pricing</a>
     <a href="#faq">FAQ</a>
   </div>
-  <a class="nav-cta" href="/business.html">Login / Sign In</a>
+  <a class="nav-cta" href="/business.html">Start Free Trial</a>
 </nav>
 
 <!-- ── HERO ── -->
@@ -373,20 +409,19 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
       🇿🇦 Proudly South African — Built for SA businesses
     </div>
     <h1 class="hero-h">
-      Your business finances.<br>
-      <span class="accent">Automated.</span>
-      <span class="accent2">Understood.</span>
+      Stop paying <span class="accent2">R3,000/month</span><br>
+      to your <span class="accent">accountant.</span>
     </h1>
-    <p class="hero-sub">Invoices. Payroll. VAT. Bank reconciliation. SARS deadlines. Everything in one financial command center — no accountant jargon, no spreadsheets.</p>
+    <p class="hero-sub">Invoices, bank reconciliation, VAT, payroll and SARS prep — automated for South African small businesses. From R299/month.</p>
     <div class="hero-btns">
-      <a class="btn-primary" href="/business.html">Start Free Trial →</a>
-      <a class="btn-secondary" href="#pricing">See Pricing</a>
+      <a class="btn-primary" href="/business.html">Start 7-Day Free Trial →</a>
+      <a class="btn-secondary" href="#how">See How It Works</a>
     </div>
     <div class="hero-trust">
       <div class="trust-item"><span>✓</span> No credit card required</div>
-      <div class="trust-item"><span>✓</span> SARS-aligned deadlines</div>
+      <div class="trust-item"><span>✓</span> SARS 2025/26 aligned</div>
       <div class="trust-item"><span>✓</span> POPIA compliant</div>
-      <div class="trust-item"><span>✓</span> Cancel anytime</div>
+      <div class="trust-item"><span>✓</span> Full access for 7 days</div>
     </div>
 
     <!-- ── CONTROL CENTER MOCKUP ── -->
@@ -631,30 +666,93 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
   <div class="container">
     <div class="how-inner reveal">
       <div class="section-badge">How it works</div>
-      <h2 class="section-h">Up and running in minutes</h2>
-      <p class="section-sub" style="margin:0 auto">No accountant jargon. No spreadsheets. No setup fees. Built for SA business owners and their bookkeepers — your accountant gets clean, ready-to-review books every month, you stay in control.</p>
+      <h2 class="section-h">How it works — 3 simple steps</h2>
+      <p class="section-sub" style="margin:0 auto">No accounting knowledge needed. Set up in under 5 minutes, run your entire financial month in under 15.</p>
     </div>
-    <div class="how-steps">
+    <div class="how-steps" style="grid-template-columns:repeat(3,1fr)">
       <div class="step reveal">
         <div class="step-num">1</div>
-        <div class="step-title">Set up your business profile</div>
-        <p class="step-desc">Enter your business details, VAT registration status, PAYE obligations and financial year end. A guided setup walks you through each step — takes under 2 minutes.</p>
+        <div class="step-title">Create invoices &amp; add transactions</div>
+        <p class="step-desc">Send invoices via WhatsApp or email. Add expenses or import your bank statement CSV. Everything captures to your books automatically — no spreadsheet needed.</p>
       </div>
       <div class="step reveal reveal-delay-1">
         <div class="step-num">2</div>
-        <div class="step-title">Capture, import or upload</div>
-        <p class="step-desc">Create invoices, add expenses, or import your bank transactions (CSV or Excel) for instant AI analysis. Your financials and reconciliation update automatically.</p>
+        <div class="step-title">Auto-match &amp; reconcile</div>
+        <p class="step-desc">OneTouch matches your bank transactions to your invoices automatically. Review unmatched items, close the month, and lock your records with an immutable audit trail.</p>
       </div>
       <div class="step reveal reveal-delay-2">
         <div class="step-num">3</div>
-        <div class="step-title">Reconcile and close each month</div>
-        <p class="step-desc">Match bank transactions to invoices in one screen. When you hit 80%+ match rate, close the month — locking your records and updating your bookkeeper pack.</p>
+        <div class="step-title">Generate &amp; submit to SARS</div>
+        <p class="step-desc">VAT201, EMP201, IRP6 and ITR14 prep documents generated in one click — SARS 2025/26 compliant. Hand clean books to your accountant or submit yourself via eFiling.</p>
       </div>
-      <div class="step reveal reveal-delay-3">
-        <div class="step-num">4</div>
-        <div class="step-title">Stay ahead of SARS — always</div>
-        <p class="step-desc">Your compliance calendar keeps you on track. VAT201, EMP201, IRP6 and ITR14 prep documents generated in one click — ready to submit via eFiling.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── VS ACCOUNTANT ── -->
+<section class="vs-section">
+  <div class="container">
+    <div class="vs-inner reveal">
+      <div class="section-badge">The cost comparison</div>
+      <h2 class="section-h">R299/month vs R3,000–R7,000/month</h2>
+      <p class="section-sub" style="margin:0 auto">OneTouch doesn't replace your accountant — it eliminates 80% of the work they charge you for.</p>
+    </div>
+    <div class="vs-grid">
+      <div class="vs-card ot reveal">
+        <div class="vs-label">OneTouch TaxApp</div>
+        <div class="vs-price" style="color:var(--blue)"><sup style="font-size:18px;vertical-align:top;margin-top:8px;display:inline-block">R</sup>299</div>
+        <div class="vs-price-note">per month · cancel anytime</div>
+        <ul class="vs-list">
+          <li><span class="vi">✅</span> Unlimited invoices &amp; quotes</li>
+          <li><span class="vi">✅</span> Automatic bank reconciliation</li>
+          <li><span class="vi">✅</span> VAT201 prep — one click</li>
+          <li><span class="vi">✅</span> EMP201 &amp; payroll processing</li>
+          <li><span class="vi">✅</span> IRP6 &amp; ITR14 prep documents</li>
+          <li><span class="vi">✅</span> SARS-aligned compliance calendar</li>
+          <li><span class="vi">✅</span> AI tax assistant included</li>
+          <li><span class="vi">✅</span> WhatsApp &amp; email invoice delivery</li>
+        </ul>
+        <a href="/business.html" class="price-cta solid-blue">Start 7-Day Free Trial →</a>
       </div>
+      <div class="vs-card ac reveal reveal-delay-1">
+        <div class="vs-label">Traditional Accountant</div>
+        <div class="vs-price" style="color:var(--text-3)"><sup style="font-size:18px;vertical-align:top;margin-top:8px;display:inline-block">R</sup>3,000<span style="font-size:20px">+</span></div>
+        <div class="vs-price-note">per month · typically R3,000–R7,000</div>
+        <ul class="vs-list">
+          <li><span class="vi" style="color:var(--text-3)">—</span> <span style="color:var(--text-3)">Hourly billing for bookkeeping</span></li>
+          <li><span class="vi" style="color:var(--text-3)">—</span> <span style="color:var(--text-3)">Manual reconciliation charges</span></li>
+          <li><span class="vi" style="color:var(--text-3)">—</span> <span style="color:var(--text-3)">Separate VAT return fees</span></li>
+          <li><span class="vi" style="color:var(--text-3)">—</span> <span style="color:var(--text-3)">Payroll processing charges</span></li>
+          <li><span class="vi" style="color:var(--text-3)">—</span> <span style="color:var(--text-3)">Annual tax prep fees</span></li>
+          <li><span class="vi" style="color:var(--text-3)">—</span> <span style="color:var(--text-3)">Slow turnaround on reports</span></li>
+          <li><span class="vi" style="color:var(--text-3)">—</span> <span style="color:var(--text-3)">No real-time visibility</span></li>
+          <li><span class="vi" style="color:var(--text-3)">—</span> <span style="color:var(--text-3)">You're dependent on their schedule</span></li>
+        </ul>
+        <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:14px;text-align:center;font-size:13px;color:var(--text-3)">Still useful for final tax review &amp; SARS submissions — but shouldn't cost you this much every month.</div>
+      </div>
+    </div>
+    <div class="vs-saving reveal" style="margin-top:32px">
+      <div class="vs-saving-text"><strong>One client payment covers your entire monthly subscription.</strong><br>Most users save R2,500–R6,000 per month compared to their previous accounting fees.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TRIAL STRIP ── -->
+<section class="trial-strip">
+  <div class="container">
+    <div class="trial-strip-inner reveal">
+      <div class="section-badge">7-Day Free Trial</div>
+      <h2 style="font-size:clamp(22px,3.5vw,32px);font-weight:800;letter-spacing:-0.5px;margin-bottom:10px">Try the full product — free for 7 days</h2>
+      <p style="font-size:14px;color:var(--text-2);line-height:1.7">No credit card. No feature restrictions. Full Pro + Full access from day one.</p>
+      <div class="trial-features">
+        <div class="trial-feat"><span>🧾</span> Unlimited invoices &amp; quotes</div>
+        <div class="trial-feat"><span>🔗</span> Bank reconciliation</div>
+        <div class="trial-feat"><span>📊</span> VAT &amp; payroll tools</div>
+        <div class="trial-feat"><span>📲</span> WhatsApp &amp; email sends</div>
+        <div class="trial-feat"><span>🤖</span> AI tax assistant</div>
+      </div>
+      <a href="/business.html" class="btn-primary" style="font-size:15px;padding:14px 32px">Start 7-Day Free Trial →</a>
+      <div style="margin-top:14px;font-size:12px;color:var(--text-3)">After 7 days — Pro R299/month or Full R499/month. Cancel anytime.</div>
     </div>
   </div>
 </section>
@@ -665,7 +763,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
     <div class="pricing-inner reveal">
       <div class="section-badge">Pricing</div>
       <h2 class="section-h">Simple, transparent pricing</h2>
-      <p class="section-sub" style="margin:0 auto">No hidden fees. No per-user charges. Cancel anytime — your data stays yours.</p>
+      <p class="section-sub" style="margin:0 auto">No hidden fees. No per-user charges. One subscription covers one business — everything included.</p>
     </div>
     <div class="pricing-grid">
 
@@ -756,6 +854,43 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
   </div>
 </section>
 
+<!-- ── TRUST SIGNALS ── -->
+<section style="padding:60px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:rgba(11,14,26,.5)">
+  <div class="container">
+    <div style="display:flex;justify-content:center;align-items:center;gap:40px;flex-wrap:wrap">
+      <div style="text-align:center">
+        <div style="font-size:22px;margin-bottom:6px">🇿🇦</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Built for South Africa</div>
+        <div style="font-size:11px;color:var(--text-3)">SA VAT, PAYE, UIF &amp; SDL</div>
+      </div>
+      <div style="width:1px;height:40px;background:var(--border);flex-shrink:0"></div>
+      <div style="text-align:center">
+        <div style="font-size:22px;margin-bottom:6px">📋</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">SARS 2025/26 Aligned</div>
+        <div style="font-size:11px;color:var(--text-3)">Updated tax tables &amp; brackets</div>
+      </div>
+      <div style="width:1px;height:40px;background:var(--border);flex-shrink:0"></div>
+      <div style="text-align:center">
+        <div style="font-size:22px;margin-bottom:6px">🔒</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">POPIA Compliant</div>
+        <div style="font-size:11px;color:var(--text-3)">Your data never sold or shared</div>
+      </div>
+      <div style="width:1px;height:40px;background:var(--border);flex-shrink:0"></div>
+      <div style="text-align:center">
+        <div style="font-size:22px;margin-bottom:6px">🏦</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">All Major SA Banks</div>
+        <div style="font-size:11px;color:var(--text-3)">FNB, Absa, Nedbank, Standard, Capitec</div>
+      </div>
+      <div style="width:1px;height:40px;background:var(--border);flex-shrink:0"></div>
+      <div style="text-align:center">
+        <div style="font-size:22px;margin-bottom:6px">⚠️</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Assist — Not Replace</div>
+        <div style="font-size:11px;color:var(--text-3)">Always verify with a tax practitioner</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ── TESTIMONIALS ── -->
 <section class="testimonials" id="testimonials">
   <div class="container">
@@ -839,6 +974,19 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
         <div class="faq-q">Can I manage more than one business on one account? <span class="faq-arrow">▼</span></div>
         <div class="faq-a">Each OneTouch account supports one business. If you own multiple businesses, you will need a separate account (and separate subscription) for each one. This keeps your books, invoices and tax records completely separate per entity — which is also what SARS requires. Multi-business support is on our roadmap for a future release.</div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FINAL CTA ── -->
+<section class="cta-strip" style="background:linear-gradient(180deg,transparent,rgba(11,14,26,.8))">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-badge" style="margin-bottom:20px">Ready to start?</div>
+      <h2>Take back control of your finances</h2>
+      <p>7 days free. Full access. No accountant required.</p>
+      <a href="/business.html" class="btn-primary" style="font-size:16px;padding:16px 40px">Start 7-Day Free Trial →</a>
+      <div style="margin-top:16px;font-size:12px;color:var(--text-3)">No credit card · Cancel anytime · SARS 2025/26 aligned</div>
     </div>
   </div>
 </section>
