@@ -156,6 +156,11 @@
 [data-theme="light"] .inv-form-footer-actions button[style*="rgba(255,255,255"]{border-color:var(--border2)!important;color:var(--text-2)!important}
 [data-theme="light"] .payslip-card button[style*="rgba(255,255,255"]{background:var(--surface2)!important;border-color:var(--border2)!important;color:var(--text-2)!important}
 [data-theme="light"] #importModal button[style*="rgba(255,255,255"]{background:var(--surface2)!important;border-color:var(--border2)!important;color:var(--text-2)!important}
+[data-theme="light"] #assignOverlay>div{background:var(--surface)!important;border-color:var(--border2)!important;box-shadow:0 24px 64px rgba(15,23,42,.15)!important}
+[data-theme="light"] #assignOverlay>div>div:first-child{border-bottom-color:var(--border)!important}
+[data-theme="light"] #assignOverlay .assign-tx-card{background:var(--surface2)!important;border-color:var(--border)!important}
+[data-theme="light"] #assignOverlay .assign-inv-row{background:var(--surface2)!important;border-color:var(--border)!important}
+[data-theme="light"] #assignOverlay select{background:var(--surface2)!important;border-color:var(--border)!important;color:var(--text)!important}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
@@ -6377,13 +6382,13 @@ function openAssignPanel(txId, defaultMode) {
   switchReconTab('transactions', document.querySelectorAll('.recon-tab')[0]);
   const matchableInvs = invoices.filter(i => i.type === 'income' && i.doc_type !== 'quote');
   const panel = `<div id="assignOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px">
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto">
-      <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+    <div style="background:#1a1d24;border:1px solid rgba(255,255,255,.12);border-radius:16px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto">
+      <div style="padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between">
         <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text)">Assign Transaction</div>
         <button onclick="document.getElementById('assignOverlay').remove()" style="background:none;border:none;color:var(--text-3);font-size:18px;cursor:pointer">✕</button>
       </div>
       <div style="padding:16px 20px">
-        <div style="background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:16px">
+        <div class="assign-tx-card" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:12px;margin-bottom:16px">
           <div style="font-size:11px;color:var(--text-3);margin-bottom:4px">Transaction</div>
           <div style="font-size:14px;font-weight:600;color:var(--text)">${escHtml(tx.description)}</div>
           <div style="font-size:12px;color:var(--text-3)">${escHtml(tx.date)} · <span style="color:${tx.type==='credit'?'var(--green)':' var(--red)'};font-weight:700">${tx.type==='debit'?'-':'+'} ${fmtR(tx.amount)}</span></div>
@@ -6391,7 +6396,7 @@ function openAssignPanel(txId, defaultMode) {
         <div style="font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Match to Invoice</div>
         <div style="max-height:200px;overflow-y:auto;margin-bottom:14px">
           ${matchableInvs.length ? matchableInvs.map(inv => `
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 10px;background:var(--input-bg);border:1px solid var(--border);border-radius:7px;margin-bottom:5px">
+            <div class="assign-inv-row" style="display:flex;align-items:center;justify-content:space-between;padding:9px 10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:7px;margin-bottom:5px">
               <div>
                 <div style="font-size:12px;font-weight:600;color:var(--text)">${escHtml(inv.invoice_number||'INV')} — ${escHtml(inv.client_name||'—')}</div>
                 <div style="font-size:11px;color:var(--text-3)">${fmtR(inv.total||inv.amount)} · ${inv.date||''}</div>
@@ -6403,7 +6408,7 @@ function openAssignPanel(txId, defaultMode) {
         ${tx.type==='debit' ? `
           <div style="margin-bottom:12px">
             <div style="font-size:11px;color:var(--text-3);margin-bottom:6px">Expense Category</div>
-            <select id="expCatSelect" style="width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
+            <select id="expCatSelect" style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
               <option value="">Select a category...</option>
               <option value="Fuel & Travel">Fuel & Travel</option>
               <option value="Telecommunications">Telecommunications</option>
