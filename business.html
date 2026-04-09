@@ -8497,7 +8497,8 @@ async function saveAndWhatsApp() {
   const waNum    = document.getElementById('inv-whatsapp')?.value?.trim() || '';
   const invNum   = document.getElementById('inv-number')?.value?.trim() || '';
   await saveInvoice();
-  // Find the specific invoice we just saved by its number (not invoices[0] which could be wrong)
+  // saveInvoice fires loadInvoices without awaiting — reload now to get the new invoice's DB id
+  await loadInvoices();
   const saved = invoices.find(i => i.invoice_number === invNum);
   if (saved) {
     saved.whatsapp = waNum;
@@ -8541,7 +8542,8 @@ async function saveAndEmail() {
   const overlay = document.getElementById('invFormOverlay');
   if (overlay && overlay.style.display !== 'none') return;
 
-  // Generate public invoice link
+  // Reload invoices to ensure new invoice's DB id is available
+  await loadInvoices();
   const savedInv = invoices.find(i => i.invoice_number === invNumber);
   const pubToken = savedInv ? await getOrCreatePublicToken(savedInv.id) : null;
   const invoiceUrl = getInvoicePublicUrl(pubToken);
