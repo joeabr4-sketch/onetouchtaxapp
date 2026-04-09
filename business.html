@@ -6376,7 +6376,7 @@ function openAssignPanel(txId, defaultMode) {
   if (!tx) return;
   switchReconTab('transactions', document.querySelectorAll('.recon-tab')[0]);
   const matchableInvs = invoices.filter(i => i.type === 'income' && i.doc_type !== 'quote');
-  const panel = `<div id="assignOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px">
+  const panel = `<div id="assignOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px">
     <div style="background:#1a1d24;border:1px solid rgba(255,255,255,.12);border-radius:16px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto">
       <div style="padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between">
         <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text)">Assign Transaction</div>
