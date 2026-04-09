@@ -8400,6 +8400,23 @@ window.addEventListener('pageshow', function(e) {
   })();
 });
 
+// ── PUBLIC INVOICE TOKEN ──
+async function getOrCreatePublicToken(invoiceId) {
+  try {
+    const { data: row } = await sb.from('invoices').select('public_token').eq('id', invoiceId).single();
+    if (row?.public_token) return row.public_token;
+    const token = crypto.randomUUID();
+    await sb.from('invoices').update({ public_token: token }).eq('id', invoiceId);
+    // Update local cache too
+    const inv = invoices.find(i => i.id === invoiceId);
+    if (inv) inv.public_token = token;
+    return token;
+  } catch { return null; }
+}
+function getInvoicePublicUrl(token) {
+  return token ? `${window.location.origin}/invoice-view.html?token=${token}` : null;
+}
+
 // ── WHATSAPP INVOICE DELIVERY ──
 async function sendInvoiceWhatsApp(inv) {
   if (!canUse('whatsapp')) {
@@ -8439,6 +8456,8 @@ async function sendInvoiceWhatsApp(inv) {
   if (btn) { btn.textContent = 'Sending...'; btn.disabled = true; }
 
   try {
+    const pubToken = await getOrCreatePublicToken(inv.id);
+    const invoiceUrl = getInvoicePublicUrl(pubToken);
     const { data: { session } } = await sb.auth.getSession();
     const res = await fetch('/api/whatsapp', {
       method: 'POST',
@@ -8451,7 +8470,7 @@ async function sendInvoiceWhatsApp(inv) {
         dueDate,
         businessName,
         docType,
-        invoiceUrl: ''
+        invoiceUrl: invoiceUrl || ''
       })
     });
 
@@ -8522,6 +8541,14 @@ async function saveAndEmail() {
   const overlay = document.getElementById('invFormOverlay');
   if (overlay && overlay.style.display !== 'none') return;
 
+  // Generate public invoice link
+  const savedInv = invoices.find(i => i.invoice_number === invNumber);
+  const pubToken = savedInv ? await getOrCreatePublicToken(savedInv.id) : null;
+  const invoiceUrl = getInvoicePublicUrl(pubToken);
+  const viewBtnHtml = invoiceUrl
+    ? `<div style="text-align:center;margin:24px 0 8px"><a href="${invoiceUrl}" style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;padding:13px 30px;border-radius:9px;font-size:14px;font-weight:700;font-family:'Helvetica Neue',Arial,sans-serif">View Invoice Online →</a></div>`
+    : '';
+
   // Build professional HTML email
   const liRows = lineItemsSnap.map(li => {
     const qty = li.qty || 1;
@@ -8566,6 +8593,7 @@ async function saveAndEmail() {
       </tfoot>
     </table>
     <p style="margin:20px 0 0;font-size:13px;color:#5a6a88;line-height:1.6">If you have any questions, please don't hesitate to reach out.</p>
+    ${viewBtnHtml}
   </div>
   <div style="padding:16px 32px;border-top:1px solid rgba(255,255,255,.07);font-size:11.5px;color:#5a6a88">
     Kind regards, <strong style="color:#99aac8">${escHtml(bizName)}</strong>${bizPhone ? ' · '+escHtml(bizPhone) : ''}<br>

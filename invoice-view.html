@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invoice — OneTouch TaxApp</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',sans-serif;background:#f0f4f8;color:#1a202c;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 16px 64px}
+    .doc-wrap{background:#fff;width:100%;max-width:780px;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.10);overflow:hidden}
+    /* Header */
+    .doc-header{padding:36px 40px 28px;border-bottom:2px solid #f0f4f8;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
+    .doc-logo{width:80px;height:80px;object-fit:contain;border-radius:10px}
+    .doc-logo-placeholder{width:80px;height:80px;border-radius:10px;background:#e8edf5;display:flex;align-items:center;justify-content:center;font-size:28px}
+    .doc-biz{flex:1}
+    .doc-biz-name{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:#1a202c;margin-bottom:4px}
+    .doc-biz-detail{font-size:12.5px;color:#64748b;line-height:1.7}
+    .doc-title-block{text-align:right}
+    .doc-type{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:#1e3a8a;letter-spacing:1px;text-transform:uppercase}
+    .doc-number{font-size:13px;color:#64748b;margin-top:4px}
+    .doc-status{display:inline-block;margin-top:8px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+    .status-paid{background:#dcfce7;color:#166534}
+    .status-outstanding{background:#fef9c3;color:#854d0e}
+    .status-overdue{background:#fee2e2;color:#991b1b}
+    .status-draft{background:#f1f5f9;color:#475569}
+    /* Meta row */
+    .doc-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-bottom:1px solid #f0f4f8}
+    .doc-meta-cell{padding:16px 40px;border-right:1px solid #f0f4f8}
+    .doc-meta-cell:last-child{border-right:none}
+    .doc-meta-label{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;font-weight:600}
+    .doc-meta-val{font-size:13.5px;font-weight:600;color:#1a202c}
+    /* Bill to / from */
+    .doc-parties{display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:1px solid #f0f4f8}
+    .doc-party{padding:20px 40px}
+    .doc-party:first-child{border-right:1px solid #f0f4f8}
+    .doc-party-label{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;font-weight:600}
+    .doc-party-name{font-size:14px;font-weight:700;color:#1a202c;margin-bottom:3px}
+    .doc-party-detail{font-size:12.5px;color:#64748b;line-height:1.7}
+    /* Line items */
+    .doc-items{padding:24px 40px}
+    .items-table{width:100%;border-collapse:collapse}
+    .items-table th{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;font-weight:600;padding:0 10px 10px;text-align:left;border-bottom:2px solid #f0f4f8}
+    .items-table th.r{text-align:right}
+    .items-table td{padding:11px 10px;font-size:13px;color:#1a202c;border-bottom:1px solid #f8fafc;vertical-align:top}
+    .items-table td.r{text-align:right}
+    .items-table td.muted{color:#64748b;font-size:12px}
+    .items-table tbody tr:last-child td{border-bottom:none}
+    /* Totals */
+    .doc-totals{padding:0 40px 24px;display:flex;justify-content:flex-end}
+    .totals-block{width:260px}
+    .totals-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:#475569}
+    .totals-row.total{border-top:2px solid #1e3a8a;margin-top:6px;padding-top:10px;font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#1a202c}
+    .totals-row.total span:last-child{color:#1e3a8a}
+    .totals-row.deposit{color:#16a34a}
+    /* Notes */
+    .doc-notes{margin:0 40px 24px;background:#f8fafc;border-radius:10px;padding:14px 18px}
+    .doc-notes-label{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:6px}
+    .doc-notes-text{font-size:13px;color:#475569;line-height:1.7}
+    /* Payment */
+    .doc-payment{margin:0 40px 32px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:18px 22px}
+    .doc-payment-title{font-size:11px;color:#1e40af;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:12px}
+    .payment-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px}
+    .payment-row{display:flex;flex-direction:column;gap:2px}
+    .payment-label{font-size:10.5px;color:#64748b}
+    .payment-val{font-size:13px;font-weight:600;color:#1a202c}
+    /* Footer */
+    .doc-footer{border-top:1px solid #f0f4f8;padding:16px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+    .doc-footer-brand{font-size:11.5px;color:#94a3b8}
+    .doc-footer-brand a{color:#2563eb;text-decoration:none;font-weight:600}
+    /* Print button */
+    .print-bar{width:100%;max-width:780px;display:flex;justify-content:flex-end;gap:10px;margin-bottom:16px}
+    .print-btn{background:#1e3a8a;color:#fff;border:none;padding:10px 22px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px}
+    .print-btn:hover{background:#1e40af}
+    /* Loading / error */
+    .state-wrap{text-align:center;padding:80px 20px}
+    .state-icon{font-size:48px;margin-bottom:16px}
+    .state-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:8px;color:#1a202c}
+    .state-sub{font-size:14px;color:#64748b}
+    @media print{
+      body{background:#fff;padding:0}
+      .print-bar{display:none}
+      .doc-wrap{box-shadow:none;border-radius:0}
+    }
+    @media(max-width:600px){
+      .doc-header{padding:24px 20px 20px}
+      .doc-meta{grid-template-columns:1fr 1fr}
+      .doc-meta-cell{padding:12px 20px}
+      .doc-parties{grid-template-columns:1fr}
+      .doc-party{padding:16px 20px}
+      .doc-party:first-child{border-right:none;border-bottom:1px solid #f0f4f8}
+      .doc-items{padding:16px 20px}
+      .doc-totals{padding:0 20px 20px}
+      .doc-notes{margin:0 20px 20px}
+      .doc-payment{margin:0 20px 24px}
+      .doc-footer{padding:14px 20px}
+      .payment-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="print-bar">
+    <button class="print-btn" onclick="window.print()">🖨️ Print / Save PDF</button>
+  </div>
+
+  <div class="doc-wrap" id="docWrap">
+    <div class="state-wrap" id="loadingState">
+      <div class="state-icon">⏳</div>
+      <div class="state-title">Loading document…</div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL  = 'https://stcxldjcagyxjfwfforx.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0Y3hsZGpjYWd5eGpmd2Zmb3J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM0MDkxNzQsImV4cCI6MjA1ODk4NTE3NH0.f3DmFGBIpfq1HY4qMhW9TgEJXOWXU_F8NmUCmDPP5MM';
+
+    function esc(str) {
+      return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    function fmtR(v) {
+      return 'R ' + Math.abs(Number(v)||0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2});
+    }
+    function fmtDate(d) {
+      if (!d) return '—';
+      return new Date(d).toLocaleDateString('en-ZA',{day:'2-digit',month:'short',year:'numeric'});
+    }
+
+    async function load() {
+      const token = new URLSearchParams(window.location.search).get('token');
+      if (!token) { showError('No invoice token provided.'); return; }
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_invoice_by_token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON },
+          body: JSON.stringify({ token })
+        });
+        const data = await res.json();
+        if (!data || !data.invoice) { showError('Invoice not found or link has expired.'); return; }
+        render(data.invoice, data.profile);
+      } catch(e) {
+        showError('Failed to load invoice. Please try again.');
+      }
+    }
+
+    function statusLabel(inv) {
+      const s = (inv.status||'').toLowerCase();
+      if (s === 'paid') return ['status-paid','Paid'];
+      if (s === 'overdue') return ['status-overdue','Overdue'];
+      if (s === 'outstanding') return ['status-outstanding','Outstanding'];
+      return ['status-draft','Draft'];
+    }
+
+    function render(inv, profile) {
+      const docType = (inv.doc_type === 'quote') ? 'Quote' : 'Invoice';
+      const [statusClass, statusText] = statusLabel(inv);
+
+      // Line items — support both line_items and items columns
+      const rawItems = inv.line_items || inv.items || [];
+      const lineItems = Array.isArray(rawItems) ? rawItems : (typeof rawItems === 'string' ? JSON.parse(rawItems) : []);
+
+      // Totals
+      const subtotal = Number(inv.amount || 0);
+      const vat      = Number(inv.vat || 0);
+      const total    = Number(inv.total || subtotal + vat);
+      const deposit  = Number(inv.deposit_paid || 0);
+      const balance  = total - deposit;
+
+      // Logo
+      const logoHtml = profile.logo_url
+        ? `<img class="doc-logo" src="${esc(profile.logo_url)}" alt="Logo" />`
+        : `<div class="doc-logo-placeholder">🏢</div>`;
+
+      // Business details
+      const bizLines = [
+        profile.company_address,
+        profile.company_phone,
+        profile.email,
+        profile.vat_number   ? `VAT Reg: ${profile.vat_number}` : null,
+        profile.registration_number ? `Reg: ${profile.registration_number}` : null,
+      ].filter(Boolean).join('<br>');
+
+      // Line items rows
+      const itemRows = lineItems.length
+        ? lineItems.map(item => {
+            const qty   = Number(item.qty   || item.quantity || 1);
+            const price = Number(item.price || item.unit_price || 0);
+            const amt   = Number(item.amount || item.total || qty * price);
+            return `<tr>
+              <td>${esc(item.description || item.name || '—')}</td>
+              <td class="r">${qty}</td>
+              <td class="r">${fmtR(price)}</td>
+              <td class="r">${fmtR(amt)}</td>
+            </tr>`;
+          }).join('')
+        : `<tr><td colspan="4" style="color:#94a3b8;font-style:italic;padding:20px 10px;text-align:center">${esc(inv.description||'No items listed')}</td></tr>`;
+
+      // Payment details
+      const hasBank = profile.bank_name || profile.bank_account;
+      const paymentHtml = hasBank ? `
+        <div class="doc-payment">
+          <div class="doc-payment-title">💳 Payment Details</div>
+          <div class="payment-grid">
+            ${profile.bank_name    ? `<div class="payment-row"><span class="payment-label">Bank</span><span class="payment-val">${esc(profile.bank_name)}</span></div>` : ''}
+            ${profile.bank_type    ? `<div class="payment-row"><span class="payment-label">Account Type</span><span class="payment-val">${esc(profile.bank_type)}</span></div>` : ''}
+            ${profile.bank_account ? `<div class="payment-row"><span class="payment-label">Account Number</span><span class="payment-val">${esc(profile.bank_account)}</span></div>` : ''}
+            ${profile.bank_branch  ? `<div class="payment-row"><span class="payment-label">Branch Code</span><span class="payment-val">${esc(profile.bank_branch)}</span></div>` : ''}
+          </div>
+          <div style="margin-top:12px;font-size:12px;color:#1e40af">Please use <strong>${esc(inv.invoice_number||docType)}</strong> as your payment reference.</div>
+        </div>` : '';
+
+      // Notes
+      const notesHtml = inv.notes ? `
+        <div class="doc-notes">
+          <div class="doc-notes-label">Notes</div>
+          <div class="doc-notes-text">${esc(inv.notes)}</div>
+        </div>` : '';
+
+      document.title = `${docType} ${inv.invoice_number||''} — ${profile.biz_name||'OneTouch'}`;
+
+      document.getElementById('docWrap').innerHTML = `
+        <div class="doc-header">
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+            ${logoHtml}
+            <div class="doc-biz">
+              <div class="doc-biz-name">${esc(profile.biz_name||'Business')}</div>
+              <div class="doc-biz-detail">${bizLines}</div>
+            </div>
+          </div>
+          <div class="doc-title-block">
+            <div class="doc-type">${docType}</div>
+            <div class="doc-number">#${esc(inv.invoice_number||'—')}</div>
+            <span class="doc-status ${statusClass}">${statusText}</span>
+          </div>
+        </div>
+
+        <div class="doc-meta">
+          <div class="doc-meta-cell">
+            <div class="doc-meta-label">Date Issued</div>
+            <div class="doc-meta-val">${fmtDate(inv.date)}</div>
+          </div>
+          <div class="doc-meta-cell">
+            <div class="doc-meta-label">Due Date</div>
+            <div class="doc-meta-val">${fmtDate(inv.due_date)||'—'}</div>
+          </div>
+          <div class="doc-meta-cell">
+            <div class="doc-meta-label">Payment Terms</div>
+            <div class="doc-meta-val">${esc(inv.payment_terms||'Immediate')}</div>
+          </div>
+        </div>
+
+        <div class="doc-parties">
+          <div class="doc-party">
+            <div class="doc-party-label">From</div>
+            <div class="doc-party-name">${esc(profile.biz_name||'—')}</div>
+            <div class="doc-party-detail">${bizLines}</div>
+          </div>
+          <div class="doc-party">
+            <div class="doc-party-label">Bill To</div>
+            <div class="doc-party-name">${esc(inv.client_name||'—')}</div>
+            <div class="doc-party-detail">
+              ${inv.client_email   ? esc(inv.client_email)+'<br>' : ''}
+              ${inv.client_address ? esc(inv.client_address) : ''}
+            </div>
+          </div>
+        </div>
+
+        <div class="doc-items">
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th class="r">Qty</th>
+                <th class="r">Unit Price</th>
+                <th class="r">Amount</th>
+              </tr>
+            </thead>
+            <tbody>${itemRows}</tbody>
+          </table>
+        </div>
+
+        <div class="doc-totals">
+          <div class="totals-block">
+            <div class="totals-row"><span>Subtotal</span><span>${fmtR(subtotal)}</span></div>
+            ${inv.has_vat ? `<div class="totals-row"><span>VAT (15%)</span><span>${fmtR(vat)}</span></div>` : ''}
+            ${deposit > 0 ? `<div class="totals-row deposit"><span>Deposit Paid</span><span>− ${fmtR(deposit)}</span></div>` : ''}
+            <div class="totals-row total">
+              <span>${deposit > 0 ? 'Balance Due' : 'Total'}</span>
+              <span>${fmtR(deposit > 0 ? balance : total)}</span>
+            </div>
+          </div>
+        </div>
+
+        ${notesHtml}
+        ${paymentHtml}
+
+        <div class="doc-footer">
+          <div class="doc-footer-brand">
+            Generated by <a href="https://onetouch.net.za" target="_blank">OneTouch TaxApp</a> — SARS-aligned invoicing for South African businesses
+          </div>
+          <div style="font-size:11px;color:#cbd5e1">${esc(profile.biz_name||'')} · ${fmtDate(new Date().toISOString())}</div>
+        </div>
+      `;
+    }
+
+    function showError(msg) {
+      document.getElementById('docWrap').innerHTML = `
+        <div class="state-wrap">
+          <div class="state-icon">🔍</div>
+          <div class="state-title">Document not found</div>
+          <div class="state-sub">${esc(msg)}</div>
+        </div>`;
+    }
+
+    load();
+  </script>
+</body>
+</html>
