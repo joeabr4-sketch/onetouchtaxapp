@@ -4,9 +4,10 @@ import { captureException } from './_sentry.js';
 
 const SUPABASE_URL = 'https://stcxldjcagyxjfwfforx.supabase.co';
 
+import { setCors } from './_cors.js';
+
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  setCors(req, res, 'GET, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method Not Allowed' });
 
@@ -44,14 +45,20 @@ export default async function handler(req, res) {
       `${SUPABASE_URL}/rest/v1/invoices?user_id=eq.${profile.id}&order=date.desc&select=*`,
       { headers }
     );
-    const invoices = invoicesRes.ok ? await invoicesRes.json() : [];
+    if (!invoicesRes.ok) {
+      return res.status(502).json({ error: 'Failed to load invoice data' });
+    }
+    const invoices = await invoicesRes.json();
 
     // Fetch best recon session — prefer highest confidence (closed month), fall back to most recent
     const reconRes = await fetch(
       `${SUPABASE_URL}/rest/v1/reconciliation_sessions?user_id=eq.${profile.id}&order=confidence.desc,created_at.desc&limit=1&select=*`,
       { headers }
     );
-    const reconRows = reconRes.ok ? await reconRes.json() : [];
+    if (!reconRes.ok) {
+      return res.status(502).json({ error: 'Failed to load reconciliation data' });
+    }
+    const reconRows = await reconRes.json();
 
     return res.status(200).json({
       profile,

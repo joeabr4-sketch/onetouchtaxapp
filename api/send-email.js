@@ -1,12 +1,10 @@
 // OneTouch Email Proxy — powered by Resend
 import { captureException } from './_sentry.js';
+import { setCors } from './_cors.js';
 // Handles: accountant access emails, welcome emails, notifications
 
 export default async function handler(req, res) {
-  // CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  setCors(req, res);
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });

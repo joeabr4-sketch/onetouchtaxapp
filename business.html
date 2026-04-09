@@ -3877,6 +3877,18 @@ async function saveInvoice(exportPDF) {
   const saveBtnOrigText = saveBtn?.textContent || '💾 Save Invoice';
   if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '⏳ Saving...'; }
   try {
+  // Server-side plan check — verify invoice count against DB (can't be bypassed via DevTools)
+  if (!canUse('invoices')) {
+    const { count } = await sb.from('invoices')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', currentUser.id)
+      .is('deleted_at', null)
+      .eq('type', 'income');
+    if (count >= 5) {
+      showToast('Free plan is limited to 5 invoices — upgrade to Pro for unlimited.', 'var(--amber)');
+      return false;
+    }
+  }
   const subtotal = rnd(lineItems.reduce((s,li)=>s+(li.qty||1)*(li.price||0),0));
   const vatAmt = invVATEnabled ? vatOn(subtotal) : 0;
   const total = rnd(subtotal + vatAmt);
@@ -4361,9 +4373,13 @@ function handleLogoUpload(e) {
         }
       } else {
         console.warn('Logo storage upload failed:', upErr.message);
+        showToast('Logo saved locally but failed to sync — your invoice links may not show the logo. Try re-uploading.', 'var(--amber)');
+        return;
       }
     } catch (err) {
       console.warn('Logo upload to storage failed:', err.message);
+      showToast('Logo saved locally but failed to sync — your invoice links may not show the logo. Try re-uploading.', 'var(--amber)');
+      return;
     }
     showToast('✅ Logo uploaded — will appear on your branded invoices', 'var(--green)');
   };
@@ -4397,12 +4413,19 @@ async function deleteAccount() {
   if (!confirm('⚠ Delete your account?\n\nThis will permanently delete all your invoices, statements, and data. This cannot be undone.')) return;
   if (!confirm('Last chance — all data will be gone forever. Continue?')) return;
   try {
-    await sb.from('invoices').delete().eq('user_id', currentUser.id);
-    await sb.from('statements').delete().eq('user_id', currentUser.id);
-    await sb.from('monthly_snapshots').delete().eq('user_id', currentUser.id);
-    await sb.from('opening_balances').delete().eq('user_id', currentUser.id);
-    await sb.from('doc_history').delete().eq('user_id', currentUser.id);
-    await sb.from('profiles').delete().eq('id', currentUser.id);
+    const tables = [
+      { from: 'invoices',            col: 'user_id' },
+      { from: 'statements',          col: 'user_id' },
+      { from: 'monthly_snapshots',   col: 'user_id' },
+      { from: 'opening_balances',    col: 'user_id' },
+      { from: 'doc_history',         col: 'user_id' },
+    ];
+    for (const t of tables) {
+      const { error } = await sb.from(t.from).delete().eq(t.col, currentUser.id);
+      if (error) throw new Error(`Failed to delete ${t.from}: ${error.message}`);
+    }
+    const { error: profErr } = await sb.from('profiles').delete().eq('id', currentUser.id);
+    if (profErr) throw new Error('Failed to delete profile: ' + profErr.message);
     await sb.auth.signOut();
     currentUser = null; userProfile = null; invoices = [];
     document.getElementById('mainWrapper').style.display = 'none';
