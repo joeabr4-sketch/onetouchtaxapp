@@ -64,6 +64,10 @@ export default async function handler(req, res) {
   const profRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}&select=payfast_token,plan`, {
     headers: { 'apikey': serviceKey, 'Authorization': `Bearer ${serviceKey}` }
   });
+  if (!profRes.ok) {
+    console.error(`payfast-cancel: failed to fetch profile for user ${userId}`, profRes.status);
+    return res.status(502).json({ error: 'Failed to retrieve subscription details' });
+  }
   const profiles = await profRes.json();
   const profile  = profiles?.[0];
 
@@ -93,8 +97,10 @@ export default async function handler(req, res) {
     return res.status(502).json({ error: 'PayFast API error', detail: errText });
   }
 
-  // Clear the stored token and downgrade plan to free in Supabase
-  await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, {
+  // Clear the stored token in Supabase
+  // Note: keep plan as-is — it stays active until billing period ends.
+  // PayFast will send an IPN with payment_status=CANCELLED when it lapses.
+  const clearRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -103,10 +109,15 @@ export default async function handler(req, res) {
       'Prefer': 'return=minimal'
     },
     body: JSON.stringify({ payfast_token: null })
-    // Note: keep plan as-is — it stays active until billing period ends.
-    // PayFast will send an IPN with payment_status=CANCELLED when it lapses.
   });
+  if (!clearRes.ok) {
+    const errText = await clearRes.text();
+    console.error(`payfast-cancel: profile token clear failed for user ${userId}`, errText);
+    await captureException(new Error('PayFast token clear failed after cancel'), { userId, detail: errText });
+    // PayFast cancel succeeded — still return success but flag the issue
+    return res.status(200).json({ method: 'api', message: 'Subscription cancelled with PayFast. Token cleanup failed — contact support if issues arise.', tokenCleared: false });
+  }
 
   console.log(`payfast-cancel: subscription cancelled for user ${userId}, token ${token}`);
-  return res.status(200).json({ method: 'api', message: 'Subscription cancelled with PayFast.' });
+  return res.status(200).json({ method: 'api', message: 'Subscription cancelled with PayFast.', tokenCleared: true });
 }

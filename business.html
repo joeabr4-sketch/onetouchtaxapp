@@ -3970,7 +3970,6 @@ async function saveInvoice(exportPDF) {
     return false;
   }
   showToast(editingInvId ? `✅ ${isQuote?'Quote':'Invoice'} updated!` : `✅ ${isQuote?'Quote':'Invoice'} created — ready to send and track.`, 'var(--green)');
-  // Close form immediately — don't block on reload
   const savedId = editingInvId;
   if (exportPDF && !isQuote) {
     closeInvForm();
@@ -3978,9 +3977,8 @@ async function saveInvoice(exportPDF) {
   } else {
     closeInvForm();
   }
+  loadInvoices().catch(e => console.warn('Invoice list refresh failed:', e.message));
   return true;
-  // Refresh data in background
-  loadInvoices();
   } finally {
     _savingInvoice = false;
     if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = saveBtnOrigText; }
@@ -5300,34 +5298,49 @@ async function checkAICalls() {
 
 async function recordAICallUsed() {
   if (!currentUser || !userProfile) return;
-  const monthKey = await ensureMonthlyReset();
-  const calls = userProfile.ai_calls||0;
-  await sb.from('profiles').update({ai_calls: calls+1, ai_calls_month: monthKey}).eq('id', currentUser.id);
-  userProfile.ai_calls = calls+1;
-  updateUsageBadges();
+  try {
+    const monthKey = await ensureMonthlyReset();
+    const calls = userProfile.ai_calls||0;
+    const { error } = await sb.from('profiles').update({ai_calls: calls+1, ai_calls_month: monthKey}).eq('id', currentUser.id);
+    if (error) throw error;
+    userProfile.ai_calls = calls+1;
+    updateUsageBadges();
+  } catch (e) {
+    console.warn('AI call counter update failed:', e.message);
+  }
 }
 
 async function trackWhatsAppSent() {
   if (!currentUser || !userProfile) return;
-  await ensureMonthlyReset();
-  const count = (userProfile.whatsapp_sent||0) + 1;
-  await sb.from('profiles').update({ whatsapp_sent: count }).eq('id', currentUser.id);
-  userProfile.whatsapp_sent = count;
-  if (count === USAGE_LIMITS.whatsapp.soft) {
-    showToast(`📲 You've sent ${count} WhatsApp messages this month. Usage is healthy — heads up for your records.`, 'var(--amber)');
-  } else if (count === USAGE_LIMITS.whatsapp.warn) {
-    showToast(`📲 ${count} WhatsApp messages this month. High volume — please review if all are needed.`, 'var(--amber)');
+  try {
+    await ensureMonthlyReset();
+    const count = (userProfile.whatsapp_sent||0) + 1;
+    const { error } = await sb.from('profiles').update({ whatsapp_sent: count }).eq('id', currentUser.id);
+    if (error) throw error;
+    userProfile.whatsapp_sent = count;
+    if (count === USAGE_LIMITS.whatsapp.soft) {
+      showToast(`📲 You've sent ${count} WhatsApp messages this month. Usage is healthy — heads up for your records.`, 'var(--amber)');
+    } else if (count === USAGE_LIMITS.whatsapp.warn) {
+      showToast(`📲 ${count} WhatsApp messages this month. High volume — please review if all are needed.`, 'var(--amber)');
+    }
+    updateUsageBadges();
+  } catch (e) {
+    console.warn('WhatsApp sent counter update failed:', e.message);
   }
-  updateUsageBadges();
 }
 
 async function trackEmailSent() {
   if (!currentUser || !userProfile) return;
-  await ensureMonthlyReset();
-  const count = (userProfile.email_sent||0) + 1;
-  await sb.from('profiles').update({ email_sent: count }).eq('id', currentUser.id);
-  userProfile.email_sent = count;
-  updateUsageBadges();
+  try {
+    await ensureMonthlyReset();
+    const count = (userProfile.email_sent||0) + 1;
+    const { error } = await sb.from('profiles').update({ email_sent: count }).eq('id', currentUser.id);
+    if (error) throw error;
+    userProfile.email_sent = count;
+    updateUsageBadges();
+  } catch (e) {
+    console.warn('Email sent counter update failed:', e.message);
+  }
 }
 
 function updateUsageBadges() {
