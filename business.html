@@ -1067,8 +1067,9 @@ body.help-mode .main{padding-top:34px}
     <div class="ob-dots" style="display:flex;justify-content:center;gap:8px;margin-bottom:20px">
       <div class="ob-dot on" id="od1"></div>
       <div class="ob-dot" id="od2"></div>
+      <div class="ob-dot" id="od3"></div>
     </div>
-    <div id="obStepLabel" class="ob-step-label">Step 1 of 2</div>
+    <div id="obStepLabel" class="ob-step-label">Step 1 of 3</div>
     <div id="obs1">
       <div class="f-group" style="margin-bottom:18px">
         <label class="f-label" style="margin-bottom:8px">Choose your language</label>
@@ -1093,7 +1094,7 @@ body.help-mode .main{padding-top:34px}
           <div class="toggle-opt on" id="paye-n" onclick="setToggle('paye','no')">🙋 No</div>
         </div>
       </div>
-      <button class="ob-btn" onclick="obStep()">Next — Banking Details →</button>
+      <button class="ob-btn" onclick="obStep(1)">Next — Banking Details →</button>
     </div>
     <div id="obs2" style="display:none">
       <div style="font-size:12px;color:var(--text-3);margin-bottom:16px;line-height:1.6">These details appear on your invoices so clients know where to pay. You can skip and add them in Settings later.</div>
@@ -1107,6 +1108,16 @@ body.help-mode .main{padding-top:34px}
           <option>Business</option>
         </select>
       </div>
+      <button class="ob-btn" onclick="obStep(2)">Next — Terms & Conditions →</button>
+      <button type="button" onclick="obStep(2)" style="width:100%;background:none;border:none;color:var(--text-3);font-size:12px;margin-top:8px;cursor:pointer;padding:4px">Skip banking</button>
+    </div>
+    <div id="obs3" style="display:none">
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:14px;line-height:1.6">Type or paste your standard terms & conditions — they'll appear at the bottom of every invoice and quote. You can edit these anytime in Settings.</div>
+      <div class="f-group">
+        <label class="f-label">Terms & Conditions <span style="font-weight:400;color:var(--text-3)">(optional)</span></label>
+        <textarea id="ob-tc" class="f-input" rows="6" placeholder="e.g. Payment is due within 30 days of invoice date.&#10;Goods remain property of the seller until paid in full.&#10;No refunds on custom orders once approved and in production.&#10;Quotes are valid for 7 days unless otherwise stated." style="resize:vertical;line-height:1.7;font-size:13px"></textarea>
+      </div>
+      <div style="font-size:11px;color:var(--text-3);margin-bottom:16px">Each line will appear as a bullet point on your documents.</div>
       <button class="ob-btn" id="obLaunchBtn" onclick="saveProfile()">Launch My Dashboard →</button>
       <button type="button" onclick="saveProfile()" style="width:100%;background:none;border:none;color:var(--text-3);font-size:12px;margin-top:8px;cursor:pointer;padding:4px">Skip for now</button>
     </div>
@@ -2259,6 +2270,11 @@ body.help-mode .main{padding-top:34px}
                 <select id="set-acctype"><option>Current / Cheque</option><option>Savings</option><option>Business</option></select>
               </div>
             </div>
+            <div class="set-section-title" style="margin-top:8px">Terms & Conditions</div>
+            <div style="font-size:12px;color:var(--text-3);margin-bottom:10px;line-height:1.6">These appear at the bottom of all invoices and quotes. Each line becomes a bullet point. Type or paste your standard terms.</div>
+            <div class="set-field" style="margin-bottom:16px">
+              <textarea id="set-tc" class="f-input" rows="6" placeholder="e.g. Payment is due within 30 days of invoice date.&#10;Goods remain property of the seller until paid in full.&#10;No refunds on custom orders once approved and in production.&#10;Quotes are valid for 7 days unless otherwise stated." style="resize:vertical;line-height:1.7;font-size:13px;width:100%"></textarea>
+            </div>
           </div>
         </div>
         <!-- INVOICE BRANDING -->
@@ -3228,13 +3244,21 @@ function setToggle(key, val) {
   }
 }
 function obStep(n) {
-  const biz = document.getElementById('ob-biz').value.trim();
-  if (!biz) { showToast('Please enter your business name', 'var(--amber)'); return; }
-  document.getElementById('obs1').style.display = 'none';
-  document.getElementById('obs2').style.display = 'block';
-  document.getElementById('od1').className = 'ob-dot done';
-  document.getElementById('od2').className = 'ob-dot on';
-  document.getElementById('obStepLabel').textContent = 'Step 2 of 2';
+  if (n === 1) {
+    const biz = document.getElementById('ob-biz').value.trim();
+    if (!biz) { showToast('Please enter your business name', 'var(--amber)'); return; }
+    document.getElementById('obs1').style.display = 'none';
+    document.getElementById('obs2').style.display = 'block';
+    document.getElementById('od1').className = 'ob-dot done';
+    document.getElementById('od2').className = 'ob-dot on';
+    document.getElementById('obStepLabel').textContent = 'Step 2 of 3';
+  } else if (n === 2) {
+    document.getElementById('obs2').style.display = 'none';
+    document.getElementById('obs3').style.display = 'block';
+    document.getElementById('od2').className = 'ob-dot done';
+    document.getElementById('od3').className = 'ob-dot on';
+    document.getElementById('obStepLabel').textContent = 'Step 3 of 3';
+  }
 }
 async function saveProfile() {
   const biz = document.getElementById('ob-biz')?.value.trim() || '';
@@ -3259,10 +3283,11 @@ async function saveProfile() {
     plan: 'trial',
     trial_start: new Date().toISOString(),
     ai_calls: 0,
-    bank_name:    document.getElementById('ob-bank')?.value.trim()    || '',
-    bank_account: document.getElementById('ob-acc')?.value.trim()     || '',
-    bank_branch:  document.getElementById('ob-branch')?.value.trim()  || '',
-    bank_type:    document.getElementById('ob-acctype')?.value        || 'Current / Cheque',
+    bank_name:         document.getElementById('ob-bank')?.value.trim()    || '',
+    bank_account:      document.getElementById('ob-acc')?.value.trim()     || '',
+    bank_branch:       document.getElementById('ob-branch')?.value.trim()  || '',
+    bank_type:         document.getElementById('ob-acctype')?.value        || 'Current / Cheque',
+    terms_conditions:  document.getElementById('ob-tc')?.value.trim()      || null,
   };
 
   // Save profile — guard dashboard init behind successful save
@@ -4198,6 +4223,28 @@ function exportInvoicePDF(inv) {
     doc.text(noteLines, M+90, y+14);
   }
 
+  // Terms & Conditions
+  const tcText = (userProfile?.terms_conditions || '').trim();
+  if (tcText) {
+    const tcLines = tcText.split('\n').map(l => l.trim()).filter(Boolean);
+    if (tcLines.length && y < 240) {
+      y += 6;
+      doc.setDrawColor(220,225,235);
+      doc.line(M, y, W-M, y);
+      y += 6;
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(100,120,150);
+      doc.text('TERMS & CONDITIONS', M, y);
+      y += 5;
+      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(60,80,110);
+      for (const line of tcLines) {
+        const wrapped = doc.splitTextToSize('• ' + line, W - M*2 - 4);
+        if (y + wrapped.length * 4.5 > 268) break;
+        doc.text(wrapped, M, y);
+        y += wrapped.length * 4.5 + 1;
+      }
+    }
+  }
+
   y = 275;
   // Footer — branding depends on plan
   doc.setFillColor(15,21,32);
@@ -4249,6 +4296,7 @@ function loadSettings() {
   if(f('set-acc')) f('set-acc').value = userProfile.bank_account||'';
   if(f('set-branch')) f('set-branch').value = userProfile.bank_branch||'';
   if(f('set-acctype')) f('set-acctype').value = userProfile.bank_type||'Current / Cheque';
+  if(f('set-tc')) f('set-tc').value = userProfile.terms_conditions||'';
   // VAT + PAYE registration
   setSettingsVAT(isVatRegistered());
   setSettingsPAYE(!!userProfile.has_paye);
@@ -4279,6 +4327,7 @@ async function saveSettings() {
     bank_account: document.getElementById('set-acc')?.value.trim()||'',
     bank_branch: document.getElementById('set-branch')?.value.trim()||'',
     bank_type: document.getElementById('set-acctype')?.value||'Current / Cheque',
+    terms_conditions: document.getElementById('set-tc')?.value.trim()||null,
   };
   const { error } = await sb.from('profiles').update(updates).eq('id', currentUser.id);
   if (error) { showToast('Error: ' + error.message, 'var(--red)'); return; }
