@@ -3936,7 +3936,14 @@ async function saveInvoice(exportPDF) {
     error = res.error;
   }
   const isQuote = invData.doc_type === 'quote';
-  if (error) { showToast('Error saving: ' + error.message, 'var(--red)'); return; }
+  if (error) {
+    if (error.code === '23505' || (error.message||'').includes('unique') || (error.message||'').includes('duplicate')) {
+      showToast(`Invoice number ${invData.invoice_number} already exists — please use a different number`, 'var(--red)');
+    } else {
+      showToast('Error saving: ' + error.message, 'var(--red)');
+    }
+    return;
+  }
   showToast(editingInvId ? `✅ ${isQuote?'Quote':'Invoice'} updated!` : `✅ ${isQuote?'Quote':'Invoice'} created — ready to send and track.`, 'var(--green)');
   // Close form immediately — don't block on reload
   const savedId = editingInvId;
