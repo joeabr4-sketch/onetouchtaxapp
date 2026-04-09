@@ -4296,10 +4296,28 @@ function handleLogoUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = (ev) => {
+  reader.onload = async (ev) => {
     logoDataUrl = ev.target.result;
     localStorage.setItem('ot_logo_' + currentUser.id, logoDataUrl);
     showLogoPreview(logoDataUrl);
+    // Upload to Supabase Storage so public invoice links can show the logo
+    try {
+      const ext = (file.name.split('.').pop() || 'png').toLowerCase();
+      const path = `logos/${currentUser.id}/logo.${ext}`;
+      const { error: upErr } = await sb.storage.from('documents').upload(path, file, { upsert: true, contentType: file.type });
+      if (!upErr) {
+        const { data: urlData } = sb.storage.from('documents').getPublicUrl(path);
+        const publicUrl = urlData?.publicUrl;
+        if (publicUrl) {
+          await sb.from('profiles').update({ logo_url: publicUrl }).eq('id', currentUser.id);
+          if (userProfile) userProfile.logo_url = publicUrl;
+        }
+      } else {
+        console.warn('Logo storage upload failed:', upErr.message);
+      }
+    } catch (err) {
+      console.warn('Logo upload to storage failed:', err.message);
+    }
     showToast('✅ Logo uploaded — will appear on your branded invoices', 'var(--green)');
   };
   reader.readAsDataURL(file);
@@ -4312,6 +4330,9 @@ function removeLogo() {
   const txt = document.getElementById('logoUploadText');
   if (img) { img.src = ''; img.style.display = 'none'; }
   if (txt) txt.style.display = '';
+  sb.from('profiles').update({ logo_url: null }).eq('id', currentUser.id)
+    .then(() => { if (userProfile) userProfile.logo_url = null; })
+    .catch(err => console.warn('Logo removal from DB failed:', err.message));
   showToast('Logo removed', 'var(--amber)');
 }
 
