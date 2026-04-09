@@ -4303,7 +4303,7 @@ function handleLogoUpload(e) {
     // Upload to Supabase Storage so public invoice links can show the logo
     try {
       const ext = (file.name.split('.').pop() || 'png').toLowerCase();
-      const path = `logos/${currentUser.id}/logo.${ext}`;
+      const path = `${currentUser.id}/logo.${ext}`;
       const { error: upErr } = await sb.storage.from('documents').upload(path, file, { upsert: true, contentType: file.type });
       if (!upErr) {
         const { data: urlData } = sb.storage.from('documents').getPublicUrl(path);
