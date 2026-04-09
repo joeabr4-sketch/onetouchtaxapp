@@ -3942,7 +3942,7 @@ async function saveInvoice(exportPDF) {
     } else {
       showToast('Error saving: ' + error.message, 'var(--red)');
     }
-    return;
+    return false;
   }
   showToast(editingInvId ? `✅ ${isQuote?'Quote':'Invoice'} updated!` : `✅ ${isQuote?'Quote':'Invoice'} created — ready to send and track.`, 'var(--green)');
   // Close form immediately — don't block on reload
@@ -3953,6 +3953,7 @@ async function saveInvoice(exportPDF) {
   } else {
     closeInvForm();
   }
+  return true;
   // Refresh data in background
   loadInvoices();
   } finally {
@@ -8503,15 +8504,16 @@ async function saveAndWhatsApp() {
   // Capture form values before saveInvoice() closes the form
   const waNum    = document.getElementById('inv-whatsapp')?.value?.trim() || '';
   const invNum   = document.getElementById('inv-number')?.value?.trim() || '';
-  await saveInvoice();
-  // saveInvoice fires loadInvoices without awaiting — reload now to get the new invoice's DB id
+  const ok = await saveInvoice();
+  if (!ok) return;
   await loadInvoices();
-  const saved = invoices.find(i => i.invoice_number === invNum);
+  const saved = invoices.find(i => i.invoice_number === invNum)
+    || invoices.filter(i => i.type === 'income').sort((a,b) => new Date(b.created_at) - new Date(a.created_at))[0];
   if (saved) {
     saved.whatsapp = waNum;
     await sendInvoiceWhatsApp(saved);
   } else {
-    showToast('Could not find saved invoice to send — please send WhatsApp manually', 'var(--amber)');
+    showToast('Invoice saved — tap the WhatsApp icon on the invoice to send', 'var(--amber)');
   }
 }
 
@@ -8543,15 +8545,13 @@ async function saveAndEmail() {
     return;
   }
 
-  await saveInvoice();
-
-  // Only proceed if save succeeded (form closed)
-  const overlay = document.getElementById('invFormOverlay');
-  if (overlay && overlay.style.display !== 'none') return;
+  const ok = await saveInvoice();
+  if (!ok) return;
 
   // Reload invoices to ensure new invoice's DB id is available
   await loadInvoices();
-  const savedInv = invoices.find(i => i.invoice_number === invNumber);
+  const savedInv = invoices.find(i => i.invoice_number === invNumber)
+    || invoices.filter(i => i.type === 'income').sort((a,b) => new Date(b.created_at) - new Date(a.created_at))[0];
   const pubToken = savedInv ? await getOrCreatePublicToken(savedInv.id) : null;
   const invoiceUrl = getInvoicePublicUrl(pubToken);
   const viewBtnHtml = invoiceUrl
