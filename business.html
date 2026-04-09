@@ -1602,6 +1602,15 @@ body.help-mode .main{padding-top:34px}
           <div class="chart-title">Income vs Expenses<div class="chart-legend"><span style="display:flex;align-items:center;gap:5px"><div class="leg-dot" style="background:var(--green)"></div>Income</span><span style="display:flex;align-items:center;gap:5px"><div class="leg-dot" style="background:var(--red)"></div>Expenses</span></div></div>
           <div class="bar-chart" id="barChart"><div style="color:var(--text-3);font-size:13px;margin:auto">Add invoices to see your chart</div></div>
         </div>
+        <!-- EXPENSE CATEGORY BREAKDOWN -->
+        <div class="card" id="expCatCard" style="display:none;margin-bottom:16px">
+          <div class="card-head">
+            <div class="card-title">💸 Expense Breakdown</div>
+            <span style="font-size:10px;font-weight:600;background:rgba(79,142,247,.1);color:var(--blue);border:1px solid rgba(79,142,247,.2);border-radius:20px;padding:2px 9px">from reconciliation</span>
+          </div>
+          <div id="expCatBreakdown" style="padding:16px 20px;display:flex;flex-direction:column;gap:10px"></div>
+        </div>
+
         <div class="card">
           <div class="card-head"><div class="card-title">💡 AI Business Tips</div><span class="badge b-blue plan-lock" style="font-size:10px">PRO</span><button class="gen-tips-btn" onclick="generateSavingTips()" id="tipsBtn" style="margin-left:auto;display:none">✨ Generate Tips</button></div>
           <div id="tipsWrap" style="padding:16px 20px">
@@ -4995,14 +5004,20 @@ async function renderFinancials() {
   const income = filtered.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0);
   let exp      = filtered.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0);
   // Also include bank transactions classified as expense in reconciliation
+  const catMap = {};
   try {
     const { data: bankExpTxs } = await sb
       .from('bank_transactions')
-      .select('amount')
+      .select('amount, expense_category')
       .eq('user_id', currentUser.id)
       .eq('classification', 'expense')
       .gte('date', cutoffStr);
-    (bankExpTxs || []).forEach(tx => { exp += Math.abs(Number(tx.amount || 0)); });
+    (bankExpTxs || []).forEach(tx => {
+      const amt = Math.abs(Number(tx.amount || 0));
+      exp += amt;
+      const cat = tx.expense_category || 'Other';
+      catMap[cat] = (catMap[cat] || 0) + amt;
+    });
   } catch {}
   const profit = income-exp;
   const finRev = document.getElementById('fin-rev');
@@ -5013,8 +5028,36 @@ async function renderFinancials() {
   if (finExp) finExp.textContent = fmtR(exp);
   if (finProfit) { finProfit.textContent = fmtR(profit); finProfit.style.color = profit>=0?'var(--green)':'var(--red)'; }
   if (finMargin) finMargin.textContent = (income>0?((profit/income)*100).toFixed(1):0)+'% profit margin';
+  lastExpCatMap = catMap;
   renderBarChart(months);
+  renderExpCatBreakdown(catMap, exp);
   updateTipsState();
+}
+
+function renderExpCatBreakdown(catMap, totalBankExp) {
+  const card = document.getElementById('expCatCard');
+  const container = document.getElementById('expCatBreakdown');
+  if (!card || !container) return;
+  const entries = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
+  if (!entries.length) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  const grandTotal = totalBankExp || entries.reduce((s, [, v]) => s + v, 0);
+  container.innerHTML = entries.map(([cat, amt]) => {
+    const pct = grandTotal > 0 ? ((amt / grandTotal) * 100).toFixed(1) : 0;
+    return `
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:13px;font-weight:500;color:var(--text)">${escHtml(cat)}</span>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:11px;color:var(--text-3)">${pct}%</span>
+            <span style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--red)">${fmtR(amt)}</span>
+          </div>
+        </div>
+        <div style="height:4px;border-radius:2px;background:var(--surface2);overflow:hidden">
+          <div style="height:100%;border-radius:2px;background:var(--red);width:${pct}%;opacity:.7;transition:width .4s ease"></div>
+        </div>
+      </div>`;
+  }).join('');
 }
 function updateTipsState() {
   const tipsBtn = document.getElementById('tipsBtn');
@@ -5061,18 +5104,14 @@ async function generateSavingTips() {
   const income = invoices.filter(i=>i.type==='income').reduce((s,i)=>s+Number(i.amount||0),0);
   let exp = invoices.filter(i=>i.type==='expense').reduce((s,i)=>s+Number(i.amount||0),0);
   const cats = [...new Set(invoices.map(i=>i.category).filter(Boolean))].join(', ');
-  // Build categorised expense breakdown from bank-classified transactions
+  // Use expense category map built by renderFinancials
   let expBreakdown = '';
   try {
-    const { data: bankExps } = await sb.from('bank_transactions').select('amount, expense_category').eq('user_id', currentUser.id).eq('classification', 'expense');
-    if (bankExps?.length) {
-      const catMap = {};
-      bankExps.forEach(t => {
-        const c = t.expense_category || 'Other';
-        catMap[c] = (catMap[c] || 0) + Number(t.amount || 0);
-        exp += Number(t.amount || 0);
-      });
-      expBreakdown = Object.entries(catMap).map(([c,v]) => `${c}: ${fmtR(v)}`).join(', ');
+    if (Object.keys(lastExpCatMap).length) {
+      expBreakdown = Object.entries(lastExpCatMap)
+        .sort((a, b) => b[1] - a[1])
+        .map(([c, v]) => `${c}: ${fmtR(v)}`).join(', ');
+      Object.values(lastExpCatMap).forEach(v => { exp += v; });
     }
   } catch {}
   try {
@@ -5551,6 +5590,7 @@ async function saveStatement(file, result) {
 
 let reconSession = null;
 let reconTransactions = [];
+let lastExpCatMap = {}; // populated by renderFinancials, consumed by generateSavingTips
 let selectedTxId = null;
 let _reconBusy = false;
 
