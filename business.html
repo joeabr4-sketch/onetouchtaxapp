@@ -8439,9 +8439,10 @@ async function sendInvoiceWhatsApp(inv) {
   if (btn) { btn.textContent = 'Sending...'; btn.disabled = true; }
 
   try {
+    const { data: { session } } = await sb.auth.getSession();
     const res = await fetch('/api/whatsapp', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token||''}` },
       body: JSON.stringify({
         to: phone,
         clientName: inv.client_name || '',
