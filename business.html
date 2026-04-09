@@ -7298,7 +7298,14 @@ async function _executeClearHistory() {
     if (s2.error) throw s2.error;
     if (s3.error) throw s3.error;
     // Clear localStorage caches
-    try { localStorage.removeItem('ot_recon_done_' + uid); } catch {}
+    try {
+      localStorage.removeItem('ot_recon_done_' + uid);
+      localStorage.removeItem('ot_upload_summary_' + uid);
+      localStorage.removeItem('ot_summary_dismissed_' + uid);
+    } catch {}
+    // Hide summary card if visible
+    const summaryCard = document.getElementById('uploadSummaryCard');
+    if (summaryCard) summaryCard.style.display = 'none';
     // Reset in-memory state
     reconSession = null;
     bankTransactions = [];
