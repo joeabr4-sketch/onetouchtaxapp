@@ -680,7 +680,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
     <div class="how-layout">
       <!-- Video panel -->
       <div class="how-video-wrap">
-        <video id="hv1" class="active" autoplay muted loop playsinline>
+        <video id="hv1" class="active" muted loop playsinline>
           <source src="https://stcxldjcagyxjfwfforx.supabase.co/storage/v1/object/public/documents/d1936adb-ce4c-4249-82f2-32c869d821e5/step%201%20upload%20or%20capture%20invoice.mp4" type="video/mp4" />
         </video>
         <video id="hv2" muted loop playsinline>
@@ -715,13 +715,12 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
       document.querySelectorAll('.how-steps .step').forEach((s,i) => s.classList.toggle('active', i+1===n));
       [1,2,3].forEach(i => {
         const v = document.getElementById('hv'+i);
-        if (i===n) { v.classList.add('active'); v.play(); }
+        if (i===n) { v.classList.add('active'); v.currentTime = 0; v.play(); }
         else { v.classList.remove('active'); v.pause(); }
       });
     }
-    // Auto-advance every 12 seconds
-    let _step = 1;
-    setInterval(() => { _step = _step >= 3 ? 1 : _step + 1; setStep(_step); }, 12000);
+    // Start first video on load
+    document.getElementById('hv1').play();
   </script>
 </section>
 
