@@ -171,14 +171,20 @@ section{position:relative;z-index:1}
 /* ── HOW IT WORKS ── */
 .how{padding:100px 0}
 .how-inner{text-align:center;margin-bottom:60px}
-.how-steps{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
-.step{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px 28px;text-align:center;transition:all .3s}
-.step:hover{border-color:var(--border2);transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.3)}
-.step-num{width:48px;height:48px;background:linear-gradient(135deg,var(--blue),var(--cyan));border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:20px;font-weight:700;color:#fff;margin:0 auto 18px}
-.step-title{font-size:17px;font-weight:700;margin-bottom:8px}
-.step-desc{font-size:13.5px;color:var(--text-2);line-height:1.65}
-.step-video{margin-top:20px;border-radius:10px;overflow:hidden;border:1px solid var(--border);aspect-ratio:16/9;background:#000}
-.step-video video{width:100%;height:100%;object-fit:cover;display:block}
+.how-layout{display:grid;grid-template-columns:380px 1fr;gap:32px;align-items:start}
+.how-steps{display:flex;flex-direction:column;gap:12px}
+.step{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px 22px;text-align:left;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.step::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blue);opacity:0;transition:opacity .25s}
+.step.active{border-color:var(--blue);background:var(--surface2);box-shadow:0 0 0 1px rgba(79,142,247,.15)}
+.step.active::before{opacity:1}
+.step:hover:not(.active){border-color:var(--border2)}
+.step-num{width:36px;height:36px;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;font-weight:700;color:var(--text-2);margin-bottom:14px;transition:all .25s;flex-shrink:0}
+.step.active .step-num{background:linear-gradient(135deg,var(--blue),var(--cyan));border-color:transparent;color:#fff}
+.step-title{font-size:15px;font-weight:700;margin-bottom:6px}
+.step-desc{font-size:13px;color:var(--text-2);line-height:1.65}
+.how-video-wrap{position:sticky;top:88px;border-radius:16px;overflow:hidden;border:1px solid var(--border);background:#000;aspect-ratio:16/9;box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.how-video-wrap video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .35s}
+.how-video-wrap video.active{opacity:1}
 
 /* ── FEATURES ── */
 .features{padding:100px 0;background:linear-gradient(180deg,transparent,rgba(11,14,26,.6),transparent)}
@@ -363,7 +369,9 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
   .compare-grid{grid-template-columns:1fr}
   .footer-grid{grid-template-columns:1fr 1fr}
   .testi-grid{grid-template-columns:1fr}
-  .how-steps{grid-template-columns:1fr}
+  .how-layout{grid-template-columns:1fr}
+  .how-video-wrap{order:-1;position:relative;top:0}
+  .how-steps{flex-direction:column}
   .cc-health{grid-template-columns:1fr 1fr}
   .cc-mid{grid-template-columns:1fr}
   .cc-bot{grid-template-columns:1fr 1fr}
@@ -671,39 +679,52 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
       <h2 class="section-h">How it works — 3 simple steps</h2>
       <p class="section-sub" style="margin:0 auto">No accounting knowledge needed. Set up in under 5 minutes, run your entire financial month in under 15.</p>
     </div>
-    <div class="how-steps" style="grid-template-columns:repeat(3,1fr)">
-      <div class="step reveal">
-        <div class="step-num">1</div>
-        <div class="step-title">Create invoices &amp; add transactions</div>
-        <p class="step-desc">Send invoices via WhatsApp or email. Add expenses or import your bank statement CSV. Everything captures to your books automatically — no spreadsheet needed.</p>
-        <div class="step-video">
-          <video autoplay muted loop playsinline preload="none">
-            <source src="https://stcxldjcagyxjfwfforx.supabase.co/storage/v1/object/public/documents/d1936adb-ce4c-4249-82f2-32c869d821e5/invoice%20upload%20step%201.mp4" type="video/mp4" />
-          </video>
+    <div class="how-layout">
+      <!-- Step selector -->
+      <div class="how-steps">
+        <div class="step active" onclick="setStep(1)">
+          <div class="step-num">1</div>
+          <div class="step-title">Create invoices &amp; add transactions</div>
+          <p class="step-desc">Send invoices via WhatsApp or email. Import your bank statement CSV and everything captures to your books automatically.</p>
+        </div>
+        <div class="step" onclick="setStep(2)">
+          <div class="step-num">2</div>
+          <div class="step-title">Auto-match &amp; reconcile</div>
+          <p class="step-desc">OneTouch matches your bank transactions to invoices automatically. Watch your outstanding balance update in real time.</p>
+        </div>
+        <div class="step" onclick="setStep(3)">
+          <div class="step-num">3</div>
+          <div class="step-title">Assign, review &amp; close the month</div>
+          <p class="step-desc">Assign unmatched expenses to the right category in seconds. Lock your records with an immutable audit trail — ready for SARS or your accountant.</p>
         </div>
       </div>
-      <div class="step reveal reveal-delay-1">
-        <div class="step-num">2</div>
-        <div class="step-title">Auto-match &amp; reconcile</div>
-        <p class="step-desc">OneTouch matches your bank transactions to your invoices automatically. Watch your outstanding balance update in real time as payments are matched and confirmed.</p>
-        <div class="step-video">
-          <video autoplay muted loop playsinline preload="none">
-            <source src="https://stcxldjcagyxjfwfforx.supabase.co/storage/v1/object/public/documents/d1936adb-ce4c-4249-82f2-32c869d821e5/transaction%20upload%20step%202.mp4" type="video/mp4" />
-          </video>
-        </div>
-      </div>
-      <div class="step reveal reveal-delay-2">
-        <div class="step-num">3</div>
-        <div class="step-title">Assign, review &amp; close the month</div>
-        <p class="step-desc">Assign unmatched expenses to the right category in seconds. Once everything balances, lock your records with an immutable audit trail — ready for SARS or your accountant.</p>
-        <div class="step-video">
-          <video autoplay muted loop playsinline preload="none">
-            <source src="https://stcxldjcagyxjfwfforx.supabase.co/storage/v1/object/public/documents/d1936adb-ce4c-4249-82f2-32c869d821e5/assigning%20un-matched%20expences%20and%20transactions%20upload%20step%203.mp4" type="video/mp4" />
-          </video>
-        </div>
+      <!-- Video panel -->
+      <div class="how-video-wrap">
+        <video id="hv1" class="active" autoplay muted loop playsinline>
+          <source src="https://stcxldjcagyxjfwfforx.supabase.co/storage/v1/object/public/documents/d1936adb-ce4c-4249-82f2-32c869d821e5/invoice%20upload%20step%201.mp4" type="video/mp4" />
+        </video>
+        <video id="hv2" muted loop playsinline style="position:absolute;inset:0">
+          <source src="https://stcxldjcagyxjfwfforx.supabase.co/storage/v1/object/public/documents/d1936adb-ce4c-4249-82f2-32c869d821e5/transaction%20upload%20step%202.mp4" type="video/mp4" />
+        </video>
+        <video id="hv3" muted loop playsinline style="position:absolute;inset:0">
+          <source src="https://stcxldjcagyxjfwfforx.supabase.co/storage/v1/object/public/documents/d1936adb-ce4c-4249-82f2-32c869d821e5/assigning%20un-matched%20expences%20and%20transactions%20upload%20step%203.mp4" type="video/mp4" />
+        </video>
       </div>
     </div>
   </div>
+  <script>
+    function setStep(n) {
+      document.querySelectorAll('.how-steps .step').forEach((s,i) => s.classList.toggle('active', i+1===n));
+      [1,2,3].forEach(i => {
+        const v = document.getElementById('hv'+i);
+        if (i===n) { v.classList.add('active'); v.play(); }
+        else { v.classList.remove('active'); v.pause(); }
+      });
+    }
+    // Auto-advance every 12 seconds
+    let _step = 1;
+    setInterval(() => { _step = _step >= 3 ? 1 : _step + 1; setStep(_step); }, 12000);
+  </script>
 </section>
 
 <!-- ── VS ACCOUNTANT ── -->
