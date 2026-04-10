@@ -177,6 +177,8 @@ section{position:relative;z-index:1}
 .step-num{width:48px;height:48px;background:linear-gradient(135deg,var(--blue),var(--cyan));border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:20px;font-weight:700;color:#fff;margin:0 auto 18px}
 .step-title{font-size:17px;font-weight:700;margin-bottom:8px}
 .step-desc{font-size:13.5px;color:var(--text-2);line-height:1.65}
+.step-video{margin-top:20px;border-radius:10px;overflow:hidden;border:1px solid var(--border);aspect-ratio:16/9;background:#000}
+.step-video video{width:100%;height:100%;object-fit:cover;display:block}
 
 /* ── FEATURES ── */
 .features{padding:100px 0;background:linear-gradient(180deg,transparent,rgba(11,14,26,.6),transparent)}
@@ -674,16 +676,31 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:60px
         <div class="step-num">1</div>
         <div class="step-title">Create invoices &amp; add transactions</div>
         <p class="step-desc">Send invoices via WhatsApp or email. Add expenses or import your bank statement CSV. Everything captures to your books automatically — no spreadsheet needed.</p>
+        <div class="step-video">
+          <video autoplay muted loop playsinline preload="none">
+            <source src="https://stcxldjcagyxjfwfforx.supabase.co/storage/v1/object/public/documents/d1936adb-ce4c-4249-82f2-32c869d821e5/invoice%20upload%20step%201.mp4" type="video/mp4" />
+          </video>
+        </div>
       </div>
       <div class="step reveal reveal-delay-1">
         <div class="step-num">2</div>
         <div class="step-title">Auto-match &amp; reconcile</div>
-        <p class="step-desc">OneTouch matches your bank transactions to your invoices automatically. Review unmatched items, close the month, and lock your records with an immutable audit trail.</p>
+        <p class="step-desc">OneTouch matches your bank transactions to your invoices automatically. Watch your outstanding balance update in real time as payments are matched and confirmed.</p>
+        <div class="step-video">
+          <video autoplay muted loop playsinline preload="none">
+            <source src="https://stcxldjcagyxjfwfforx.supabase.co/storage/v1/object/public/documents/d1936adb-ce4c-4249-82f2-32c869d821e5/transaction%20upload%20step%202.mp4" type="video/mp4" />
+          </video>
+        </div>
       </div>
       <div class="step reveal reveal-delay-2">
         <div class="step-num">3</div>
-        <div class="step-title">Generate &amp; submit to SARS</div>
-        <p class="step-desc">VAT201, EMP201, IRP6 and ITR14 prep documents generated in one click — SARS 2025/26 compliant. Hand clean books to your accountant or submit yourself via eFiling.</p>
+        <div class="step-title">Assign, review &amp; close the month</div>
+        <p class="step-desc">Assign unmatched expenses to the right category in seconds. Once everything balances, lock your records with an immutable audit trail — ready for SARS or your accountant.</p>
+        <div class="step-video">
+          <video autoplay muted loop playsinline preload="none">
+            <source src="https://stcxldjcagyxjfwfforx.supabase.co/storage/v1/object/public/documents/d1936adb-ce4c-4249-82f2-32c869d821e5/assigning%20un-matched%20expences%20and%20transactions%20upload%20step%203.mp4" type="video/mp4" />
+          </video>
+        </div>
       </div>
     </div>
   </div>
