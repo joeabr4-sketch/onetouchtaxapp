@@ -3,6 +3,7 @@
 
 import crypto from 'crypto';
 import { captureException } from './_sentry.js';
+import { encrypt } from './_encrypt.js';
 
 // Disable Vercel's body parser so we can read the raw body for signature verification
 export const config = { api: { bodyParser: false } };
@@ -138,7 +139,7 @@ export default async function handler(req, res) {
   // Store the subscription token so we can call the PayFast cancel API later.
   // `token` is only present for recurring/subscription payments.
   const profileUpdate = { plan };
-  if (data.token) profileUpdate.payfast_token = data.token;
+  if (data.token) profileUpdate.payfast_token = encrypt(data.token);
 
   const update = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, {
     method: 'PATCH',

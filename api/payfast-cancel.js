@@ -4,6 +4,7 @@
 
 import crypto from 'crypto';
 import { captureException } from './_sentry.js';
+import { safeDecrypt } from './_encrypt.js';
 
 const MERCHANT_ID  = process.env.PAYFAST_MERCHANT_ID;
 const MERCHANT_KEY = process.env.PAYFAST_MERCHANT_KEY;
@@ -78,7 +79,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ method: 'manual', message: 'No subscription token found — cancellation request sent to support.' });
   }
 
-  const token    = profile.payfast_token;
+  const token    = safeDecrypt(profile.payfast_token);
   const timestamp = new Date().toISOString().replace('T', 'T').split('.')[0]; // ISO 8601 no ms
 
   // Call PayFast cancel API
