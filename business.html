@@ -2574,6 +2574,7 @@ body.help-mode .main{padding-top:34px}
         <div class="inv-field"><label data-i18n="inv_client_email">Client Email</label><input type="email" id="inv-email" placeholder="client@company.co.za" /></div>
         <div class="inv-field"><label data-i18n="inv_client_whatsapp">Client WhatsApp Number</label><input type="tel" id="inv-whatsapp" placeholder="+27 82 123 4567" /></div>
         <div class="inv-field full"><label data-i18n="inv_client_address">Client Address</label><input id="inv-address" placeholder="123 Client Street, Johannesburg, 2001" /></div>
+        <div class="inv-field"><label>Client VAT Number <span style="font-weight:400;color:var(--text-3)">(optional)</span></label><input id="inv-client-vat" placeholder="e.g. 4123456789" /></div>
       </div>
       <div class="inv-form-section" data-i18n="inv_section_items">Line Items</div>
       <div class="line-items-wrap">
@@ -3729,6 +3730,7 @@ function openInvForm() {
   document.getElementById('inv-email').value = '';
   document.getElementById('inv-whatsapp').value = '';
   document.getElementById('inv-address').value = '';
+  document.getElementById('inv-client-vat').value = '';
   document.getElementById('inv-notes').value = '';
   document.getElementById('inv-status').value = 'outstanding';
   document.getElementById('inv-deposit').value = '';
@@ -3943,7 +3945,8 @@ async function saveInvoice(exportPDF) {
     has_vat: invVATEnabled,
     description: lineItems.map(li=>li.desc).filter(Boolean).join(', '),
     doc_type: document.getElementById('invFormOverlay').getAttribute('data-is-quote')==='true' ? 'quote' : 'invoice',
-    client_whatsapp: document.getElementById('inv-whatsapp')?.value?.trim() || ''
+    client_whatsapp: document.getElementById('inv-whatsapp')?.value?.trim() || '',
+    client_vat_number: document.getElementById('inv-client-vat')?.value?.trim() || ''
   };
   // Block saves into locked periods
   if (invData.date) {
@@ -4015,6 +4018,7 @@ async function editInvoice(id) {
   document.getElementById('inv-email').value = inv.client_email||'';
   document.getElementById('inv-whatsapp').value = inv.client_whatsapp||'';
   document.getElementById('inv-address').value = inv.client_address||'';
+  document.getElementById('inv-client-vat').value = inv.client_vat_number||'';
   document.getElementById('inv-notes').value = inv.notes||'';
   document.getElementById('inv-status').value = inv.status||'outstanding';
   document.getElementById('inv-deposit').value = inv.deposit_paid||'';
@@ -4115,6 +4119,7 @@ function exportInvoicePDF(inv) {
   if (inv.client_address) doc.text(inv.client_address, W/2+4, y);
   y += 4;
   if (userProfile?.vat_number) { doc.text('VAT: ' + userProfile.vat_number, M, y); y += 4; }
+  if (inv.client_vat_number) { doc.text('VAT: ' + inv.client_vat_number, W/2+4, y); y += 4; }
   if (userProfile?.company_phone) { doc.text('Tel: ' + userProfile.company_phone, M, y); y += 4; }
 
   y += 8;

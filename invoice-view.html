@@ -276,8 +276,9 @@
             <div class="doc-party-label">Bill To</div>
             <div class="doc-party-name">${esc(inv.client_name||'—')}</div>
             <div class="doc-party-detail">
-              ${inv.client_email   ? esc(inv.client_email)+'<br>' : ''}
-              ${inv.client_address ? esc(inv.client_address) : ''}
+              ${inv.client_email      ? esc(inv.client_email)+'<br>' : ''}
+              ${inv.client_address    ? esc(inv.client_address)+'<br>' : ''}
+              ${inv.client_vat_number ? 'VAT: '+esc(inv.client_vat_number) : ''}
             </div>
           </div>
         </div>
