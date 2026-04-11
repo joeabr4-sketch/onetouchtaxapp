@@ -4254,7 +4254,14 @@ function exportInvoicePDF(inv) {
       doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(60,80,110);
       for (const line of tcLines) {
         const wrapped = doc.splitTextToSize('• ' + line, W - M*2 - 4);
-        if (y + wrapped.length * 4.5 > 268) break;
+        if (y + wrapped.length * 4.5 > 268) {
+          doc.addPage();
+          y = 20;
+          doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(100,120,150);
+          doc.text('TERMS & CONDITIONS (continued)', M, y);
+          y += 5;
+          doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(60,80,110);
+        }
         doc.text(wrapped, M, y);
         y += wrapped.length * 4.5 + 1;
       }
@@ -8692,6 +8699,7 @@ async function saveAndEmail() {
   const emailHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:0;background:#070809;font-family:'Helvetica Neue',Arial,sans-serif">
 <div style="max-width:580px;margin:32px auto;background:#0f1520;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.1)">
   <div style="background:linear-gradient(135deg,#1a2540,#0f1520);padding:28px 32px;border-bottom:1px solid rgba(255,255,255,.08)">
+    ${userProfile?.logo_url ? `<img src="${escHtml(userProfile.logo_url)}" alt="${escHtml(bizName)}" style="max-height:52px;max-width:180px;object-fit:contain;margin-bottom:12px;display:block">` : ''}
     <div style="font-size:11px;color:#99aac8;letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px">${escHtml(bizName)}</div>
     <div style="font-size:22px;font-weight:700;color:#e8edf5;font-family:'Helvetica Neue',Arial,sans-serif">Invoice #${escHtml(invNumber)}</div>
   </div>
